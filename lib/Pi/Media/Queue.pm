@@ -3,7 +3,7 @@ use 5.14.0;
 use Mouse;
 
 has _videos => (
-    traits  => 'Array',
+    traits  => ['Array'],
     isa     => 'ArrayRef[Str]',
     default => sub { [] },
     handles => {
