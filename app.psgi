@@ -83,6 +83,8 @@ my %endpoints = (
 
             $Queue->push($video);
 
+            $Television->set_active_source;
+
             my $res = $req->new_response;
 
             if ($Controller->current_video) {
