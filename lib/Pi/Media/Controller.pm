@@ -31,7 +31,26 @@ sub play_next_in_queue {
     $self->_play_file($file);
 }
 
-sub run_command {
+sub decrease_speed          { shift->_run_command('1') }
+sub increase_speed          { shift->_run_command('2') }
+sub rewind                  { shift->_run_command('<') }
+sub fast_forward            { shift->_run_command('>') }
+sub show_info               { shift->_run_command('z') }
+sub previous_audio          { shift->_run_command('j') }
+sub next_audio              { shift->_run_command('k') }
+sub previous_chapter        { shift->_run_command('i') }
+sub next_chapter            { shift->_run_command('o') }
+sub previous_subtitles      { shift->_run_command('n') }
+sub next_subtitles          { shift->_run_command('m') }
+sub toggle_subtitles        { shift->_run_command('s') }
+sub decrease_subtitle_delay { shift->_run_command('d') }
+sub increase_subtitle_delay { shift->_run_command('f') }
+sub stop_current            { shift->_run_command('q') }
+sub toggle_pause            { shift->_run_command('p') }
+sub decrease_volume         { shift->_run_command('-') }
+sub increase_volume         { shift->_run_command('+') }
+
+sub _run_command {
     my $self = shift;
     my $command = shift;
 

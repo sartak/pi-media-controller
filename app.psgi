@@ -30,7 +30,7 @@ my %endpoints = (
         },
         DELETE => sub {
             my $req = shift;
-            run_command('q');
+            $Controller->stop_current;
             return $req->new_response(200);
         },
     },
