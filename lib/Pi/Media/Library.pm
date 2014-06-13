@@ -120,7 +120,7 @@ sub insert_video {
     $self->_dbh->do('
         INSERT INTO video
             (path, name, spoken_langs, subtitle_langs, immersible, streamable, mediumId, seriesId, seasonId)
-        VALUES (?, ?, ?, ?, ?, ?, ?)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
     ;', {}, (
         $args{path},
         $args{name},
