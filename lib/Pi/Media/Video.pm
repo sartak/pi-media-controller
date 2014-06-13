@@ -14,4 +14,12 @@ has name => (
     required => 1,
 );
 
+sub TO_JSON {
+    my $self = shift;
+    return {
+        path => $self->path,
+        name => $self->name,
+    };
+}
+
 1;
