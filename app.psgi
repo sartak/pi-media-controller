@@ -36,7 +36,7 @@ $server->register_service(sub {
         return $res->finalize;
     };
 
-    unless (-e $file) {
+    unless (-e $file && -r _ && !-d _) {
         my $res = $req->new_response(404);
         $res->body("file not found");
         return $res->finalize;
