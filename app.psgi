@@ -47,11 +47,13 @@ $server->register_service(sub {
     warn "Queued $file ...\n";
     push @Queue, $file;
 
+    my $res = $req->new_response(200);
+    $res->body(join "\n", @Queue);
+
     if (!$Player) {
         try_play_next();
     }
 
-    my $res = $req->new_response(200);
     return $res->finalize;
 });
 
