@@ -14,7 +14,6 @@ my $season = $ARGV{season};
 if ($season && !$series) { usage("series required if season present"); }
 
 my $identifier     = $ARGV{identifier};
-my $name           = $ARGV{name} or usage("name required");
 my $spoken_langs   = $ARGV{spoken_langs} or usage("spoken_langs required");
 my $subtitle_langs = $ARGV{subtitle_langs} or usage("subtitle_langs required");
 
@@ -55,6 +54,6 @@ $library->insert_video(
 
 sub usage {
     my $reason = shift;
-    die "$reason\nusage: $0 [--medium=MEDIUM --series=SERIES] [--season=SEASON] [--label_en=LABEL --label_ja=LABEL] [--identifier=IDENTIFIER] --spoken_langs=en,ja --subtotle_langs=en,ja --immersible|--noimmersible --streamable|--unstreamable PATH";
+    die "$reason\nusage: $0 [--medium=MEDIUM --series=SERIES] [--season=SEASON] [--label_en=LABEL --label_ja=LABEL] [--identifier=IDENTIFIER] --spoken_langs=en,ja --subtitle_langs=en,ja --immersible|--noimmersible --streamable|--unstreamable PATH";
 }
 
