@@ -25,7 +25,8 @@ has _handle => (
 sub play_next_in_queue {
     my $self = shift;
 
-    my $file = $self->queue->shift;
+    my $file = $self->queue->shift
+        or return;
 
     $self->_play_file($file);
 }
