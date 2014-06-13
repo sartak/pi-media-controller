@@ -7,6 +7,7 @@ use Twiggy::Server;
 
 use Pi::Media::Queue;
 use Pi::Media::Controller;
+use Pi::Media::Library;
 
 my $json = JSON->new->convert_blessed(1);
 
@@ -17,6 +18,7 @@ my $server = Twiggy::Server->new(
 
 my $Queue = Pi::Media::Queue->new;
 my $Controller = Pi::Media::Controller->new(queue => $Queue);
+my $Library = Pi::Media::Library->new;
 
 my %endpoints = (
     '/current' => {
@@ -94,6 +96,16 @@ my %endpoints = (
             $Queue->clear;
             my $res = $req->new_response;
             $res->redirect('/queue');
+            return $res;
+        },
+    },
+
+    '/library' => {
+        GET => sub {
+            my $req = shift;
+            my $res = $req->new_response(200);
+            $res->content_type("application/json");
+            $res->body($json->encode([$Library->videos]));
             return $res;
         },
     },
