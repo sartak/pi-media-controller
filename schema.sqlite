@@ -6,22 +6,22 @@ CREATE TABLE IF NOT EXISTS medium (
 
 CREATE TABLE IF NOT EXISTS series (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    label_en TEXT UNIQUE NOT NULL,
-    label_ja TEXT UNIQUE NOT NULL,
+    label_en TEXT,
+    label_ja TEXT,
     mediumId INTEGER NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS season (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    label_en TEXT NOT NULL,
-    label_ja TEXT NOT NULL,
+    label_en TEXT,
+    label_ja TEXT,
     seriesId INTEGER NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS video (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    label_en TEXT NOT NULL,
-    label_ja TEXT NOT NULL,
+    label_en TEXT,
+    label_ja TEXT,
     path TEXT UNIQUE NOT NULL,
     spoken_langs TEXT NOT NULL,
     subtitle_langs TEXT NOT NULL,
