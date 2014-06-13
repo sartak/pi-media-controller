@@ -138,4 +138,6 @@ $server->register_service(sub {
     return $res->finalize;
 });
 
+warn "Ready!\n";
+
 AE::cv->recv;
