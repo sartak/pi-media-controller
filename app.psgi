@@ -43,7 +43,7 @@ my %endpoints = (
             }
 
             my $res = $req->new_response(200);
-            $res->body(join "\n", $Queue->elements);
+            $res->body(join "\n", $Queue->videos);
             return $res;
         },
         POST => sub {
