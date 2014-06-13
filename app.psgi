@@ -33,6 +33,16 @@ my %endpoints = (
             $Controller->stop_current;
             return $req->new_response(200);
         },
+        PLAYPAUSE => sub {
+            my $req = shift;
+            $Controller->toggle_pause;
+            return $req->new_response(200);
+        },
+        # decrease_speed increase_speed rewind fast_forward show_info
+        # previous_audio next_audio previous_chapter next_chapter
+        # previous_subtitles next_subtitles toggle_subtitles
+        # decrease_subtitle_delay increase_subtitle_delay decrease_volume
+        # increase_volume
     },
 
     '/queue' => {
