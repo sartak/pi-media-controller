@@ -7,7 +7,7 @@ use Pi::Media::Queue;
 has current_file => (
     is      => 'ro',
     isa     => 'Str',
-    setter  => '_set_current_file',
+    writer  => '_set_current_file',
     clearer => '_clear_current_file',
 );
 
