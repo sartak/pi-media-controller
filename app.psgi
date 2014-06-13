@@ -79,12 +79,16 @@ my %endpoints = (
 
             $Queue->push($video);
 
-            if (!$Controller->current_video) {
+            my $res = $req->new_response;
+
+            if ($Controller->current_video) {
+                $res->redirect('/queue');
+            }
+            else {
                 $Controller->play_next_in_queue;
+                $res->redirect('/current');
             }
 
-            my $res = $req->new_response;
-            $res->redirect('/queue');
             return $res;
         },
         DELETE => sub {
