@@ -4,7 +4,7 @@ use Mouse;
 use Pi::Media::Video;
 use DBI;
 
-has dbh => (
+has _dbh => (
     is      => 'ro',
     lazy    => 1,
     default => sub {
@@ -16,9 +16,6 @@ has dbh => (
         );
         $dbh->{sqlite_unicode} = 1;
         $dbh
-    },
-    handles => {
-        _prepare => 'prepare',
     },
 );
 
@@ -46,10 +43,95 @@ sub _inflate_videos_from_sth {
     return @videos;
 }
 
+sub _id_for_medium {
+    my ($self, $name) = @_;
+
+    my $sth = $self->_dbh->prepare('SELECT id FROM medium WHERE name=?;');
+    $sth->execute($name);
+    return ($sth->fetchrow_array)[0];
+}
+
+sub _id_for_series {
+    my ($self, $name, %args) = @_;
+
+    return undef if !$name;
+
+    my $sth = $self->_dbh->prepare('SELECT id FROM series WHERE name=?;');
+    $sth->execute($name);
+    if (!$sth->rows) {
+        $self->_dbh->do('
+            INSERT INTO series
+                (name, mediumId)
+            VALUES (?, ?)
+        ;', {}, (
+            $name,
+            $args{mediumId},
+        ));
+    }
+
+    $sth = $self->_dbh->prepare('SELECT id FROM series WHERE name=?;');
+    $sth->execute($name);
+    return ($sth->fetchrow_array)[0];
+}
+
+sub _id_for_season {
+    my ($self, $name, %args) = @_;
+
+    return undef if !$name;
+
+    my $sth = $self->_dbh->prepare('SELECT id FROM season WHERE name=?;');
+    $sth->execute($name);
+    if (!$sth->rows) {
+        $self->_dbh->do('
+            INSERT INTO season
+                (name, seriesId)
+            VALUES (?, ?)
+        ;', {}, (
+            $name,
+            $args{seriesId},
+        ));
+    }
+
+    $sth = $self->_dbh->prepare('SELECT id FROM season WHERE name=?;');
+    $sth->execute($name);
+    return ($sth->fetchrow_array)[0];
+}
+
+sub insert_video {
+    my ($self, %args) = @_;
+
+    my $mediumId = $self->_id_for_medium($args{medium})
+        or die "unknown medium $args{medium}";
+
+    my $seriesId = $self->_id_for_series(
+        $args{series},
+        mediumId => $mediumId,
+    );
+
+    my $seasonId = $self->_id_for_season($args{season},
+        mediumId => $mediumId,
+        seriesId => $seriesId,
+    );
+
+    $self->_dbh->do('
+        INSERT INTO video
+            (path, name, immersible, streamable, mediumId, seriesId, seasonId)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+    ;', {}, (
+        $args{path},
+        $args{name},
+        $args{immersible} ? 1 : 0,
+        $args{streamable} ? 1 : 0,
+        $mediumId,
+        $seriesId,
+        $seasonId,
+    ));
+}
+
 sub videos {
     my ($self) = @_;
 
-    my $sth = $self->_prepare('
+    my $sth = $self->_dbh->prepare('
         SELECT
             video.id, video.path, video.name, video.immersible, video.streamable, medium.name, series.name, season.name
         FROM video
@@ -59,13 +141,15 @@ sub videos {
         ;
     ');
 
-    $sth->execute($id);
+    $sth->execute;
+
+    return $self->_inflate_videos_from_sth($sth);
 }
 
 sub get_video_by_id {
     my ($self, $id) = @_;
 
-    my $sth = $self->_prepare('
+    my $sth = $self->_dbh->prepare('
         SELECT
             video.id, video.path, video.name, video.immersible, video.streamable, medium.name, series.name, season.name
         FROM video
