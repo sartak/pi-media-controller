@@ -14,7 +14,7 @@ sub set_active_source {
     warn "Setting self as active source for TV ... \n";
 
     my $handle = AnyEvent::Run->new(
-        cmd => [ 'echo "as" | cec-client -s' ],
+        cmd => [ 'echo "on" | cec-client -s; echo "as" | cec-client -s' ],
     );
     $self->_handle($handle);
 
