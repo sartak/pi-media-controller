@@ -152,6 +152,20 @@ sub videos {
     return $self->_inflate_videos_from_sth($sth);
 }
 
+sub paths {
+    my ($self) = @_;
+
+    my $sth = $self->_dbh->prepare('SELECT path FROM video;');
+    $sth->execute;
+
+    my @paths;
+    while (my ($path) = $sth->fetchrow_array) {
+        push @paths, $path;
+    }
+
+    return @paths;
+}
+
 sub video_with_id {
     my ($self, $id) = @_;
 
