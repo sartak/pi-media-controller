@@ -5,6 +5,7 @@ use utf8::all;
 use Plack::Request;
 use JSON;
 use Twiggy::Server;
+use Encode;
 
 use Pi::Media::Queue;
 use Pi::Media::Controller;
@@ -30,7 +31,7 @@ my %endpoints = (
             }
 
             my $res = $req->new_response(200);
-            $res->body($json->encode($Controller->current_video));
+            $res->body(encode_utf8($json->encode($Controller->current_video)));
             return $res;
         },
         DELETE => sub {
@@ -59,7 +60,7 @@ my %endpoints = (
 
             my $res = $req->new_response(200);
             $res->content_type("application/json");
-            $res->body($json->encode([$Queue->videos]));
+            $res->body(encode_utf8($json->encode([$Queue->videos])));
             return $res;
         },
         POST => sub {
@@ -106,7 +107,7 @@ my %endpoints = (
             my $req = shift;
             my $res = $req->new_response(200);
             $res->content_type("application/json");
-            $res->body($json->encode([$Library->videos]));
+            $res->body(encode_utf8($json->encode([$Library->videos])));
             return $res;
         },
     },
