@@ -1,6 +1,7 @@
 #!/usr/bin/env perl
 use 5.14.0;
 use warnings;
+use utf8::all;
 use Plack::Request;
 use JSON;
 use Twiggy::Server;
