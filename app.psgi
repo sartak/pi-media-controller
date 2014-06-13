@@ -63,24 +63,20 @@ my %endpoints = (
         },
         POST => sub {
             my $req = shift;
-            my $file = $req->param('file') or do {
+            my $id = $req->param('video') or do {
                 my $res = $req->new_response(400);
-                $res->body("file required");
+                $res->body("video required");
                 return $res;
             };
 
-            unless (-e $file && -r _ && !-d _) {
+            my $video = $Library->video_with_id($id) or do {
                 my $res = $req->new_response(404);
-                $res->body("file not found");
+                $res->body("video not found");
                 return $res;
-            }
+            };
 
-            warn "Queued $file ...\n";
+            warn "Queued $video ...\n";
 
-            my $video = Pi::Media::Video->new(
-                path => $file,
-                name => $file,
-            );
             $Queue->push($video);
 
             if (!$Controller->current_video) {
