@@ -163,7 +163,7 @@ sub videos {
 
     my $sth = $self->_dbh->prepare('
         SELECT
-            video.id, video.path, video.identifier, video.label_en, video.label_ja, video.spoken_langs, video.subtitle_langs, video.immersible, video.streamable, medium.name, series.name, season.name
+            video.id, video.path, video.identifier, video.label_en, video.label_ja, video.spoken_langs, video.subtitle_langs, video.immersible, video.streamable, medium.id, series.id, season.id
         FROM video
         JOIN      medium ON video.mediumId = medium.id
         LEFT JOIN series ON video.seriesId = series.id
@@ -195,7 +195,7 @@ sub video_with_id {
 
     my $sth = $self->_dbh->prepare('
         SELECT
-            video.id, video.path, video.identifier, video.label_en, video.label_ja, video.spoken_langs, video.subtitle_langs, video.immersible, video.streamable, medium.name, series.name, season.name
+            video.id, video.path, video.identifier, video.label_en, video.label_ja, video.spoken_langs, video.subtitle_langs, video.immersible, video.streamable, medium.id, series.id, season.id
         FROM video
         JOIN      medium ON video.mediumId = medium.id
         LEFT JOIN series ON video.seriesId = series.id
