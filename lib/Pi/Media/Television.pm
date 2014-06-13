@@ -6,6 +6,20 @@ use AnyEvent::Run;
 has _handle => (
     is      => 'rw',
     clearer => '_clear_handle',
+    lazy    => 1,
+    builder => sub {
+        my $self = shift;
+
+        my $handle = AnyEvent::Run->new(cmd => "cec-client");
+        $handle->on_read(sub {});
+        $handle->on_eof(undef);
+        $handle->on_error(sub {
+            $self->_clear_handle;
+            undef $handle;
+        });
+
+        return $handle;
+    },
 );
 
 sub set_active_source {
@@ -14,21 +28,10 @@ sub set_active_source {
 
     warn "Setting self as active source for TV ... \n";
 
-    my $handle = AnyEvent::Run->new(
-        cmd => [ 'echo "on" | cec-client -s; echo "as" | cec-client -s' ],
-    );
-    $self->_handle($handle);
+    $self->_handle->push_write("on\n");
+    $self->_handle->push_write("as\n");
 
-    # set things up to just wait until omxplayer exits
-    $handle->on_read(sub {});
-    $handle->on_eof(undef);
-    $handle->on_error(sub {
-        warn "Done setting active source\n";
-        $self->_clear_handle;
-        undef $handle;
-
-        $then->() if $then;
-    });
+    $then->() if $then;
 }
 
 1;
