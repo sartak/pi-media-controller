@@ -124,8 +124,8 @@ sub insert_video {
     ;', {}, (
         $args{path},
         $args{name},
-        (join ',', $args{spoken_langs}),
-        (join ',', $args{subtitle_langs}),
+        (join ',', @{$args{spoken_langs}}),
+        (join ',', @{$args{subtitle_langs}}),
         $args{immersible} ? 1 : 0,
         $args{streamable} ? 1 : 0,
         $mediumId,
