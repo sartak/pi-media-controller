@@ -73,9 +73,14 @@ sub queue {
     my $req = shift;
 
     if ($req->method eq 'GET') {
-        my $res = $req->new_response(200);
-        $res->body(join "\n", @Queue);
-        return $res;
+        if (@Queue) {
+            my $res = $req->new_response(200);
+            $res->body(join "\n", @Queue);
+            return $res;
+        }
+        else {
+            return $req->new_response(204);
+        }
     }
     elsif ($req->method eq 'POST') {
         my $file = $req->param('file') or do {
