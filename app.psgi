@@ -20,12 +20,12 @@ my %endpoints = (
     '/current' => {
         GET => sub {
             my $req = shift;
-            if (!$Controller->current_file) {
+            if (!$Controller->current_video) {
                 return $req->new_response(204);
             }
 
             my $res = $req->new_response(200);
-            $res->body($Controller->current_file);
+            $res->body($Controller->current_video);
             return $res;
         },
         DELETE => sub {
@@ -72,9 +72,14 @@ my %endpoints = (
             }
 
             warn "Queued $file ...\n";
-            $Queue->push($file);
 
-            if (!$Controller->current_file) {
+            my $video = Pi::Media::Video->new(
+                path => $file,
+                name => $file,
+            );
+            $Queue->push($video);
+
+            if (!$Controller->current_video) {
                 $Controller->play_next_in_queue;
             }
 

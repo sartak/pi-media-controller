@@ -3,12 +3,13 @@ use 5.14.0;
 use Mouse;
 use AnyEvent::Run;
 use Pi::Media::Queue;
+use Pi::Media::Video;
 
-has current_file => (
+has current_video => (
     is      => 'ro',
-    isa     => 'Str',
-    writer  => '_set_current_file',
-    clearer => '_clear_current_file',
+    isa     => 'Pi::Media::Video',
+    writer  => '_set_current_video',
+    clearer => '_clear_current_video',
 );
 
 has queue => (
@@ -25,10 +26,10 @@ has _handle => (
 sub play_next_in_queue {
     my $self = shift;
 
-    my $file = $self->queue->shift
+    my $video = $self->queue->shift
         or return;
 
-    $self->_play_file($file);
+    $self->_play_video($video);
 }
 
 sub decrease_speed          { shift->_run_command('1') }
@@ -58,16 +59,16 @@ sub _run_command {
     $self->_handle->push_write($command);
 }
 
-sub _play_file {
+sub _play_video {
     my $self = shift;
-    my $file = shift;
+    my $video = shift;
 
-    warn "Playing $file ...\n";
+    warn "Playing $video ...\n";
 
-    $self->_set_current_file($file);
+    $self->_set_current_video($video);
 
     my $handle = AnyEvent::Run->new(
-        cmd => ['omxplayer', '-b', $file],
+        cmd => ['omxplayer', '-b', $video->path],
     );
     $self->_handle($handle);
 
@@ -75,8 +76,8 @@ sub _play_file {
     $handle->on_read(sub {});
     $handle->on_eof(undef);
     $handle->on_error(sub {
-        warn "Done playing $file\n";
-        $self->_clear_current_file;
+        warn "Done playing $video\n";
+        $self->_clear_current_video;
         $self->_clear_handle;
         undef $handle;
 
