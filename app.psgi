@@ -42,98 +42,84 @@ sub run_command {
     $Player->push_write(shift);
 }
 
-sub current {
-    my $req = shift;
+my %endpoints = (
+    '/current' => {
+        GET => sub {
+            if (!$CurrentFile) {
+                return $req->new_response(204);
+            }
 
-    if ($req->method eq 'GET') {
-        my $res;
-
-        if ($CurrentFile) {
-            $res = $req->new_response(200);
+            my $res = $req->new_response(200);
             $res->body($CurrentFile);
-        }
-        else {
-            $res = $req->new_response(204);
-        }
+            return $res;
+        },
+        DELETE => sub {
+            run_command('q');
+            return $req->new_response(200);
+        },
+    },
 
-        return $res;
-    }
-    elsif ($req->method eq 'DELETE') {
-        run_command('q');
-        return $req->new_response(200);
-    }
-    else {
-        my $res = $req->new_response(405);
-        $res->body("valid methods: GET, DELETE");
-        return $res;
-    }
-}
+    '/queue' => {
+        GET => sub {
+            if (!@Queue) {
+                return $req->new_response(204);
+            }
 
-sub queue {
-    my $req = shift;
-
-    if ($req->method eq 'GET') {
-        if (@Queue) {
             my $res = $req->new_response(200);
             $res->body(join "\n", @Queue);
             return $res;
-        }
-        else {
-            return $req->new_response(204);
-        }
-    }
-    elsif ($req->method eq 'POST') {
-        my $file = $req->param('file') or do {
-            my $res = $req->new_response(400);
-            $res->body("file required");
+        },
+        POST => {
+            my $file = $req->param('file') or do {
+                my $res = $req->new_response(400);
+                $res->body("file required");
+                return $res;
+            };
+
+            unless (-e $file && -r _ && !-d _) {
+                my $res = $req->new_response(404);
+                $res->body("file not found");
+                return $res;
+            }
+
+            warn "Queued $file ...\n";
+            push @Queue, $file;
+
+            if (!$Player) {
+                try_play_next();
+            }
+
+            my $res = $req->new_response;
+            $res->redirect('/queue');
             return $res;
-        };
-
-        unless (-e $file && -r _ && !-d _) {
-            my $res = $req->new_response(404);
-            $res->body("file not found");
+        },
+        DELETE => {
+            @Queue = ();
+            my $res = $req->new_response;
+            $res->redirect('/queue');
             return $res;
-        }
-
-        warn "Queued $file ...\n";
-        push @Queue, $file;
-
-        if (!$Player) {
-            try_play_next();
-        }
-
-        my $res = $req->new_response;
-        $res->redirect('/queue');
-        return $res;
-    }
-    elsif ($req->method eq 'DELETE') {
-        @Queue = ();
-        my $res = $req->new_response;
-        $res->redirect('/queue');
-        return $res;
-    }
-    else {
-        my $res = $req->new_response(405);
-        $res->body("valid methods: GET, POST, DELETE");
-        return $res;
-    }
-}
+        },
+    },
+);
 
 $server->register_service(sub {
     my $req = Plack::Request->new(shift);
-    my $res;
 
-    if ($req->path_info eq '/current') {
-        $res = current($req);
-    }
-    elsif ($req->path_info eq '/queue') {
-        $res = queue($req);
-    }
-    else {
-        $res = $req->new_response(404);
+    my $spec = $endpoints{$req->path_info};
+    if (!$spec) {
+        my $res = $req->new_response(404);
         $res->body("endpoint not found");
+        return $res->finalize;
     }
 
+    my $action = $spec->{uc $req->method};
+    if (!$action) {
+        my $res = $req->new_response(405);
+        $res->body("allowed methods: " . (join ', ', sort keys %spec));
+        return $res->finalize;
+    }
+
+    my $res = $action->($req);
     return $res->finalize;
 });
 
