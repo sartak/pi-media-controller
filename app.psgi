@@ -17,6 +17,7 @@ sub try_play_next {
     return unless @Queue;
 
     my $file = shift @Queue;
+    warn "Playing $file ...\n";
 
     $Player = AnyEvent::Run->new(
         cmd => ['omxplayer', '-b', $file],
@@ -24,6 +25,7 @@ sub try_play_next {
     $Player->on_read(sub {});
     $Player->on_eof(undef);
     $Player->on_error(sub {
+        warn "Done playing $file\n";
         try_play_next();
     });
 }
@@ -42,6 +44,7 @@ $server->register_service(sub {
         return $res->finalize;
     }
 
+    warn "Queued $file ...\n";
     push @Queue, $file;
 
     if (!$Player) {
