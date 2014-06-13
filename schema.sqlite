@@ -19,6 +19,8 @@ CREATE TABLE IF NOT EXISTS video (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT NOT NULL,
     path TEXT UNIQUE NOT NULL,
+    spoken_langs TEXT NOT NULL,
+    subtitle_langs TEXT NOT NULL,
     immersible BOOLEAN NOT NULL,
     streamable BOOLEAN NOT NULL DEFAULT 1,
     mediumId INTEGER NOT NULL,

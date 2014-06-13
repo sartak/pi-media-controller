@@ -26,16 +26,18 @@ sub _inflate_videos_from_sth {
 
     my @videos;
 
-    while (my ($id, $path, $name, $immersible, $streamable, $medium, $series, $season) = $sth->fetchrow_array) {
+    while (my ($id, $path, $name, $spoken_langs, $subtitle_langs, $immersible, $streamable, $medium, $series, $season) = $sth->fetchrow_array) {
         my $video = Pi::Media::Video->new(
-            id         => $id,
-            path       => $path,
-            name       => $name,
-            immersible => $immersible,
-            streamable => $streamable,
-            medium     => $medium,
-            series     => $series,
-            season     => $season,
+            id             => $id,
+            path           => $path,
+            name           => $name,
+            spoken_langs   => [split ',', $spoken_langs],
+            subtitle_langs => [split ',', $subtitle_langs],
+            immersible     => $immersible,
+            streamable     => $streamable,
+            medium         => $medium,
+            series         => $series,
+            season         => $season,
         );
         push @videos, $video;
     }
@@ -117,11 +119,13 @@ sub insert_video {
 
     $self->_dbh->do('
         INSERT INTO video
-            (path, name, immersible, streamable, mediumId, seriesId, seasonId)
+            (path, name, spoken_langs, subtitle_langs, immersible, streamable, mediumId, seriesId, seasonId)
         VALUES (?, ?, ?, ?, ?, ?, ?)
     ;', {}, (
         $args{path},
         $args{name},
+        (join ',', $args{spoken_langs}),
+        (join ',', $args{subtitle_langs}),
         $args{immersible} ? 1 : 0,
         $args{streamable} ? 1 : 0,
         $mediumId,
@@ -135,7 +139,7 @@ sub videos {
 
     my $sth = $self->_dbh->prepare('
         SELECT
-            video.id, video.path, video.name, video.immersible, video.streamable, medium.name, series.name, season.name
+            video.id, video.path, video.name, video.spoken_langs, video.subtitle_langs, video.immersible, video.streamable, medium.name, series.name, season.name
         FROM video
         JOIN      medium ON video.mediumId = medium.id
         LEFT JOIN series ON video.seriesId = series.id
@@ -153,7 +157,7 @@ sub video_with_id {
 
     my $sth = $self->_dbh->prepare('
         SELECT
-            video.id, video.path, video.name, video.immersible, video.streamable, medium.name, series.name, season.name
+            video.id, video.path, video.name, video.spoken_langs, video.subtitle_langs, video.immersible, video.streamable, medium.name, series.name, season.name
         FROM video
         JOIN      medium ON video.mediumId = medium.id
         LEFT JOIN series ON video.seriesId = series.id

@@ -19,6 +19,18 @@ has name => (
     required => 1,
 );
 
+has spoken_langs => (
+    is       => 'ro',
+    isa      => 'ArrayRef[Str]',
+    required => 1,
+);
+
+has subtitle_langs => (
+    is       => 'ro',
+    isa      => 'ArrayRef[Str]',
+    required => 1,
+);
+
 has immersible => (
     is       => 'ro',
     isa      => 'Bool',
@@ -49,7 +61,7 @@ has season => (
 sub TO_JSON {
     my $self = shift;
     return {
-        map { $_ => $self->$_ } qw/id path name immersible streamable medium series season/
+        map { $_ => $self->$_ } qw/id path name spoken_langs subtitle_langs immersible streamable medium series season/
     };
 }
 
