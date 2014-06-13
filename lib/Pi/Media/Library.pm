@@ -24,19 +24,10 @@ has dbh => (
 
 sub file { 'library.sqlite' }
 
-sub get_video_by_id {
-    my ($self, $id) = @_;
+sub _inflate_videos_from_sth {
+    my ($self, $sth) = @_;
 
-    my $sth = $self->_prepare('
-        SELECT
-            video.id, video.path, video.name, video.immersible, video.streamable, medium.name, series.name, season.name
-        FROM video
-        JOIN      medium ON video.mediumId = medium.id
-        LEFT JOIN series ON video.seriesId = series.id
-        LEFT JOIN season ON video.seasonId = season.id
-        WHERE id = ?
-        LIMIT 1');
-    $sth->execute($id);
+    my @videos;
 
     while (my ($id, $path, $name, $immersible, $streamable, $medium, $series, $season) = $sth->fetchrow_array) {
         my $video = Pi::Media::Video->new(
@@ -49,8 +40,46 @@ sub get_video_by_id {
             series     => $series,
             season     => $season,
         );
-        return $video;
+        push @videos, $video;
     }
+
+    return @videos;
+}
+
+sub videos {
+    my ($self) = @_;
+
+    my $sth = $self->_prepare('
+        SELECT
+            video.id, video.path, video.name, video.immersible, video.streamable, medium.name, series.name, season.name
+        FROM video
+        JOIN      medium ON video.mediumId = medium.id
+        LEFT JOIN series ON video.seriesId = series.id
+        LEFT JOIN season ON video.seasonId = season.id
+        ;
+    ');
+
+    $sth->execute($id);
+}
+
+sub get_video_by_id {
+    my ($self, $id) = @_;
+
+    my $sth = $self->_prepare('
+        SELECT
+            video.id, video.path, video.name, video.immersible, video.streamable, medium.name, series.name, season.name
+        FROM video
+        JOIN      medium ON video.mediumId = medium.id
+        LEFT JOIN series ON video.seriesId = series.id
+        LEFT JOIN season ON video.seasonId = season.id
+        WHERE id = ?
+        LIMIT 1
+    ;');
+
+    $sth->execute($id);
+
+    my @videos = $self->_inflate_videos_from_sth($sth);
+    return $videos[0];
 }
 
 1;
