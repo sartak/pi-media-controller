@@ -148,7 +148,7 @@ sub videos {
     return $self->_inflate_videos_from_sth($sth);
 }
 
-sub get_video_by_id {
+sub video_with_id {
     my ($self, $id) = @_;
 
     my $sth = $self->_dbh->prepare('
