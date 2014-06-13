@@ -8,6 +8,8 @@ use Twiggy::Server;
 use Pi::Media::Queue;
 use Pi::Media::Controller;
 
+my $json = JSON->new->convert_blessed(1);
+
 my $server = Twiggy::Server->new(
     host => "10.0.1.13",
     port => "5000",
@@ -54,7 +56,7 @@ my %endpoints = (
 
             my $res = $req->new_response(200);
             $res->content_type("application/json");
-            $res->body(encode_json([$Queue->videos]));
+            $res->body($json->encode([$Queue->videos]));
             return $res;
         },
         POST => sub {
