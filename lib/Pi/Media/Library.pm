@@ -58,16 +58,17 @@ sub _id_for_series {
 
     my $sth = $self->_dbh->prepare('SELECT id FROM series WHERE name=?;');
     $sth->execute($name);
-    if (!$sth->rows) {
-        $self->_dbh->do('
-            INSERT INTO series
-                (name, mediumId)
-            VALUES (?, ?)
-        ;', {}, (
-            $name,
-            $args{mediumId},
-        ));
-    }
+    my ($id) = $sth->fetchrow_array;
+    return $id if defined $id;
+
+    $self->_dbh->do('
+        INSERT INTO series
+            (name, mediumId)
+        VALUES (?, ?)
+    ;', {}, (
+        $name,
+        $args{mediumId},
+    ));
 
     $sth = $self->_dbh->prepare('SELECT id FROM series WHERE name=?;');
     $sth->execute($name);
@@ -81,16 +82,17 @@ sub _id_for_season {
 
     my $sth = $self->_dbh->prepare('SELECT id FROM season WHERE name=?;');
     $sth->execute($name);
-    if (!$sth->rows) {
-        $self->_dbh->do('
-            INSERT INTO season
-                (name, seriesId)
-            VALUES (?, ?)
-        ;', {}, (
-            $name,
-            $args{seriesId},
-        ));
-    }
+    my ($id) = $sth->fetchrow_array;
+    return $id if defined $id;
+
+    $self->_dbh->do('
+        INSERT INTO season
+            (name, seriesId)
+        VALUES (?, ?)
+    ;', {}, (
+        $name,
+        $args{seriesId},
+    ));
 
     $sth = $self->_dbh->prepare('SELECT id FROM season WHERE name=?;');
     $sth->execute($name);
