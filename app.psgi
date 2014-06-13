@@ -29,7 +29,7 @@ my %endpoints = (
             }
 
             my $res = $req->new_response(200);
-            $res->body($Controller->current_video);
+            $res->body($json->encode($Controller->current_video));
             return $res;
         },
         DELETE => sub {
