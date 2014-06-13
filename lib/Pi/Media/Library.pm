@@ -82,8 +82,8 @@ sub _id_for_season {
 
     return undef if !$name;
 
-    my $sth = $self->_dbh->prepare('SELECT id FROM season WHERE name=?;');
-    $sth->execute($name);
+    my $sth = $self->_dbh->prepare('SELECT id FROM season WHERE name=? AND seriesId=?;');
+    $sth->execute($name, $args{seriesId});
     my ($id) = $sth->fetchrow_array;
     return $id if defined $id;
 
@@ -96,8 +96,8 @@ sub _id_for_season {
         $args{seriesId},
     ));
 
-    $sth = $self->_dbh->prepare('SELECT id FROM season WHERE name=?;');
-    $sth->execute($name);
+    $sth = $self->_dbh->prepare('SELECT id FROM season WHERE name=? AND seriesId=?;');
+    $sth->execute($name, $args{seriesId});
     return ($sth->fetchrow_array)[0];
 }
 
