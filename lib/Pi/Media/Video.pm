@@ -13,10 +13,14 @@ has path => (
     required => 1,
 );
 
-has name => (
-    is       => 'ro',
-    isa      => 'Str',
-    required => 1,
+has identifier => (
+    is  => 'ro',
+    isa => 'Str',
+);
+
+has label => (
+    is  => 'ro',
+    isa => 'HashRef[Str]',
 );
 
 has spoken_langs => (
@@ -61,7 +65,7 @@ has season => (
 sub TO_JSON {
     my $self = shift;
     return {
-        map { $_ => $self->$_ } qw/id path name spoken_langs subtitle_langs immersible streamable medium series season/
+        map { $_ => $self->$_ } qw/id path identifier label spoken_langs subtitle_langs immersible streamable medium series season/
     };
 }
 

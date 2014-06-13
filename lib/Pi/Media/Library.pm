@@ -26,11 +26,16 @@ sub _inflate_videos_from_sth {
 
     my @videos;
 
-    while (my ($id, $path, $name, $spoken_langs, $subtitle_langs, $immersible, $streamable, $medium, $series, $season) = $sth->fetchrow_array) {
+    while (my ($id, $path, $identifier, $label_en, $label_ja, $spoken_langs, $subtitle_langs, $immersible, $streamable, $medium, $series, $season) = $sth->fetchrow_array) {
+        my %label;
+        $label{en} = $label_en if $label_en;
+        $label{ja} = $label_ja if $label_ja;
+
         my $video = Pi::Media::Video->new(
             id             => $id,
             path           => $path,
-            name           => $name,
+            identifier     => $identifier,
+            label          => \%label,
             spoken_langs   => [split ',', $spoken_langs],
             subtitle_langs => [split ',', $subtitle_langs],
             immersible     => $immersible,
@@ -48,82 +53,67 @@ sub _inflate_videos_from_sth {
 sub _id_for_medium {
     my ($self, $name) = @_;
 
-    my $sth = $self->_dbh->prepare('SELECT id FROM medium WHERE name=?;');
-    $sth->execute($name);
+    my $sth = $self->_dbh->prepare('SELECT id FROM medium WHERE label_en=? OR label_ja=?;');
+    $sth->execute($name, $name);
     return ($sth->fetchrow_array)[0];
 }
 
+sub _id_for_medium_series {
+    my ($self, $medium, $series) = @_;
+
+    if ($series) {
+        my $sth = $self->_dbh->prepare('SELECT mediumId, id FROM series WHERE label_en=? OR label_ja=?;');
+        $sth->execute($series, $series);
+        return $sth->fetchrow_array;
+    }
+    else {
+        my $sth = $self->_dbh->prepare('SELECT id FROM medium WHERE label_en=? OR label_ja=?;');
+        $sth->execute($medium, $medium);
+        return $sth->fetchrow_array;
+    }
+}
+
 sub _id_for_series {
-    my ($self, $name, %args) = @_;
+    my ($self, $name) = @_;
 
     return undef if !$name;
 
-    my $sth = $self->_dbh->prepare('SELECT id FROM series WHERE name=?;');
-    $sth->execute($name);
-    my ($id) = $sth->fetchrow_array;
-    return $id if defined $id;
-
-    $self->_dbh->do('
-        INSERT INTO series
-            (name, mediumId)
-        VALUES (?, ?)
-    ;', {}, (
-        $name,
-        $args{mediumId},
-    ));
-
-    $sth = $self->_dbh->prepare('SELECT id FROM series WHERE name=?;');
-    $sth->execute($name);
+    my $sth = $self->_dbh->prepare('SELECT id FROM series WHERE label_en=? OR label_ja=?;');
+    $sth->execute($name, $name);
     return ($sth->fetchrow_array)[0];
 }
 
 sub _id_for_season {
-    my ($self, $name, %args) = @_;
+    my ($self, $seriesId, $name) = @_;
 
-    return undef if !$name;
+    return undef if !defined($seriesId) || !$name;
 
-    my $sth = $self->_dbh->prepare('SELECT id FROM season WHERE name=? AND seriesId=?;');
-    $sth->execute($name, $args{seriesId});
-    my ($id) = $sth->fetchrow_array;
-    return $id if defined $id;
-
-    $self->_dbh->do('
-        INSERT INTO season
-            (name, seriesId)
-        VALUES (?, ?)
-    ;', {}, (
-        $name,
-        $args{seriesId},
-    ));
-
-    $sth = $self->_dbh->prepare('SELECT id FROM season WHERE name=? AND seriesId=?;');
-    $sth->execute($name, $args{seriesId});
+    my $sth = $self->_dbh->prepare('SELECT id FROM season WHERE seriesId=? AND (label_en=? OR label_ja=?);');
+    $sth->execute($seriesId, $name, $name);
     return ($sth->fetchrow_array)[0];
 }
 
 sub insert_video {
     my ($self, %args) = @_;
 
-    my $mediumId = $self->_id_for_medium($args{medium})
-        or die "unknown medium $args{medium}";
+    my ($mediumId, $seriesId) = $self->_id_for_medium_series($args{medium}, $args{series})
+        or die "unknown medium $args{medium} or series $args{series}";
 
-    my $seriesId = $self->_id_for_series(
-        $args{series},
-        mediumId => $mediumId,
-    );
+    my $seasonId = $self->_id_for_season($seriesId, $args{season});
 
-    my $seasonId = $self->_id_for_season($args{season},
-        mediumId => $mediumId,
-        seriesId => $seriesId,
-    );
+    die "no medium?" unless $mediumId;
+    die "no series for $args{series}" if $args{series} && !$seriesId;
+    die "unknown season $args{season} for series $args{series}" if $args{season} && !$seasonId;
 
     $self->_dbh->do('
         INSERT INTO video
-            (path, name, spoken_langs, subtitle_langs, immersible, streamable, mediumId, seriesId, seasonId)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            (path, identifier, label_en, label_ja, spoken_langs, subtitle_langs, immersible, streamable, mediumId, seriesId, seasonId)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     ;', {}, (
         $args{path},
-        $args{name},
+        $args{identifier},
+        $args{label_en},
+        $args{label_ja},
         (join ',', @{$args{spoken_langs}}),
         (join ',', @{$args{subtitle_langs}}),
         $args{immersible} ? 1 : 0,
@@ -134,12 +124,46 @@ sub insert_video {
     ));
 }
 
+sub insert_series {
+    my ($self, %args) = @_;
+
+    my $mediumId = $self->_id_for_medium($args{medium})
+        or die "unknown medium $args{medium}";
+
+    $self->_dbh->do('
+        INSERT INTO series
+            (label_en, label_ja, mediumId)
+        VALUES (?, ?, ?)
+    ;', {}, (
+        $args{label_en},
+        $args{label_ja},
+        $mediumId,
+    ));
+}
+
+sub insert_season {
+    my ($self, %args) = @_;
+
+    my $seriesId = $self->_id_for_series($args{series})
+        or die "unknown series $args{series}";
+
+    $self->_dbh->do('
+        INSERT INTO season
+            (label_en, label_ja, seriesId)
+        VALUES (?, ?, ?)
+    ;', {}, (
+        $args{label_en},
+        $args{label_ja},
+        $seriesId,
+    ));
+}
+
 sub videos {
     my ($self) = @_;
 
     my $sth = $self->_dbh->prepare('
         SELECT
-            video.id, video.path, video.name, video.spoken_langs, video.subtitle_langs, video.immersible, video.streamable, medium.name, series.name, season.name
+            video.id, video.path, video.identifier, video.label_en, video.label_ja, video.spoken_langs, video.subtitle_langs, video.immersible, video.streamable, medium.name, series.name, season.name
         FROM video
         JOIN      medium ON video.mediumId = medium.id
         LEFT JOIN series ON video.seriesId = series.id
@@ -171,7 +195,7 @@ sub video_with_id {
 
     my $sth = $self->_dbh->prepare('
         SELECT
-            video.id, video.path, video.name, video.spoken_langs, video.subtitle_langs, video.immersible, video.streamable, medium.name, series.name, season.name
+            video.id, video.path, video.identifier, video.label_en, video.label_ja, video.spoken_langs, video.subtitle_langs, video.immersible, video.streamable, medium.name, series.name, season.name
         FROM video
         JOIN      medium ON video.mediumId = medium.id
         LEFT JOIN series ON video.seriesId = series.id

@@ -20,6 +20,7 @@ CREATE TABLE IF NOT EXISTS season (
 
 CREATE TABLE IF NOT EXISTS video (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
+    identifier TEXT,
     label_en TEXT,
     label_ja TEXT,
     path TEXT UNIQUE NOT NULL,
