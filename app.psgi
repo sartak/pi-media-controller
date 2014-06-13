@@ -10,6 +10,7 @@ use Encode;
 use Pi::Media::Queue;
 use Pi::Media::Controller;
 use Pi::Media::Library;
+use Pi::Media::Television;
 
 my $json = JSON->new->convert_blessed(1);
 
@@ -21,6 +22,7 @@ my $server = Twiggy::Server->new(
 my $Queue = Pi::Media::Queue->new;
 my $Controller = Pi::Media::Controller->new(queue => $Queue);
 my $Library = Pi::Media::Library->new;
+my $Television = Pi::Media::Television->new;
 
 my %endpoints = (
     '/current' => {
