@@ -1,23 +1,27 @@
 CREATE TABLE IF NOT EXISTS medium (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    name TEXT UNIQUE NOT NULL
+    label_en TEXT UNIQUE NOT NULL,
+    label_ja TEXT UNIQUE NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS series (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    name TEXT NOT NULL,
+    label_en TEXT UNIQUE NOT NULL,
+    label_ja TEXT UNIQUE NOT NULL,
     mediumId INTEGER NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS season (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    name TEXT NOT NULL,
+    label_en TEXT NOT NULL,
+    label_ja TEXT NOT NULL,
     seriesId INTEGER NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS video (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    name TEXT NOT NULL,
+    label_en TEXT NOT NULL,
+    label_ja TEXT NOT NULL,
     path TEXT UNIQUE NOT NULL,
     spoken_langs TEXT NOT NULL,
     subtitle_langs TEXT NOT NULL,
@@ -28,9 +32,9 @@ CREATE TABLE IF NOT EXISTS video (
     seasonId INTEGER
 );
 
-INSERT INTO medium (name) VALUES
-    ("Movie"),
-    ("TV"),
-    ("Commercial"),
-    ("Short"),
-    ("Talk");
+INSERT INTO medium (label_en, label_ja) VALUES
+    ("Movie", "映画"),
+    ("TV", "テレビ"),
+    ("Commercial", "広告"),
+    ("Short", "短編映画"),
+    ("Talk", "トーク");
