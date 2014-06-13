@@ -102,11 +102,15 @@ sub queue {
             try_play_next();
         }
 
-        return $req->new_response->redirect('/queue');
+        my $res = $req->new_response;
+        $res->redirect('/queue');
+        return $res;
     }
     elsif ($req->method eq 'DELETE') {
         @Queue = ();
-        return $req->new_response->redirect('/queue');
+        my $res = $req->new_response;
+        $res->redirect('/queue');
+        return $res;
     }
     else {
         my $res = $req->new_response(405);
