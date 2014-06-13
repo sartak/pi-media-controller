@@ -10,6 +10,7 @@ has _handle => (
 
 sub set_active_source {
     my $self = shift;
+    my $then = shift;
 
     warn "Setting self as active source for TV ... \n";
 
@@ -25,6 +26,8 @@ sub set_active_source {
         warn "Done setting active source\n";
         $self->_clear_handle;
         undef $handle;
+
+        $then->() if $then;
     });
 }
 

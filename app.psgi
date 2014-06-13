@@ -83,15 +83,17 @@ my %endpoints = (
 
             $Queue->push($video);
 
-            $Television->set_active_source;
-
             my $res = $req->new_response;
 
             if ($Controller->current_video) {
+                $Television->set_active_source;
+
                 $res->redirect('/queue');
             }
             else {
-                $Controller->play_next_in_queue;
+                $Television->set_active_source(sub {
+                    $Controller->play_next_in_queue;
+                });
                 $res->redirect('/current');
             }
 
