@@ -53,7 +53,8 @@ my %endpoints = (
             }
 
             my $res = $req->new_response(200);
-            $res->body(join "\n", $Queue->videos);
+            $res->content_type("application/json");
+            $res->body(encode_json([$Queue->videos]));
             return $res;
         },
         POST => sub {
