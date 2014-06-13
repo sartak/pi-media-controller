@@ -2,7 +2,6 @@
 use 5.14.0;
 use warnings;
 use Plack::Request;
-use Plack::Response;
 use AnyEvent::Run;
 use JSON;
 
@@ -103,11 +102,11 @@ sub queue {
             try_play_next();
         }
 
-        return Plack::Response->new->redirect('/queue');
+        return $req->new_response->redirect('/queue');
     }
     elsif ($req->method eq 'DELETE') {
         @Queue = ();
-        return Plack::Response->new->redirect('/queue');
+        return $req->new_response->redirect('/queue');
     }
     else {
         my $res = $req->new_response(405);
