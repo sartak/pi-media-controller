@@ -26,6 +26,7 @@ sub try_play_next {
     $Player->on_eof(undef);
     $Player->on_error(sub {
         warn "Done playing $file\n";
+        undef $Player;
         try_play_next();
     });
 }
