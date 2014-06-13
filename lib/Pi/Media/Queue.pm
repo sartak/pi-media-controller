@@ -7,11 +7,11 @@ has _videos => (
     isa     => 'ArrayRef[Str]',
     default => sub { [] },
     handles => {
-        push     => 'push',
-        shift    => 'shift',
-        count    => 'count',
-        elements => 'videos',
-        clear    => 'clear',
+        videos => 'elements',
+        push   => 'push',
+        shift  => 'shift',
+        count  => 'count',
+        clear  => 'clear',
     },
 );
 
