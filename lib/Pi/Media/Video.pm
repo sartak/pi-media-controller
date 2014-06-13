@@ -37,13 +37,13 @@ has medium => (
 );
 
 has series => (
-    is => 'ro',
-    isa => 'Str',
+    is  => 'ro',
+    isa => 'Maybe[Str]',
 );
 
 has season => (
-    is => 'ro',
-    isa => 'Str',
+    is  => 'ro',
+    isa => 'Maybe[Str]',
 );
 
 sub TO_JSON {
