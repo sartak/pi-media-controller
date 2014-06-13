@@ -2,6 +2,11 @@ package Pi::Media::Video;
 use 5.14.0;
 use Mouse;
 
+has id => (
+    is  => 'ro',
+    isa => 'Int',
+);
+
 has path => (
     is       => 'ro',
     isa      => 'Str',
@@ -14,11 +19,37 @@ has name => (
     required => 1,
 );
 
+has immersible => (
+    is       => 'ro',
+    isa      => 'Bool',
+    required => 1,
+);
+
+has streamable => (
+    is       => 'ro',
+    isa      => 'Bool',
+    required => 1,
+);
+
+has medium => (
+    is  => 'ro',
+    isa => 'Str',
+);
+
+has series => (
+    is => 'ro',
+    isa => 'Str',
+);
+
+has season => (
+    is => 'ro',
+    isa => 'Str',
+);
+
 sub TO_JSON {
     my $self = shift;
     return {
-        path => $self->path,
-        name => $self->name,
+        map { $_ => $self->$_ } qw/id path name immersible streamable medium series season/
     };
 }
 
