@@ -158,7 +158,7 @@ sub video_with_id {
         JOIN      medium ON video.mediumId = medium.id
         LEFT JOIN series ON video.seriesId = series.id
         LEFT JOIN season ON video.seasonId = season.id
-        WHERE id = ?
+        WHERE video.id = ?
         LIMIT 1
     ;');
 
