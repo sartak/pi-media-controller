@@ -63,6 +63,10 @@ sub _play_video {
     my $self = shift;
     my $video = shift;
 
+    if (!-r $video->path) {
+        die "Video file " . $video->path . " not found";
+    }
+
     warn "Playing $video ...\n";
 
     $self->_set_current_video($video);
