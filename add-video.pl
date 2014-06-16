@@ -13,7 +13,10 @@ $medium || $series or usage("medium or series required");
 my $season = $ARGV{season};
 if ($season && !$series) { usage("series required if season present"); }
 
-my $identifier     = $ARGV{identifier};
+my $identifier = $ARGV{identifier};
+warn "identifier probably shouldn't start with 0\n"
+	if $identifier && $identifier =~ /^0/;
+
 my $spoken_langs   = $ARGV{spoken_langs} or usage("spoken_langs required");
 my $subtitle_langs = $ARGV{subtitle_langs} or usage("subtitle_langs required");
 
