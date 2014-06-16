@@ -15,7 +15,7 @@ has path => (
 
 has identifier => (
     is  => 'ro',
-    isa => 'Str',
+    isa => 'Maybe[Str]',
 );
 
 has label => (
