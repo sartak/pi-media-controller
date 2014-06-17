@@ -241,8 +241,8 @@ sub add_viewing {
         VALUES (?, ?, ?, ?)
     ;', {}, (
         $args{video}->id,
-        $args{startTime},
-        $args{endTime},
+        $args{start_time},
+        $args{end_time},
         $args{percent},
     ));
 }

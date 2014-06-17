@@ -94,6 +94,15 @@ sub _play_video {
     $handle->on_read(sub {});
     $handle->on_eof(undef);
     $handle->on_error(sub {
+        my $percent;
+
+        $library->add_viewing(
+            video      => $self->current_video,
+            start_time => $self->_start_time,
+            end_time   => time,
+            percent    => $percent,
+        );
+
         warn "Done playing $video\n";
         $self->_clear_current_video;
         $self->_clear_handle;
