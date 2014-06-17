@@ -81,6 +81,18 @@ sub toggle_pause {
     $self->_run_command('p');
 }
 
+sub unpause {
+    my $self = shift;
+    return unless $self->is_paused;
+    $self->toggle_pause;
+}
+
+sub pause {
+    my $self = shift;
+    return if $self->is_paused;
+    $self->toggle_pause;
+}
+
 sub _run_command {
     my $self = shift;
     my $command = shift;
