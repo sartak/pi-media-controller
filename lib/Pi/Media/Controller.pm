@@ -132,7 +132,7 @@ sub _play_video {
     $self->_start_time(time);
 
     $self->notify({
-        playing => $video,
+        started => $video,
     });
 
     my $handle = AnyEvent::Run->new(
