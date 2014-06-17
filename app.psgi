@@ -46,6 +46,24 @@ my %endpoints = (
             $Controller->toggle_pause;
             return $req->new_response(200);
         },
+        PAUSE => sub {
+            my $req = shift;
+            if ($Controller->pause) {
+                return $req->new_response(200);
+            }
+            else {
+                return $req->new_response(204);
+            }
+        },
+        UNPAUSE => sub {
+            my $req = shift;
+            if ($Controller->unpause) {
+                return $req->new_response(200);
+            }
+            else {
+                return $req->new_response(204);
+            }
+        },
         NEXTAUDIO => sub {
             my $req = shift;
             $Controller->next_audio;

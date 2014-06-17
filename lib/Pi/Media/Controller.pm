@@ -83,14 +83,16 @@ sub toggle_pause {
 
 sub unpause {
     my $self = shift;
-    return unless $self->is_paused;
+    return 0 unless $self->is_paused;
     $self->toggle_pause;
+    return 1;
 }
 
 sub pause {
     my $self = shift;
-    return if $self->is_paused;
+    return 0 if $self->is_paused;
     $self->toggle_pause;
+    return 1;
 }
 
 sub _run_command {
