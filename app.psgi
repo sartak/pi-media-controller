@@ -21,7 +21,7 @@ my $server = Twiggy::Server->new(
 
 my $Library = Pi::Media::Library->new;
 my $Queue = Pi::Media::Queue::Autofilling->new(library => $Library);
-my $Controller = Pi::Media::Controller->new(queue => $Queue);
+my $Controller = Pi::Media::Controller->new(queue => $Queue, library => $Library);
 my $Television = Pi::Media::Television->new;
 
 my %endpoints = (

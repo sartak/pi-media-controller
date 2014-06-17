@@ -4,6 +4,7 @@ use Mouse;
 use AnyEvent::Run;
 use Pi::Media::Queue;
 use Pi::Media::Video;
+use Pi::Media::Library;
 
 has current_video => (
     is      => 'ro',
@@ -15,6 +16,12 @@ has current_video => (
 has queue => (
     is       => 'ro',
     isa      => 'Pi::Media::Queue',
+    required => 1,
+);
+
+has library => (
+    is       => 'ro',
+    isa      => 'Pi::Media::Library',
     required => 1,
 );
 
