@@ -233,5 +233,19 @@ sub random_video_for_immersion {
     return $videos[0];
 }
 
+sub add_viewing {
+    my ($self, %args) = @_;
+    $self->_dbh->do('
+        INSERT INTO viewing
+            (videoId, startTime, endTime, percent)
+        VALUES (?, ?, ?, ?)
+    ;', {}, (
+        $args{video}->id,
+        $args{startTime},
+        $args{endTime},
+        $args{percent},
+    ));
+}
+
 1;
 
