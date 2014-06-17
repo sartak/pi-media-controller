@@ -19,9 +19,9 @@ my $server = Twiggy::Server->new(
     port => "5000",
 );
 
-my $Queue = Pi::Media::Queue->new;
-my $Controller = Pi::Media::Controller->new(queue => $Queue);
 my $Library = Pi::Media::Library->new;
+my $Queue = Pi::Media::Queue->new(library => $Library);
+my $Controller = Pi::Media::Controller->new(queue => $Queue);
 my $Television = Pi::Media::Television->new;
 
 my %endpoints = (
