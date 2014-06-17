@@ -7,7 +7,7 @@ use JSON;
 use Twiggy::Server;
 use Encode;
 
-use Pi::Media::Queue;
+use Pi::Media::Queue::Autofilling;
 use Pi::Media::Controller;
 use Pi::Media::Library;
 use Pi::Media::Television;
@@ -20,7 +20,7 @@ my $server = Twiggy::Server->new(
 );
 
 my $Library = Pi::Media::Library->new;
-my $Queue = Pi::Media::Queue->new(library => $Library);
+my $Queue = Pi::Media::Queue::Autofilling->new(library => $Library);
 my $Controller = Pi::Media::Controller->new(queue => $Queue);
 my $Television = Pi::Media::Television->new;
 
