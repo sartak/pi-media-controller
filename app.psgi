@@ -19,12 +19,26 @@ my $server = Twiggy::Server->new(
     port => "5000",
 );
 
-my $Library = Pi::Media::Library->new;
-my $Queue = Pi::Media::Queue::Autofilling->new(library => $Library);
-my $Controller = Pi::Media::Controller->new(queue => $Queue, library => $Library);
-my $Television = Pi::Media::Television->new;
 my @Watchers;
 
+my $notify_cb = sub {
+    my $event = shift;
+    my $json = encode_utf8($json->encode($event));
+
+    for my $writer (@Watchers) {
+        $writer->write($json);
+        $writer->write("\n");
+    }
+};
+
+my $Library = Pi::Media::Library->new;
+my $Queue = Pi::Media::Queue::Autofilling->new(library => $Library);
+my $Controller = Pi::Media::Controller->new(
+    queue     => $Queue,
+    library   => $Library,
+    notify_cb => $notify_cb,
+);
+my $Television = Pi::Media::Television->new;
 my %endpoints = (
     '/current' => {
         GET => sub {
@@ -180,16 +194,6 @@ $server->register_service(sub {
     my $res = $action->($req);
     return $res->finalize;
 });
-
-sub notify {
-    my $event = shift;
-    my $json = encode_utf8($json->encode($event));
-
-    for my $writer (@Watchers) {
-        $writer->write($json);
-        $writer->write("\n");
-    }
-}
 
 warn "Ready!\n";
 

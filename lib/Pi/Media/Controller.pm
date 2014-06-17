@@ -5,6 +5,12 @@ use AnyEvent::Run;
 use Pi::Media::Queue;
 use Pi::Media::Video;
 use Pi::Media::Library;
+use JSON::Types;
+
+has notify_cb => (
+    is      => 'ro',
+    default => sub { sub {} },
+);
 
 has current_video => (
     is      => 'ro',
@@ -79,6 +85,9 @@ sub toggle_pause {
     my $self = shift;
     $self->_set_is_paused(!$self->is_paused);
     $self->_run_command('p');
+    $self->notify({
+        paused => bool($self->is_paused),
+    });
 }
 
 sub unpause {
@@ -93,6 +102,11 @@ sub pause {
     return 0 if $self->is_paused;
     $self->toggle_pause;
     return 1;
+}
+
+sub notify {
+    my $self = shift;
+    $self->notify_cb->(@_);
 }
 
 sub _run_command {
@@ -116,6 +130,10 @@ sub _play_video {
     $self->_set_is_paused(0);
     $self->_set_current_video($video);
     $self->_start_time(time);
+
+    $self->notify({
+        playing => $video,
+    });
 
     my $handle = AnyEvent::Run->new(
         cmd => ['omxplayer', '-b', $video->path],
