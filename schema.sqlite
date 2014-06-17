@@ -37,7 +37,7 @@ CREATE TABLE IF NOT EXISTS viewing (
     videoId INTEGER,
     startTime INTEGER NOT NULL,
     endTime INTEGER NOT NULL,
-    percent REAL NOT NULL
+    elapsedSeconds INTEGER
 );
 
 INSERT INTO medium (label_en, label_ja) VALUES

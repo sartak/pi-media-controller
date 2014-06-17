@@ -107,15 +107,15 @@ sub _play_video {
 
     $handle->on_eof(undef);
     $handle->on_error(sub {
-        my $percent;
-
-        warn $self->_buffer;
+        my ($h, $m, $s) = $self->_buffer =~ /Stopped at: (\d+):(\d\d):(\d\d)/;
+        $s += $m * 60;
+        $s += $h * 3600;
 
         $self->library->add_viewing(
-            video      => $self->current_video,
-            start_time => $self->_start_time,
-            end_time   => time,
-            percent    => $percent,
+            video           => $self->current_video,
+            start_time      => $self->_start_time,
+            end_time        => time,
+            elapsed_seconds => $s,
         );
 
         warn "Done playing $video\n";

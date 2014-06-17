@@ -239,13 +239,13 @@ sub add_viewing {
     my ($self, %args) = @_;
     $self->_dbh->do('
         INSERT INTO viewing
-            (videoId, startTime, endTime, percent)
+            (videoId, startTime, endTime, elapsedSeconds)
         VALUES (?, ?, ?, ?)
     ;', {}, (
         $args{video}->id,
         $args{start_time},
         $args{end_time},
-        $args{percent},
+        $args{elapsed_seconds},
     ));
 }
 
