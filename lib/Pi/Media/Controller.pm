@@ -36,6 +36,12 @@ has _start_time => (
     clearer => '_clear_start_time',
 );
 
+has _buffer => (
+    is      => 'rw',
+    isa     => 'Str',
+    clearer => '_clear_buffer',
+);
+
 sub play_next_in_queue {
     my $self = shift;
 
@@ -91,12 +97,21 @@ sub _play_video {
     $self->_handle($handle);
 
     # set things up to just wait until omxplayer exits
-    $handle->on_read(sub {});
+    $handle->on_read(sub {
+        my ($handle) = @_;
+        my $buf = $handle->{rbuf};
+        $handle->{rbuf} = '';
+
+        $self->_buffer($self->_buffer . $buf);
+    });
+
     $handle->on_eof(undef);
     $handle->on_error(sub {
         my $percent;
 
-        $library->add_viewing(
+        warn $self->_buffer;
+
+        $self->library->add_viewing(
             video      => $self->current_video,
             start_time => $self->_start_time,
             end_time   => time,
@@ -106,6 +121,7 @@ sub _play_video {
         warn "Done playing $video\n";
         $self->_clear_current_video;
         $self->_clear_handle;
+        $self->_clear_buffer;
         $self->_clear_start_time;
         undef $handle;
 
