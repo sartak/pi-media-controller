@@ -220,7 +220,9 @@ sub random_video_for_immersion {
         JOIN      medium ON video.mediumId = medium.id
         LEFT JOIN series ON video.seriesId = series.id
         LEFT JOIN season ON video.seasonId = season.id
-        WHERE video.immersible = 1
+        WHERE
+            video.immersible = 1
+            AND video.streamable = 1
         ORDER BY RANDOM()
         LIMIT 1
     ;');
