@@ -13,6 +13,12 @@ has current_video => (
     clearer => '_clear_current_video',
 );
 
+has is_paused => (
+    is     => 'ro',
+    isa    => 'Bool',
+    writer => '_set_is_paused',
+);
+
 has queue => (
     is       => 'ro',
     isa      => 'Pi::Media::Queue',
@@ -66,9 +72,14 @@ sub toggle_subtitles        { shift->_run_command('s') }
 sub decrease_subtitle_delay { shift->_run_command('d') }
 sub increase_subtitle_delay { shift->_run_command('f') }
 sub stop_current            { shift->_run_command('q') }
-sub toggle_pause            { shift->_run_command('p') }
 sub decrease_volume         { shift->_run_command('-') }
 sub increase_volume         { shift->_run_command('+') }
+
+sub toggle_pause {
+    my $self = shift;
+    $self->_set_is_paused(!$self->is_paused);
+    $self->_run_command('p');
+}
 
 sub _run_command {
     my $self = shift;
@@ -88,6 +99,7 @@ sub _play_video {
 
     warn "Playing $video ...\n";
 
+    $self->_set_is_paused(0);
     $self->_set_current_video($video);
     $self->_start_time(time);
 
