@@ -107,15 +107,18 @@ sub _play_video {
 
     $handle->on_eof(undef);
     $handle->on_error(sub {
-        my ($h, $m, $s) = $self->_buffer =~ /Stopped at: (\d+):(\d\d):(\d\d)/;
-        $s += $m * 60;
-        $s += $h * 3600;
+        my $seconds;
+        if (my ($h, $m, $s) = $self->_buffer =~ /Stopped at: (\d+):(\d\d):(\d\d)/) {
+            $seconds = $s
+                     + 60 * $m
+                     + 3600 * $h;
+        }
 
         $self->library->add_viewing(
             video           => $self->current_video,
             start_time      => $self->_start_time,
             end_time        => time,
-            elapsed_seconds => $s,
+            elapsed_seconds => $seconds,
         );
 
         warn "Done playing $video\n";
