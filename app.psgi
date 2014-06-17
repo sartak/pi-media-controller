@@ -66,7 +66,7 @@ my %endpoints = (
     '/queue' => {
         GET => sub {
             my $req = shift;
-            if (!$Queue->count) {
+            if (!$Queue->has_videos) {
                 return $req->new_response(204);
             }
 
@@ -148,5 +148,9 @@ $server->register_service(sub {
 });
 
 warn "Ready!\n";
+
+if ($Queue->has_videos) {
+    $Controller->play_next_in_queue;
+}
 
 AE::cv->recv;

@@ -15,11 +15,11 @@ has _videos => (
     isa     => 'ArrayRef[Pi::Media::Video]',
     default => sub { [] },
     handles => {
-        videos => 'elements',
-        push   => 'push',
-        shift  => 'shift',
-        count  => 'count',
-        clear  => 'clear',
+        videos     => 'elements',
+        push       => 'push',
+        shift      => 'shift',
+        has_videos => 'count',
+        clear      => 'clear',
     },
 );
 
