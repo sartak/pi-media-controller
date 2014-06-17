@@ -210,5 +210,26 @@ sub video_with_id {
     return $videos[0];
 }
 
+sub random_video_for_immersion {
+    my ($self) = @_;
+
+    my $sth = $self->_dbh->prepare('
+        SELECT
+            video.id, video.path, video.identifier, video.label_en, video.label_ja, video.spoken_langs, video.subtitle_langs, video.immersible, video.streamable, medium.id, series.id, season.id
+        FROM video
+        JOIN      medium ON video.mediumId = medium.id
+        LEFT JOIN series ON video.seriesId = series.id
+        LEFT JOIN season ON video.seasonId = season.id
+        WHERE video.immersible = 1
+        ORDER BY RANDOM()
+        LIMIT 1
+    ;');
+
+    $sth->execute;
+
+    my @videos = $self->_inflate_videos_from_sth($sth);
+    return $videos[0];
+}
+
 1;
 
