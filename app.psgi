@@ -23,6 +23,7 @@ my $Library = Pi::Media::Library->new;
 my $Queue = Pi::Media::Queue::Autofilling->new(library => $Library);
 my $Controller = Pi::Media::Controller->new(queue => $Queue, library => $Library);
 my $Television = Pi::Media::Television->new;
+my @Watchers;
 
 my %endpoints = (
     '/current' => {
@@ -147,6 +148,21 @@ my %endpoints = (
 $server->register_service(sub {
     my $req = Plack::Request->new(shift);
 
+    if ($req->path_info eq '/status') {
+        if ($req->method eq 'GET') {
+            return sub {
+                my $responder = shift;
+                my $writer = $responder->([200, ['Content-Type', 'application/json']]);
+                push @Watchers, $writer;
+            };
+        }
+        else {
+            my $res = $req->new_response(405);
+            $res->body("allowed methods: GET");
+            return $res->finalize;
+        }
+    }
+
     my $spec = $endpoints{$req->path_info};
     if (!$spec) {
         my $res = $req->new_response(404);
@@ -164,6 +180,16 @@ $server->register_service(sub {
     my $res = $action->($req);
     return $res->finalize;
 });
+
+sub notify {
+    my $event = shift;
+    my $json = encode_utf8($json->encode($event));
+
+    for my $writer (@Watchers) {
+        $writer->write($json);
+        $writer->write("\n");
+    }
+}
 
 warn "Ready!\n";
 
