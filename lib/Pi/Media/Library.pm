@@ -122,6 +122,8 @@ sub insert_video {
         $seriesId,
         $seasonId,
     ));
+
+    return $self->_dbh->last_insert_id;
 }
 
 sub insert_series {

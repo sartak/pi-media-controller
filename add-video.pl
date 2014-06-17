@@ -41,7 +41,7 @@ my $immersible = $ARGV{immersible} ? 1 : 0;
 my $streamable = $ARGV{streamable} ? 1 : 0;
 
 my $library = Pi::Media::Library->new;
-$library->insert_video(
+my $id = $library->insert_video(
     path           => $path,
     identifier     => $identifier,
     label_en       => $label_en,
@@ -54,6 +54,8 @@ $library->insert_video(
     series         => $series,
     season         => $season,
 );
+
+print "Added " . ($label_ja || $label_en) . " as video $id";
 
 sub usage {
     my $reason = shift;
