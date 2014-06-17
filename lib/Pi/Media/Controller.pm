@@ -30,6 +30,12 @@ has _handle => (
     clearer => '_clear_handle',
 );
 
+has _start_time => (
+    is      => 'rw',
+    isa     => 'Int',
+    clearer => '_clear_start_time',
+);
+
 sub play_next_in_queue {
     my $self = shift;
 
@@ -77,6 +83,7 @@ sub _play_video {
     warn "Playing $video ...\n";
 
     $self->_set_current_video($video);
+    $self->_start_time(time);
 
     my $handle = AnyEvent::Run->new(
         cmd => ['omxplayer', '-b', $video->path],
@@ -90,6 +97,7 @@ sub _play_video {
         warn "Done playing $video\n";
         $self->_clear_current_video;
         $self->_clear_handle;
+        $self->_clear_start_time;
         undef $handle;
 
         $self->play_next_in_queue;
