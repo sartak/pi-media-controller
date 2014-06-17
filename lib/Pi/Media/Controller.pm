@@ -39,7 +39,7 @@ has _start_time => (
 has _buffer => (
     is      => 'rw',
     isa     => 'Str',
-    clearer => '_clear_buffer',
+    default => '',
 );
 
 sub play_next_in_queue {
@@ -124,7 +124,7 @@ sub _play_video {
         warn "Done playing $video\n";
         $self->_clear_current_video;
         $self->_clear_handle;
-        $self->_clear_buffer;
+        $self->_buffer('');
         $self->_clear_start_time;
         undef $handle;
 
