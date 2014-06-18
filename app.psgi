@@ -26,8 +26,10 @@ my $notify_cb = sub {
     my $json = encode_utf8($json->encode($event));
 
     for my $writer (@Watchers) {
-        $writer->write($json);
-        $writer->write("\n");
+	eval {
+            $writer->write($json);
+            $writer->write("\n");
+	};
     }
 };
 
