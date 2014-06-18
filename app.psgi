@@ -200,6 +200,7 @@ $server->register_service(sub {
 warn "Ready!\n";
 
 if ($Queue->has_videos) {
+    $Television->set_active_source;
     $Controller->play_next_in_queue;
 }
 
