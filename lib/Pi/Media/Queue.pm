@@ -15,11 +15,30 @@ has _videos => (
     default => sub { [] },
 );
 
-sub videos { return @{ shift->{_videos} } }
-sub push { push @{ shift->{_videos} }, @_ }
-sub shift { shift @{ shift->{_videos} } }
-sub has_videos { scalar @{ shift->{_videos} } } }
-sub clear { @{ shift->{_videos} } = () }
+sub videos {
+    my $self = shift;
+    return @{ $self->{_videos} };
+}
+
+sub push {
+    my $self = shift;
+    push @{ $self->{_videos} }, @_;
+}
+
+sub has_videos {
+    my $self = shift;
+    return scalar @{ $self->{_videos} };
+}
+
+sub clear {
+    my $self = shift;
+    @{ $self->{_videos} } = ();
+}
+
+sub shift {
+    my $self = shift;
+    return shift @{ $self->{_videos} };
+}
 
 1;
 
