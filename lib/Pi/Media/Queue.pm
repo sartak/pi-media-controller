@@ -11,6 +11,7 @@ has library => (
 );
 
 has _videos => (
+    is      => 'bare',
     isa     => 'ArrayRef[Pi::Media::Video]',
     default => sub { [] },
 );
