@@ -55,7 +55,7 @@ my $id = $library->insert_video(
     season         => $season,
 );
 
-print "Added " . ($label_ja || $label_en) . " as video $id";
+print "Added " . ($label_ja || $label_en) . " as video $id\n";
 
 sub usage {
     my $reason = shift;
