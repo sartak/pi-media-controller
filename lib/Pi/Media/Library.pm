@@ -270,5 +270,34 @@ sub mediums {
     return @mediums;
 }
 
+sub series {
+    my ($self, %args) = @_;
+
+    my ($query, @bind);
+    if ($args{mediumId}) {
+        $query = 'SELECT id, label_en, label_ja FROM series WHERE mediumId = ? ORDER BY rowid ASC;';
+    }
+    else {
+        $query = 'SELECT id, label_en, label_ja FROM series ORDER BY rowid ASC;';
+    }
+
+    my $sth = $self->_dbh->prepare($query);
+    $sth->execute(@bind);
+
+    my @series;
+    while (my ($id, $label_en, $label_ja) = $sth->fetchrow_array) {
+        my %label;
+        $label{en} = $label_en if $label_en;
+        $label{ja} = $label_ja if $label_ja;
+
+        push @series, {
+            id    => $id,
+            label => \%label,
+        };
+    }
+
+    return @series;
+}
+
 1;
 
