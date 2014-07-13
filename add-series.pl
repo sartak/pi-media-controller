@@ -12,7 +12,7 @@ $label_en || $label_ja or die usage("Must have at least one of label_en or label
 
 @ARGV == 0 or usage("must have no stray args");
 
-my $library = Pi::Media::Library->new;
+my $library = Pi::Media::Library->new(file => $ENV{PMC_DATABASE});
 $library->insert_series(
     label_en       => $label_en,
     label_ja       => $label_ja,

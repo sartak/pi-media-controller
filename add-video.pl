@@ -40,7 +40,7 @@ $path =~ s/~/$ENV{HOME}/;
 my $immersible = $ARGV{immersible} ? 1 : 0;
 my $streamable = $ARGV{streamable} ? 1 : 0;
 
-my $library = Pi::Media::Library->new;
+my $library = Pi::Media::Library->new(file => $ENV{PMC_DATABASE});
 my $id = $library->insert_video(
     path           => $path,
     identifier     => $identifier,
