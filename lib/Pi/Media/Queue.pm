@@ -11,17 +11,15 @@ has library => (
 );
 
 has _videos => (
-    traits  => ['Array'],
     isa     => 'ArrayRef[Pi::Media::Video]',
     default => sub { [] },
-    handles => {
-        videos     => 'elements',
-        push       => 'push',
-        shift      => 'shift',
-        has_videos => 'count',
-        clear      => 'clear',
-    },
 );
+
+sub videos { return @{ shift->{_videos} } }
+sub push { push @{ shift->{_videos} }, @_ }
+sub shift { shift @{ shift->{_videos} } }
+sub has_videos { scalar @{ shift->{_videos} } } }
+sub clear { @{ shift->{_videos} } = () }
 
 1;
 
