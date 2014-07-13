@@ -161,7 +161,7 @@ sub insert_season {
 }
 
 sub videos {
-    my ($self, $args) = @_;
+    my ($self, %args) = @_;
 
     my @bind;
     my @where;
