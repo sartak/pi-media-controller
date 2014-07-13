@@ -19,7 +19,11 @@ has _dbh => (
     },
 );
 
-sub file { 'library.sqlite' }
+has file => (
+    is      => 'ro',
+    isa     => 'Str',
+    default => 'library.sqlite',
+);
 
 sub _inflate_videos_from_sth {
     my ($self, $sth) = @_;

@@ -14,9 +14,12 @@ use Pi::Media::Television;
 
 my $json = JSON->new->convert_blessed(1);
 
+@ARGV == 3 or die "usage: $0 host port database\n";
+my ($host, $port, $dbfile) = @_;
+
 my $server = Twiggy::Server->new(
-    host => "10.0.1.13",
-    port => "5000",
+    host => $host,
+    port => $port,
 );
 
 my @Watchers;
@@ -33,7 +36,7 @@ my $notify_cb = sub {
     }
 };
 
-my $Library = Pi::Media::Library->new;
+my $Library = Pi::Media::Library->new(file => $dbfile);
 my $Queue = Pi::Media::Queue::Autofilling->new(library => $Library);
 my $Controller = Pi::Media::Controller->new(
     queue     => $Queue,
