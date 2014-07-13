@@ -42,6 +42,15 @@ my $Controller = Pi::Media::Controller->new(
 );
 my $Television = Pi::Media::Television->new;
 my %endpoints = (
+    '/medium' => {
+        GET => sub {
+            my $req = shift;
+            my $res = $req->new_response(200);
+            $res->body(encode_utf8($json->encode([$Library->mediums])));
+            return $res;
+        },
+    },
+
     '/current' => {
         GET => sub {
             my $req = shift;
