@@ -3,6 +3,7 @@ use 5.14.0;
 use Mouse;
 use Pi::Media::Video;
 use DBI;
+use Path::Class;
 
 has _dbh => (
     is      => 'ro',
@@ -37,7 +38,7 @@ sub _inflate_videos_from_sth {
 
         my $video = Pi::Media::Video->new(
             id             => $id,
-            path           => $path,
+            path           => $self->_absolutify_path($path),
             identifier     => $identifier,
             label          => \%label,
             spoken_langs   => [split ',', $spoken_langs],
@@ -207,7 +208,7 @@ sub paths {
 
     my @paths;
     while (my ($path) = $sth->fetchrow_array) {
-        push @paths, $path;
+        push @paths, $self->_absolutify_path($path);
     }
 
     return @paths;
@@ -318,6 +319,12 @@ sub series {
     }
 
     return @series;
+}
+
+sub _absolutify_path {
+    my ($self, $relative) = @_;
+
+    return file($self->dbfile)->dir->file($relative);
 }
 
 1;
