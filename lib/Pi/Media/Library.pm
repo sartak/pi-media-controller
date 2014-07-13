@@ -115,7 +115,7 @@ sub insert_video {
             (path, identifier, label_en, label_ja, spoken_langs, subtitle_langs, immersible, streamable, mediumId, seriesId, seasonId)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     ;', {}, (
-        $args{path},
+        $self->_relativify_path($args{path}),
         $args{identifier},
         $args{label_en},
         $args{label_ja},
@@ -325,6 +325,12 @@ sub _absolutify_path {
     my ($self, $relative) = @_;
 
     return file($self->dbfile)->dir->file($relative);
+}
+
+sub _relativify_path {
+    my ($self, $absolute) = @_;
+
+    return file($absolute)->relative(file($self->dbfile)->dir);
 }
 
 1;
