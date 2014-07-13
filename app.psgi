@@ -51,6 +51,21 @@ my %endpoints = (
         },
     },
 
+    '/series' => {
+        GET => sub {
+            my $req = shift;
+            my $res = $req->new_response(200);
+            my %args;
+
+            if (my $mediumId = $req->param('mediumId')) {
+                $args{mediumId} = $mediumId;
+            }
+
+            $res->body(encode_utf8($json->encode([$Library->series(%args)])));
+            return $res;
+        },
+    },
+
     '/current' => {
         GET => sub {
             my $req = shift;
