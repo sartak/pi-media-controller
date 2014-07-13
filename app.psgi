@@ -179,7 +179,18 @@ my %endpoints = (
             my $req = shift;
             my $res = $req->new_response(200);
             $res->content_type("application/json");
-            $res->body(encode_utf8($json->encode([$Library->videos])));
+
+            my %args;
+
+            if (my $mediumId = $req->param('mediumId')) {
+                $args{mediumId} = $mediumId;
+            }
+
+            if (my $seriesId = $req->param('seriesId')) {
+                $args{seriesId} = $seriesId;
+            }
+
+            $res->body(encode_utf8($json->encode([$Library->videos(%args)])));
             return $res;
         },
     },

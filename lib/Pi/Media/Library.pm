@@ -161,19 +161,36 @@ sub insert_season {
 }
 
 sub videos {
-    my ($self) = @_;
+    my ($self, $args) = @_;
 
-    my $sth = $self->_dbh->prepare('
+    my @bind;
+    my @where;
+
+    if ($args{mediumId}) {
+        push @bind, $args{mediumId};
+        push @where, 'mediumId = ?';
+    }
+
+    if ($args{seriesId}) {
+        push @bind, $args{seriesId};
+        push @where, 'seriesId = ?';
+    }
+
+    my $query = '
         SELECT
             video.id, video.path, video.identifier, video.label_en, video.label_ja, video.spoken_langs, video.subtitle_langs, video.immersible, video.streamable, medium.id, series.id, season.id
         FROM video
         JOIN      medium ON video.mediumId = medium.id
         LEFT JOIN series ON video.seriesId = series.id
         LEFT JOIN season ON video.seasonId = season.id
-        ;
-    ');
+    ';
 
-    $sth->execute;
+    $query .= 'WHERE ' . join(' AND ', @where) if @where;
+    $query .= ';';
+
+    my $sth = $self->_dbh->prepare($query);
+
+    $sth->execute(@bind);
 
     return $self->_inflate_videos_from_sth($sth);
 }
