@@ -30,8 +30,8 @@ my $label_en = $ARGV{label_en};
 my $label_ja = $ARGV{label_ja};
 $label_en || $label_ja or die usage("Must have at least one of label_en or label_ja");
 
-my $path = shift or usage("path required");
-@ARGV == 0 or usage("must have no stray args");
+my $path = $ARGV[0] or usage("path required");
+@ARGV == 1 or usage("must have no stray args: " . join(', ', @ARGV));
 
 $path =~ s/~/$ENV{HOME}/;
 -r $path && !-d _
