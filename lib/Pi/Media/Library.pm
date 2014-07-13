@@ -128,7 +128,7 @@ sub insert_video {
         $seasonId,
     ));
 
-    return $self->_dbh->last_insert_id;
+    return $self->_dbh->sqlite_last_insert_rowid;
 }
 
 sub insert_series {
