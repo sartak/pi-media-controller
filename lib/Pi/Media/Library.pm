@@ -324,13 +324,13 @@ sub series {
 sub _absolutify_path {
     my ($self, $relative) = @_;
 
-    return file($self->dbfile)->dir->file($relative);
+    return file($self->file)->dir->file($relative);
 }
 
 sub _relativify_path {
     my ($self, $absolute) = @_;
 
-    return file($absolute)->relative(file($self->dbfile)->dir);
+    return file($absolute)->relative(file($self->file)->dir);
 }
 
 1;
