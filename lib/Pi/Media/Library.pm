@@ -4,6 +4,7 @@ use Mouse;
 use Pi::Media::Video;
 use DBI;
 use Path::Class;
+use Unicode::Normalize 'NFC';
 
 has _dbh => (
     is      => 'ro',
@@ -324,13 +325,15 @@ sub series {
 sub _absolutify_path {
     my ($self, $relative) = @_;
 
-    return Path::Class::file($self->file)->dir->file($relative)->stringify;
+    my $path = Path::Class::file($self->file)->dir->file($relative)->stringify;
+    return NFC($path);
 }
 
 sub _relativify_path {
     my ($self, $absolute) = @_;
 
-    return Path::Class::file($absolute)->relative(file($self->file)->dir)->stringify;
+    my $path = Path::Class::file($absolute)->relative(file($self->file)->dir)->stringify;
+    return NFC($path);
 }
 
 1;
