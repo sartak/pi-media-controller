@@ -6,7 +6,7 @@ use Pi::Media::Library;
 use File::Next;
 use Path::Class 'file';
 
-my $library = Pi::Media::Library->new;
+my $library = Pi::Media::Library->new(file => $ENV{PMC_DATABASE});
 my %seen = map { $_ => 1 } $library->paths;
 my $iterator = File::Next::files(@ARGV ? @ARGV : '.');
 while (defined(my $file = $iterator->())) {

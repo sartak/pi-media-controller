@@ -4,7 +4,7 @@ use warnings;
 use utf8::all;
 use Pi::Media::Library;
 
-my $library = Pi::Media::Library->new;
+my $library = Pi::Media::Library->new(file => $ENV{PMC_DATABASE});
 
 for my $video ($library->videos) {
     next if -r $video->path && !-d _;
