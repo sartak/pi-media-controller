@@ -18,10 +18,10 @@ warn "identifier probably shouldn't start with 0\n"
 	if $identifier && $identifier =~ /^0/;
 
 my $spoken_langs   = $ARGV{spoken_langs} or usage("spoken_langs required");
-my $subtitle_langs = $ARGV{subtitle_langs} or usage("subtitle_langs required");
+defined(my $subtitle_langs = $ARGV{subtitle_langs}) or usage("subtitle_langs required");
 
 $spoken_langs =~ m{^[a-z,\?]+$} or usage("spoken_langs must be a comma-separated list");
-$subtitle_langs =~ m{^[a-z,\?]+$} or usage("subtitle_langs must be a comma-separated list");
+$subtitle_langs =~ m{^[a-z,\?]*$} or usage("subtitle_langs must be a comma-separated list");
 
 exists($ARGV{immersible}) || exists($ARGV{noimmersible}) or usage("immersible or noimmersible required");
 exists($ARGV{streamable}) || exists($ARGV{unstreamable}) or usage("streamable or unstreamable required");
