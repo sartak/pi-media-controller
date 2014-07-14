@@ -15,7 +15,7 @@ if ($season && !$series) { usage("series required if season present"); }
 
 my $identifier = $ARGV{identifier};
 warn "identifier probably shouldn't start with 0\n"
-	if $identifier && $identifier =~ /^0/;
+	if $identifier && $identifier =~ /^0\d/;
 
 my $spoken_langs   = $ARGV{spoken_langs} or usage("spoken_langs required");
 defined(my $subtitle_langs = $ARGV{subtitle_langs}) or usage("subtitle_langs required");
