@@ -122,7 +122,11 @@ sub _play_video {
     my $video = shift;
 
     if (!-r $video->path) {
-        die "Video file " . $video->path . " not found";
+        $self->notify({
+            error => "Video file " . $video->path . " not found",
+            video => $video,
+        });
+        return;
     }
 
     warn "Playing $video ...\n";
