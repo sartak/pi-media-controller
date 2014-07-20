@@ -37,6 +37,12 @@ has library => (
     required => 1,
 );
 
+has _temporarily_stopped => (
+    is      => 'rw',
+    isa     => 'Bool',
+    default => 0,
+);
+
 has _handle => (
     is      => 'rw',
     clearer => '_clear_handle',
@@ -61,6 +67,13 @@ sub play_next_in_queue {
         or return;
 
     $self->_play_video($video);
+}
+
+sub stop_playing {
+    my $self = shift;
+
+    $self->_temporarily_stopped(1);
+    $self->stop_current;
 }
 
 sub decrease_speed          { shift->_run_command('1') }
@@ -176,7 +189,12 @@ sub _play_video {
         $self->_clear_start_time;
         undef $handle;
 
-        $self->play_next_in_queue;
+        if ($self->_temporarily_stopped) {
+            $self->_temporarily_stopped(0);
+        }
+        else {
+            $self->play_next_in_queue;
+        }
     });
 }
 
