@@ -34,5 +34,12 @@ sub set_active_source {
     $then->() if $then;
 }
 
+sub power_off {
+    my $self = shift;
+    my $then = shift;
+
+    $then->() if $then;
+}
+
 1;
 
