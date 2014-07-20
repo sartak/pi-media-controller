@@ -332,7 +332,7 @@ sub _absolutify_path {
 sub _relativify_path {
     my ($self, $absolute) = @_;
 
-    my $path = Path::Class::file($absolute)->relative(file($self->file)->dir)->stringify;
+    my $path = Path::Class::file($absolute)->relative(Path::Class::file($self->file)->dir)->stringify;
     return NFC($path);
 }
 
