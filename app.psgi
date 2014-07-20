@@ -87,6 +87,11 @@ my %endpoints = (
             $Controller->toggle_pause;
             return $req->new_response(200);
         },
+        STOP => sub {
+            my $req = shift;
+            $Controller->stop_playing;
+            return $req->new_response(200);
+        },
         PAUSE => sub {
             my $req = shift;
             if ($Controller->pause) {
