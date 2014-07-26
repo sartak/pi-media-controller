@@ -187,19 +187,23 @@ my %endpoints = (
             $res->content_type("application/json");
 
             my %args;
+            my @response;
 
-            if (my $mediumId = $req->param('mediumId')) {
-                $args{mediumId} = $mediumId;
-            }
+            sub {
+                $args{mediumId} = $req->param('mediumId') or do {
+                    @response = $Library->mediums;
+                    for my $medium (@response) {
+                        $medium->{requestPath} = "/library?mediumId=" . $medium->{id};
+                    }
+                    return;
+                };
+            }->();
 
-            if (my $seriesId = $req->param('seriesId')) {
-                $args{seriesId} = $seriesId;
-            }
-
-            $res->body(encode_utf8($json->encode([$Library->videos(%args)])));
+            $res->body(encode_utf8($json->encode(\@response)));
             return $res;
         },
     },
+
 );
 
 $server->register_service(sub {
