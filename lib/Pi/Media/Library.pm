@@ -172,19 +172,34 @@ sub videos {
     my @bind;
     my @where;
 
-    if ($args{mediumId}) {
-        push @bind, $args{mediumId};
-        push @where, 'medium.id = ?';
+    if (exists $args{mediumId}) {
+        if (defined $args{mediumId}) {
+            push @bind, $args{mediumId};
+            push @where, 'medium.id = ?';
+        }
+        else {
+            push @where, 'medium.id IS NULL';
+        }
     }
 
-    if ($args{seriesId}) {
-        push @bind, $args{seriesId};
-        push @where, 'series.id = ?';
+    if (exists $args{seriesId}) {
+        if (defined $args{seriesId}) {
+            push @bind, $args{seriesId};
+            push @where, 'series.id = ?';
+        }
+        else {
+            push @where, 'series.id IS NULL';
+        }
     }
 
-    if ($args{seasonId}) {
-        push @bind, $args{seasonId};
-        push @where, 'season.id = ?';
+    if (exists $args{seasonId}) {
+        if (defined $args{seasonId}) {
+            push @bind, $args{seasonId};
+            push @where, 'season.id = ?';
+        }
+        else {
+            push @where, 'season.id IS NULL';
+        }
     }
 
     my $query = '
