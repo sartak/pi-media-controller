@@ -343,6 +343,48 @@ sub series {
     return @series;
 }
 
+sub seasons {
+    my ($self, %args) = @_;
+
+    my @bind;
+    my @where;
+
+    if (exists $args{seriesId}) {
+        if (defined $args{seriesId}) {
+            push @bind, $args{seriesId};
+            push @where, 'seriesId = ?';
+        }
+        else {
+            push @where, 'seriesId IS NULL';
+        }
+    }
+
+    my $query = '
+        SELECT id, label_en, label_ja
+        FROM season
+    ';
+
+    $query .= 'WHERE ' . join(' AND ', @where) if @where;
+    $query .= ';';
+
+    my $sth = $self->_dbh->prepare($query);
+    $sth->execute(@bind);
+
+    my @seasons;
+    while (my ($id, $label_en, $label_ja) = $sth->fetchrow_array) {
+        my %label;
+        $label{en} = $label_en if $label_en;
+        $label{ja} = $label_ja if $label_ja;
+
+        push @seasons, {
+            id    => $id,
+            label => \%label,
+        };
+    }
+
+    return @seasons;
+}
+
 sub _absolutify_path {
     my ($self, $relative) = @_;
 

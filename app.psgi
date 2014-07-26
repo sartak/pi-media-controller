@@ -211,6 +211,22 @@ my %endpoints = (
 
                     return;
                 };
+
+                $args{seasonId} = $req->param('seasonId') or do {
+                    @response = $Library->seasons(%args);
+                    for my $season (@response) {
+                        $season->{requestPath} = "/library?mediumId=" . $args{mediumId} . "&seriesId=" . $args{seriesId} . "&seasonId=" . $season->{id};
+                    }
+
+                    push @response, $Library->videos(
+                        %args,
+                        seasonId => undef,
+                    );
+
+                    return;
+                };
+
+                @response = $Library->videos(%args);
             }->();
 
             $res->body(encode_utf8($json->encode(\@response)));
