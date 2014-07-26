@@ -203,6 +203,12 @@ my %endpoints = (
                     for my $series (@response) {
                         $series->{requestPath} = "/library?mediumId=" . $args{mediumId} . "&seriesId=" . $series->{id};
                     }
+
+                    push @response, $Library->videos(
+                        %args,
+                        seriesId => undef,
+                    );
+
                     return;
                 };
             }->();
