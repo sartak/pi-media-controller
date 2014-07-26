@@ -174,12 +174,17 @@ sub videos {
 
     if ($args{mediumId}) {
         push @bind, $args{mediumId};
-        push @where, 'mediumId = ?';
+        push @where, 'medium.id = ?';
     }
 
     if ($args{seriesId}) {
         push @bind, $args{seriesId};
-        push @where, 'seriesId = ?';
+        push @where, 'series.id = ?';
+    }
+
+    if ($args{seasonId}) {
+        push @bind, $args{seasonId};
+        push @where, 'season.id = ?';
     }
 
     my $query = '
