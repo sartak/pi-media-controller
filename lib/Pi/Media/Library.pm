@@ -273,7 +273,7 @@ sub add_viewing {
 }
 
 sub mediums {
-    my ($self, %args) = @_;
+    my ($self) = @_;
 
     my $sth = $self->_dbh->prepare('SELECT id, label_en, label_ja FROM medium ORDER BY rowid ASC;');
     $sth->execute;
