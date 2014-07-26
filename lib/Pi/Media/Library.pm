@@ -299,6 +299,7 @@ sub series {
     my ($query, @bind);
     if ($args{mediumId}) {
         $query = 'SELECT id, label_en, label_ja FROM series WHERE mediumId = ? ORDER BY rowid ASC;';
+        push @bind, $args{mediumId};
     }
     else {
         $query = 'SELECT id, label_en, label_ja FROM series ORDER BY rowid ASC;';

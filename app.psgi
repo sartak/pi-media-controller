@@ -197,6 +197,14 @@ my %endpoints = (
                     }
                     return;
                 };
+
+                $args{seriesId} = $req->param('seriesId') or do {
+                    @response = $Library->series(%args);
+                    for my $series (@response) {
+                        $series->{requestPath} = "/library?mediumId=" . $args{mediumId} . "&seriesId=" . $series->{id};
+                    }
+                    return;
+                };
             }->();
 
             $res->body(encode_utf8($json->encode(\@response)));
