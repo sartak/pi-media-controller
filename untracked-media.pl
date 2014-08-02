@@ -1,10 +1,10 @@
 #!/usr/bin/env perl
 use 5.14.0;
 use warnings;
-use utf8::all;
 use Pi::Media::Library;
 use Path::Class 'file';
 use File::Find;
+use Encode;
 
 my $library = Pi::Media::Library->new(file => $ENV{PMC_DATABASE});
 my %seen = map { $_ => 1 } $library->paths;
@@ -14,9 +14,9 @@ my %seen = map { $_ => 1 } $library->paths;
 find(sub {
     return if -d $_;
 
-    my $file = $File::Find::name;
+    my $file = decode_utf8($File::Find::name);
     return if $file =~ /\.DS_Store/;
     return if $seen{$file};
 
-    warn $file;
+    warn encode_utf8($file);
 }, @ARGV);
