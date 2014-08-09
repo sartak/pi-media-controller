@@ -21,9 +21,21 @@ sub videos {
     return @{ $self->{_videos} };
 }
 
+my $Serial = 0;
+
 sub push {
     my $self = shift;
-    push @{ $self->{_videos} }, @_;
+
+    for my $video (@_) {
+        $video->{queue_id} = $Serial++;
+        push @{ $self->{_videos} }, $video;
+    }
+}
+
+sub remove_video_with_queue_id {
+    my ($self, $queue_id) = @_;
+
+    @{ $self->{_videos} } = grep { $_->{queue_id} ne $queue_id } @{ $self->{_videos} };
 }
 
 sub has_videos {
