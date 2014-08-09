@@ -79,6 +79,16 @@ my %endpoints = (
         },
         DELETE => sub {
             my $req = shift;
+            if (!$Controller->current_video) {
+                $Television->set_active_source;
+
+                if (!$Controller->current_video) {
+                    $Controller->play_next_in_queue;
+                }
+
+                return $req->new_response(204);
+            }
+
             $Controller->stop_current;
             return $req->new_response(200);
         },
