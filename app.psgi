@@ -234,6 +234,16 @@ my %endpoints = (
         },
     },
 
+    '/pi' => {
+        SHUTDOWN => sub {
+            my $req = shift;
+            my $res = $req->new_response(204);
+
+            system("sudo reboot");
+
+            return $res;
+        },
+    },
 );
 
 $server->register_service(sub {
