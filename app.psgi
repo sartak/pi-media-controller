@@ -84,7 +84,18 @@ my %endpoints = (
         },
         PLAYPAUSE => sub {
             my $req = shift;
-            $Controller->toggle_pause;
+            if ($Controller->toggle_pause) {
+                # paused
+            }
+            else {
+                # unpaused
+                $Television->set_active_source;
+
+                if (!$Controller->current_video) {
+                    $Controller->play_next_in_queue;
+                }
+            }
+
             return $req->new_response(200);
         },
         STOP => sub {
@@ -104,7 +115,12 @@ my %endpoints = (
         },
         UNPAUSE => sub {
             my $req = shift;
+            $Television->set_active_source;
             if ($Controller->unpause) {
+                if (!$Controller->current_video) {
+                    $Controller->play_next_in_queue;
+                }
+
                 return $req->new_response(200);
             }
             else {
