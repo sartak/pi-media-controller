@@ -164,9 +164,11 @@ my %endpoints = (
             my $res = $req->new_response(200);
             $res->content_type("application/json");
 
-            my @videos = $Queue->videos;
-            for my $video (@videos) {
-                $video->{removePath} = "/queue?queue_id=" . $video->{queue_id};
+            my @videos;
+            for my $original ($Queue->videos) {
+                my $copy = \%$original;
+                $copy->{removePath} = "/queue?queue_id=" . $original->{queue_id};
+                push @videos, $copy;
             }
 
             $res->body(encode_utf8($json->encode(\@videos)));
