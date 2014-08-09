@@ -29,7 +29,7 @@ sub push {
     for my $original (@_) {
         my $copy = \%$original;
 
-        $copy->{queue_id} = $Serial++;
+        $copy->{queue_id} = $$ . "-" . $Serial++;
         push @{ $self->{_videos} }, $copy;
     }
 }
