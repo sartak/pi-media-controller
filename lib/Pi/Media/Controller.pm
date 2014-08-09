@@ -101,6 +101,8 @@ sub toggle_pause {
     $self->notify({
         paused => bool($self->is_paused),
     });
+
+    return $self->is_paused;
 }
 
 sub unpause {
