@@ -64,9 +64,14 @@ has season => (
 
 sub TO_JSON {
     my $self = shift;
-    return {
+    my $frozen = {
         map { $_ => $self->$_ } qw/id path identifier label spoken_langs subtitle_langs immersible streamable medium series season/
     };
+
+    $frozen->{queue_id} = $self->{queue_id} if $self->{queue_id};
+    $frozen->{removePath} = $self->{removePath} if $self->{removePath};
+
+    return $frozen;
 }
 
 1;
