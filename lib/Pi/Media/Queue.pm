@@ -26,9 +26,11 @@ my $Serial = 0;
 sub push {
     my $self = shift;
 
-    for my $video (@_) {
-        $video->{queue_id} = $Serial++;
-        push @{ $self->{_videos} }, $video;
+    for my $original (@_) {
+        my $copy = \%$original;
+
+        $copy->{queue_id} = $Serial++;
+        push @{ $self->{_videos} }, $copy;
     }
 }
 
