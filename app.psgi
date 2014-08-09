@@ -210,6 +210,16 @@ my %endpoints = (
             $res->redirect('/queue');
             return $res;
         },
+        REMOVE => sub {
+            my $req = shift;
+            if (my $queue_id = $req->param('queue_id')) {
+                $Queue->remove_video_with_queue_id($queue_id);
+            }
+
+            my $res = $req->new_response;
+            $res->redirect('/queue');
+            return $res;
+        },
     },
 
     '/library' => {
