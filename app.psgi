@@ -95,9 +95,6 @@ my %endpoints = (
         PLAYPAUSE => sub {
             my $req = shift;
             if ($Controller->toggle_pause) {
-                # paused
-            }
-            else {
                 # unpaused
                 $Television->set_active_source;
 
