@@ -3,9 +3,11 @@ use 5.14.0;
 use warnings;
 use utf8::all;
 use Plack::Request;
+use Plack::App::File;
 use JSON;
 use Twiggy::Server;
 use Encode;
+use Scalar::Util 'blessed';
 
 use Pi::Media::Queue::Autofilling;
 use Pi::Media::Controller;
@@ -285,6 +287,28 @@ my %endpoints = (
             return $res;
         },
     },
+
+    '/stream' => {
+        GET => sub {
+            my $req = shift;
+
+            my $id = $req->param('video') or do {
+                my $res = $req->new_response(400);
+                $res->body("video required");
+                return $res;
+            };
+
+            my $video = $Library->video_with_id($id) or do {
+                my $res = $req->new_response(404);
+                $res->body("video not found");
+                return $res;
+            };
+
+            my $path = $video->path;
+
+            return Plack::App::File->new->serve_path($req->env, $path);
+        },
+    },
 );
 
 $server->register_service(sub {
@@ -320,7 +344,10 @@ $server->register_service(sub {
     }
 
     my $res = $action->($req);
-    return $res->finalize;
+    if (blessed($res)) {
+        return $res->finalize;
+    }
+    return $res;
 });
 
 warn "Ready!\n";
