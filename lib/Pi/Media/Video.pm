@@ -62,10 +62,15 @@ has season => (
     isa => 'Maybe[Str]',
 );
 
+has watched => (
+    is  => 'rw',
+    isa => 'Bool',
+);
+
 sub TO_JSON {
     my $self = shift;
     my $frozen = {
-        map { $_ => $self->$_ } qw/id path identifier label spoken_langs subtitle_langs immersible streamable medium series season/
+        map { $_ => $self->$_ } qw/id path identifier label spoken_langs subtitle_langs immersible streamable medium series season watched/
     };
 
     $frozen->{queue_id} = $self->{queue_id} if $self->{queue_id};

@@ -31,6 +31,7 @@ sub _inflate_videos_from_sth {
     my ($self, $sth) = @_;
 
     my @videos;
+    my %video_by_id;
 
     while (my ($id, $path, $identifier, $label_en, $label_ja, $spoken_langs, $subtitle_langs, $immersible, $streamable, $medium, $series, $season) = $sth->fetchrow_array) {
         my %label;
@@ -50,7 +51,23 @@ sub _inflate_videos_from_sth {
             series         => $series,
             season         => $season,
         );
+
+        $video_by_id{$id} = $video;
+
         push @videos, $video;
+    }
+
+    if (keys %video_by_id) {
+        my $query = 'SELECT videoId FROM viewing WHERE (';
+        $query .= join ' OR ', map { 'videoId=?' } keys %video_by_id;
+        $query .= ') AND elapsedSeconds IS NULL GROUP BY videoId;';
+
+        my $sth = $self->_dbh->prepare($query);
+        $sth->execute(keys %video_by_id);
+
+        while (my ($id) = $sth->fetchrow_array) {
+            $video_by_id{$id}->watched(1);
+        }
     }
 
     return @videos;
