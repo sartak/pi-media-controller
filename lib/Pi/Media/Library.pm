@@ -229,7 +229,7 @@ sub videos {
     ';
 
     $query .= 'WHERE ' . join(' AND ', @where) if @where;
-    $query .= ' ORDER BY sort_order ASC, rowid ASC';
+    $query .= ' ORDER BY video.sort_order ASC, video.rowid ASC';
     $query .= ';';
 
     my $sth = $self->_dbh->prepare($query);
