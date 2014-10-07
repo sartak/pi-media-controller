@@ -1,21 +1,24 @@
 CREATE TABLE IF NOT EXISTS medium (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     label_en TEXT UNIQUE NOT NULL,
-    label_ja TEXT UNIQUE NOT NULL
+    label_ja TEXT UNIQUE NOT NULL,
+    sort_order INTEGER
 );
 
 CREATE TABLE IF NOT EXISTS series (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     label_en TEXT,
     label_ja TEXT,
-    mediumId INTEGER NOT NULL
+    mediumId INTEGER NOT NULL,
+    sort_order INTEGER
 );
 
 CREATE TABLE IF NOT EXISTS season (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     label_en TEXT,
     label_ja TEXT,
-    seriesId INTEGER NOT NULL
+    seriesId INTEGER NOT NULL,
+    sort_order INTEGER
 );
 
 CREATE TABLE IF NOT EXISTS video (
@@ -30,7 +33,8 @@ CREATE TABLE IF NOT EXISTS video (
     streamable BOOLEAN NOT NULL DEFAULT 1,
     mediumId INTEGER NOT NULL,
     seriesId INTEGER,
-    seasonId INTEGER
+    seasonId INTEGER,
+    sort_order INTEGER
 );
 
 CREATE TABLE IF NOT EXISTS viewing (
