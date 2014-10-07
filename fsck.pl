@@ -6,7 +6,7 @@ use Pi::Media::Library;
 
 my $library = Pi::Media::Library->new(file => $ENV{PMC_DATABASE});
 
-for my $video ($library->videos) {
+for my $video ($library->videos(excludeViewing => 1)) {
     next if -r $video->path && !-d _;
 
     warn $video->id . ': cannot read ' . $video->path . "\n";

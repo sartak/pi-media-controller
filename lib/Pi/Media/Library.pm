@@ -28,7 +28,7 @@ has file => (
 );
 
 sub _inflate_videos_from_sth {
-    my ($self, $sth) = @_;
+    my ($self, $sth, %args) = @_;
 
     my @videos;
     my %video_by_id;
@@ -57,7 +57,7 @@ sub _inflate_videos_from_sth {
         push @videos, $video;
     }
 
-    if (keys %video_by_id) {
+    if (!$args{excludeViewing} && keys %video_by_id) {
         my $query = 'SELECT videoId FROM viewing WHERE (';
         $query .= join ' OR ', map { 'videoId=?' } keys %video_by_id;
         $query .= ') AND elapsedSeconds IS NULL GROUP BY videoId;';
@@ -236,7 +236,7 @@ sub videos {
 
     $sth->execute(@bind);
 
-    return $self->_inflate_videos_from_sth($sth);
+    return $self->_inflate_videos_from_sth($sth, %args);
 }
 
 sub paths {
@@ -254,7 +254,7 @@ sub paths {
 }
 
 sub video_with_id {
-    my ($self, $id) = @_;
+    my ($self, $id, %args) = @_;
 
     my $sth = $self->_dbh->prepare('
         SELECT
@@ -269,7 +269,7 @@ sub video_with_id {
 
     $sth->execute($id);
 
-    my @videos = $self->_inflate_videos_from_sth($sth);
+    my @videos = $self->_inflate_videos_from_sth($sth, %args);
     return $videos[0];
 }
 
