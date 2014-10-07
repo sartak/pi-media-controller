@@ -90,7 +90,7 @@ sub _id_for_medium_series {
         return $sth->fetchrow_array;
     }
     else {
-        my $sth = $self->_dbh->prepare('SELECT id FROM medium WHERE label_en=? OR label_ja=? ORDER BY LIMIT 1;');
+        my $sth = $self->_dbh->prepare('SELECT id FROM medium WHERE label_en=? OR label_ja=? LIMIT 1;');
         $sth->execute($medium, $medium);
         return $sth->fetchrow_array;
     }
@@ -101,7 +101,7 @@ sub _id_for_series {
 
     return undef if !$name;
 
-    my $sth = $self->_dbh->prepare('SELECT id FROM series WHERE label_en=? OR label_ja=? ORDER BY LIMIT 1;');
+    my $sth = $self->_dbh->prepare('SELECT id FROM series WHERE label_en=? OR label_ja=? LIMIT 1;');
     $sth->execute($name, $name);
     return ($sth->fetchrow_array)[0];
 }
@@ -229,7 +229,7 @@ sub videos {
     ';
 
     $query .= 'WHERE ' . join(' AND ', @where) if @where;
-    $query .= ' ORDER BY video.sort_order ASC, video.rowid ASC';
+    $query .= ' ORDER BY video.sort_order IS NULL, video.sort_order ASC, video.rowid ASC';
     $query .= ';';
 
     my $sth = $self->_dbh->prepare($query);
@@ -313,7 +313,7 @@ sub add_viewing {
 sub mediums {
     my ($self) = @_;
 
-    my $sth = $self->_dbh->prepare('SELECT id, label_en, label_ja FROM medium ORDER BY sort_order ASC, rowid ASC;');
+    my $sth = $self->_dbh->prepare('SELECT id, label_en, label_ja FROM medium ORDER BY sort_order is NULL, sort_order ASC, rowid ASC;');
     $sth->execute;
 
     my @mediums;
@@ -336,11 +336,11 @@ sub series {
 
     my ($query, @bind);
     if ($args{mediumId}) {
-        $query = 'SELECT id, label_en, label_ja FROM series WHERE mediumId = ? ORDER BY sort_order ASC, rowid ASC;';
+        $query = 'SELECT id, label_en, label_ja FROM series WHERE mediumId = ? ORDER BY sort_order IS NULL, sort_order ASC, rowid ASC;';
         push @bind, $args{mediumId};
     }
     else {
-        $query = 'SELECT id, label_en, label_ja FROM series ORDER BY sort_order ASC, rowid ASC;';
+        $query = 'SELECT id, label_en, label_ja FROM series ORDER BY sort_order IS NULL, sort_order ASC, rowid ASC;';
     }
 
     my $sth = $self->_dbh->prepare($query);
@@ -383,7 +383,7 @@ sub seasons {
     ';
 
     $query .= 'WHERE ' . join(' AND ', @where) if @where;
-    $query .= ' ORDER BY sort_order ASC, rowid ASC';
+    $query .= ' ORDER BY sort_order is NULL, sort_order ASC, rowid ASC';
     $query .= ';';
 
     my $sth = $self->_dbh->prepare($query);
