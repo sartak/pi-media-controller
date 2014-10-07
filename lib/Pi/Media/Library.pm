@@ -76,7 +76,7 @@ sub _inflate_videos_from_sth {
 sub _id_for_medium {
     my ($self, $name) = @_;
 
-    my $sth = $self->_dbh->prepare('SELECT id FROM medium WHERE label_en=? OR label_ja=? ORDER BY sort_order ASC, rowid ASC;');
+    my $sth = $self->_dbh->prepare('SELECT id FROM medium WHERE label_en=? OR label_ja=? LIMIT 1;');
     $sth->execute($name, $name);
     return ($sth->fetchrow_array)[0];
 }
@@ -85,12 +85,12 @@ sub _id_for_medium_series {
     my ($self, $medium, $series) = @_;
 
     if ($series) {
-        my $sth = $self->_dbh->prepare('SELECT mediumId, id FROM series WHERE label_en=? OR label_ja=? ORDER BY sort_order ASC, rowid ASC;');
+        my $sth = $self->_dbh->prepare('SELECT mediumId, id FROM series WHERE label_en=? OR label_ja=? LIMIT 1;');
         $sth->execute($series, $series);
         return $sth->fetchrow_array;
     }
     else {
-        my $sth = $self->_dbh->prepare('SELECT id FROM medium WHERE label_en=? OR label_ja=? ORDER BY sort_order ASC, rowid ASC;');
+        my $sth = $self->_dbh->prepare('SELECT id FROM medium WHERE label_en=? OR label_ja=? ORDER BY LIMIT 1;');
         $sth->execute($medium, $medium);
         return $sth->fetchrow_array;
     }
@@ -101,7 +101,7 @@ sub _id_for_series {
 
     return undef if !$name;
 
-    my $sth = $self->_dbh->prepare('SELECT id FROM series WHERE label_en=? OR label_ja=? ORDER BY sort_order ASC, rowid ASC;');
+    my $sth = $self->_dbh->prepare('SELECT id FROM series WHERE label_en=? OR label_ja=? ORDER BY LIMIT 1;');
     $sth->execute($name, $name);
     return ($sth->fetchrow_array)[0];
 }
@@ -111,7 +111,7 @@ sub _id_for_season {
 
     return undef if !defined($seriesId) || !$name;
 
-    my $sth = $self->_dbh->prepare('SELECT id FROM season WHERE seriesId=? AND (label_en=? OR label_ja=?) ORDER BY sort_order ASC, rowid ASC;');
+    my $sth = $self->_dbh->prepare('SELECT id FROM season WHERE seriesId=? AND (label_en=? OR label_ja=?) LIMIT 1;');
     $sth->execute($seriesId, $name, $name);
     return ($sth->fetchrow_array)[0];
 }
