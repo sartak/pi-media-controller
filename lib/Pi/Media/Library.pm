@@ -336,11 +336,11 @@ sub series {
 
     my ($query, @bind);
     if ($args{mediumId}) {
-        $query = 'SELECT id, label_en, label_ja FROM series WHERE mediumId = ? ORDER BY sort_id ASC, rowid ASC;';
+        $query = 'SELECT id, label_en, label_ja FROM series WHERE mediumId = ? ORDER BY sort_order ASC, rowid ASC;';
         push @bind, $args{mediumId};
     }
     else {
-        $query = 'SELECT id, label_en, label_ja FROM series ORDER BY sort_id ASC, rowid ASC;';
+        $query = 'SELECT id, label_en, label_ja FROM series ORDER BY sort_order ASC, rowid ASC;';
     }
 
     my $sth = $self->_dbh->prepare($query);
