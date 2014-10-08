@@ -33,23 +33,24 @@ sub _inflate_videos_from_sth {
     my @videos;
     my %video_by_id;
 
-    while (my ($id, $path, $identifier, $label_en, $label_ja, $spoken_langs, $subtitle_langs, $immersible, $streamable, $medium, $series, $season) = $sth->fetchrow_array) {
+    while (my ($id, $path, $identifier, $label_en, $label_ja, $spoken_langs, $subtitle_langs, $immersible, $streamable, $durationSeconds, $medium, $series, $season) = $sth->fetchrow_array) {
         my %label;
         $label{en} = $label_en if $label_en;
         $label{ja} = $label_ja if $label_ja;
 
         my $video = Pi::Media::Video->new(
-            id             => $id,
-            path           => $self->_absolutify_path($path),
-            identifier     => $identifier,
-            label          => \%label,
-            spoken_langs   => [split ',', $spoken_langs],
-            subtitle_langs => [split ',', $subtitle_langs],
-            immersible     => $immersible,
-            streamable     => $streamable,
-            medium         => $medium,
-            series         => $series,
-            season         => $season,
+            id               => $id,
+            path             => $self->_absolutify_path($path),
+            identifier       => $identifier,
+            label            => \%label,
+            spoken_langs     => [split ',', $spoken_langs],
+            subtitle_langs   => [split ',', $subtitle_langs],
+            immersible       => $immersible,
+            streamable       => $streamable,
+            duration_seconds => $durationSeconds,
+            medium           => $medium,
+            series           => $series,
+            season           => $season,
         );
 
         $video_by_id{$id} = $video;
@@ -219,9 +220,18 @@ sub videos {
         }
     }
 
+    if ($args{pathLike}) {
+        push @bind, $args{pathLike};
+        push @where, 'video.path LIKE ?';
+    }
+
+    if ($args{nullDuration}) {
+        push @where, 'video.durationSeconds IS NULL';
+    }
+
     my $query = '
         SELECT
-            video.id, video.path, video.identifier, video.label_en, video.label_ja, video.spoken_langs, video.subtitle_langs, video.immersible, video.streamable, medium.id, series.id, season.id
+            video.id, video.path, video.identifier, video.label_en, video.label_ja, video.spoken_langs, video.subtitle_langs, video.immersible, video.streamable, video.durationSeconds, medium.id, series.id, season.id
         FROM video
         JOIN      medium ON video.mediumId = medium.id
         LEFT JOIN series ON video.seriesId = series.id
@@ -258,7 +268,7 @@ sub video_with_id {
 
     my $sth = $self->_dbh->prepare('
         SELECT
-            video.id, video.path, video.identifier, video.label_en, video.label_ja, video.spoken_langs, video.subtitle_langs, video.immersible, video.streamable, medium.id, series.id, season.id
+            video.id, video.path, video.identifier, video.label_en, video.label_ja, video.spoken_langs, video.subtitle_langs, video.immersible, video.streamable, video.durationSeconds, medium.id, series.id, season.id
         FROM video
         JOIN      medium ON video.mediumId = medium.id
         LEFT JOIN series ON video.seriesId = series.id
@@ -402,6 +412,21 @@ sub seasons {
     }
 
     return @seasons;
+}
+
+sub update_video {
+    my ($self, $video, %args) = @_;
+    my (@columns, @bind);
+
+    for my $column (keys %args) {
+        push @columns, $column;
+        push @bind, $args{$column};
+    }
+
+    my $query = 'UPDATE video SET ';
+    $query .= join ', ', map { "$_=?" } @columns;
+    $query .= ' WHERE rowid=?;';
+    $self->_dbh->do($query, {}, @bind, $video->id);
 }
 
 sub _absolutify_path {
