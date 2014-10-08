@@ -2,7 +2,6 @@
 use 5.14.0;
 use warnings;
 use Pi::Media::Library;
-use Path::Class 'file';
 use File::Find;
 use Encode;
 
