@@ -34,7 +34,8 @@ CREATE TABLE IF NOT EXISTS video (
     mediumId INTEGER NOT NULL,
     seriesId INTEGER,
     seasonId INTEGER,
-    sort_order INTEGER
+    sort_order INTEGER,
+    durationSeconds INTEGER
 );
 
 CREATE TABLE IF NOT EXISTS viewing (
