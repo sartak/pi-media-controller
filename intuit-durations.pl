@@ -6,11 +6,15 @@ use Pi::Media::Library;
 use MP4::Info;
 
 my $library = Pi::Media::Library->new(file => $ENV{PMC_DATABASE});
-my @videos = $library->videos(
-    excludeViewing => 1,
-    pathLike => '%.mp4',
-    nullDuration => 1,
-);
+my @videos;
+
+for my $extension ('mp4', 'm4v') {
+    push @videos, $library->videos(
+        excludeViewing => 1,
+        pathLike       => "%.$extension",
+        nullDuration   => 1,
+    );
+}
 
 for my $video (@videos) {
     my $info = get_mp4info($video->path);
