@@ -175,7 +175,13 @@ sub _play_video {
             $seconds = $s
                      + 60 * $m
                      + 3600 * $h;
+
+            # close enough
+            if ($video->durationSeconds && $seconds > $video->durationSeconds * .9) {
+                $seconds = undef;
+            }
         }
+
 
         $self->library->add_viewing(
             video           => $self->current_video,
