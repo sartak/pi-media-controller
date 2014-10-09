@@ -131,6 +131,38 @@ sub insert_tree {
     ));
 }
 
+sub tree_from_segments {
+    my ($self, @segments) = @_;
+
+    my (@join, @where, @bind);
+
+    my $i = 0;
+    for my $segment (reverse @segments) {
+        push @where, "(tree$i.label_en = ? OR tree$i.label_ja = ?)";
+        push @bind, $segment, $segment;
+
+        ++$i;
+        push @join, " JOIN tree AS tree$i ON tree" . ($i-1) . ".parentId = tree$i.id";
+    }
+
+    pop @join;
+
+    my $query = 'SELECT tree0.id FROM tree AS tree0 ';
+    $query .= join " ", @join;
+    $query .= ' WHERE ';
+    $query .= join " AND ", @where;
+
+    $query .= ' LIMIT 1;';
+
+    my $sth = $self->_dbh->prepare($query);
+    $sth->execute(@bind);
+    my $id = ($sth->fetchrow_array)[0];
+    if (!$id) {
+        die "No path for segments: " . join(', ', map { qq{"$_"} } @segments);
+    }
+    return $id;
+}
+
 sub trees {
     my ($self, %args) = @_;
 

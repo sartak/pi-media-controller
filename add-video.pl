@@ -5,7 +5,10 @@ use utf8::all;
 use Getopt::Whatever;
 use Pi::Media::Library;
 
-my $treeId = $ARGV{treeId} or usage("treeId required");
+my $treeId = $ARGV{treeId};
+my $segments = ref $ARGV{segments} ? $ARGV{segments} : [$ARGV{segments}];
+
+$treeId || $ARGV{segments} or usage("treeId or segments required");
 
 my $identifier = $ARGV{identifier};
 warn "identifier probably shouldn't start with 0\n"
@@ -35,6 +38,11 @@ my $immersible = $ARGV{immersible} ? 1 : 0;
 my $streamable = $ARGV{streamable} ? 1 : 0;
 
 my $library = Pi::Media::Library->new(file => $ENV{PMC_DATABASE});
+
+if (!$treeId) {
+    $treeId = $library->tree_from_segments(@$segments);
+}
+
 my $id = $library->insert_video(
     path           => $path,
     identifier     => $identifier,
@@ -51,6 +59,6 @@ print "Added " . ($label_ja || $label_en) . " as video $id\n";
 
 sub usage {
     my $reason = shift;
-    die "$reason\nusage: $0 --treeId=treeId [--label_en=LABEL --label_ja=LABEL] [--identifier=IDENTIFIER] --spoken_langs=en,ja --subtitle_langs=en,ja --immersible|--noimmersible --streamable|--unstreamable PATH";
+    die "$reason\nusage: $0 [--treeId=treeId OR --segments=foo --segments=bar] [--label_en=LABEL --label_ja=LABEL] [--identifier=IDENTIFIER] --spoken_langs=en,ja --subtitle_langs=en,ja --immersible|--noimmersible --streamable|--unstreamable PATH";
 }
 
