@@ -169,8 +169,10 @@ sub trees {
     my @bind;
     my @where;
 
-    push @where, 'parentId = ?';
-    push @bind, $args{parentId};
+    if (!$args{all}) {
+        push @where, 'parentId = ?';
+        push @bind, $args{parentId};
+    }
 
     my $query = 'SELECT id, label_en, label_ja, parentId FROM tree';
 
@@ -190,8 +192,10 @@ sub videos {
     my @bind;
     my @where;
 
-    push @where, 'video.treeId = ?';
-    push @bind, $args{treeId};
+    if (!$args{all}) {
+        push @where, 'video.treeId = ?';
+        push @bind, $args{treeId};
+    }
 
     if ($args{pathLike}) {
         push @bind, $args{pathLike};
