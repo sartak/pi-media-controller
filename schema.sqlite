@@ -1,23 +1,8 @@
-CREATE TABLE IF NOT EXISTS medium (
+CREATE TABLE IF NOT EXISTS tree (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    label_en TEXT UNIQUE NOT NULL,
-    label_ja TEXT UNIQUE NOT NULL,
-    sort_order INTEGER
-);
-
-CREATE TABLE IF NOT EXISTS series (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    parentId INTEGER,
     label_en TEXT,
     label_ja TEXT,
-    mediumId INTEGER NOT NULL,
-    sort_order INTEGER
-);
-
-CREATE TABLE IF NOT EXISTS season (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    label_en TEXT,
-    label_ja TEXT,
-    seriesId INTEGER NOT NULL,
     sort_order INTEGER
 );
 
@@ -31,9 +16,7 @@ CREATE TABLE IF NOT EXISTS video (
     subtitle_langs TEXT NOT NULL,
     immersible BOOLEAN NOT NULL,
     streamable BOOLEAN NOT NULL DEFAULT 1,
-    mediumId INTEGER NOT NULL,
-    seriesId INTEGER,
-    seasonId INTEGER,
+    treeId INTEGER NOT NULL,
     sort_order INTEGER,
     durationSeconds INTEGER
 );
@@ -45,9 +28,10 @@ CREATE TABLE IF NOT EXISTS viewing (
     elapsedSeconds INTEGER
 );
 
-INSERT INTO medium (label_en, label_ja) VALUES
-    ("Movie", "映画"),
+INSERT INTO tree (label_en, label_ja) VALUES
+    ("Movies", "映画"),
     ("TV", "テレビ"),
-    ("Commercial", "広告"),
-    ("Short", "短編映画"),
+    ("Shorts", "短編映画"),
+    ("LP", "実況プレイ"),
+    ("Commercials", "広告"),
     ("Talk", "トーク");

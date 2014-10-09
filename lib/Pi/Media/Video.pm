@@ -47,19 +47,9 @@ has streamable => (
     required => 1,
 );
 
-has medium => (
+has treeId => (
     is  => 'ro',
-    isa => 'Str',
-);
-
-has series => (
-    is  => 'ro',
-    isa => 'Maybe[Str]',
-);
-
-has season => (
-    is  => 'ro',
-    isa => 'Maybe[Str]',
+    isa => 'Int',
 );
 
 has duration_seconds => (
@@ -75,7 +65,7 @@ has watched => (
 sub TO_JSON {
     my $self = shift;
     my $frozen = {
-        map { $_ => $self->$_ } qw/id path identifier label spoken_langs subtitle_langs immersible streamable medium series season duration_seconds watched/
+        map { $_ => $self->$_ } qw/id path identifier label spoken_langs subtitle_langs immersible streamable treeId duration_seconds watched/
     };
 
     $frozen->{queue_id} = $self->{queue_id} if $self->{queue_id};

@@ -5,13 +5,7 @@ use utf8::all;
 use Getopt::Whatever;
 use Pi::Media::Library;
 
-my $medium = $ARGV{medium};
-my $series = $ARGV{series};
-
-$medium || $series or usage("medium or series required");
-
-my $season = $ARGV{season};
-if ($season && !$series) { usage("series required if season present"); }
+my $treeId = $ARGV{treeId} or usage("treeId required");
 
 my $identifier = $ARGV{identifier};
 warn "identifier probably shouldn't start with 0\n"
@@ -50,15 +44,13 @@ my $id = $library->insert_video(
     subtitle_langs => [split ',', $subtitle_langs],
     immersible     => $immersible,
     streamable     => $streamable,
-    medium         => $medium,
-    series         => $series,
-    season         => $season,
+    treeId         => $treeId,
 );
 
 print "Added " . ($label_ja || $label_en) . " as video $id\n";
 
 sub usage {
     my $reason = shift;
-    die "$reason\nusage: $0 [--medium=MEDIUM --series=SERIES] [--season=SEASON] [--label_en=LABEL --label_ja=LABEL] [--identifier=IDENTIFIER] --spoken_langs=en,ja --subtitle_langs=en,ja --immersible|--noimmersible --streamable|--unstreamable PATH";
+    die "$reason\nusage: $0 --treeId=treeId [--label_en=LABEL --label_ja=LABEL] [--identifier=IDENTIFIER] --spoken_langs=en,ja --subtitle_langs=en,ja --immersible|--noimmersible --streamable|--unstreamable PATH";
 }
 

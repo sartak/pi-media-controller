@@ -44,30 +44,6 @@ my $Controller = Pi::Media::Controller->new(
 );
 my $Television = Pi::Media::Television->new;
 my %endpoints = (
-    '/medium' => {
-        GET => sub {
-            my $req = shift;
-            my $res = $req->new_response(200);
-            $res->body(encode_utf8($json->encode([$Library->mediums])));
-            return $res;
-        },
-    },
-
-    '/series' => {
-        GET => sub {
-            my $req = shift;
-            my $res = $req->new_response(200);
-            my %args;
-
-            if (my $mediumId = $req->param('mediumId')) {
-                $args{mediumId} = $mediumId;
-            }
-
-            $res->body(encode_utf8($json->encode([$Library->series(%args)])));
-            return $res;
-        },
-    },
-
     '/current' => {
         GET => sub {
             my $req = shift;
@@ -229,48 +205,13 @@ my %endpoints = (
             my $res = $req->new_response(200);
             $res->content_type("application/json");
 
-            my %args;
-            my @response;
+            my $treeId = $req->param('tree') || 0;
+            my @response = $Library->trees(parentId => $treeId);
+            for my $tree (@response) {
+                $tree->{requestPath} = "/library?tree=" . $tree->{id};
+            }
 
-            sub {
-                $args{mediumId} = $req->param('mediumId') or do {
-                    @response = $Library->mediums;
-                    for my $medium (@response) {
-                        $medium->{requestPath} = "/library?mediumId=" . $medium->{id};
-                    }
-                    return;
-                };
-
-                $args{seriesId} = $req->param('seriesId') or do {
-                    @response = $Library->series(%args);
-                    for my $series (@response) {
-                        $series->{requestPath} = "/library?mediumId=" . $args{mediumId} . "&seriesId=" . $series->{id};
-                    }
-
-                    push @response, $Library->videos(
-                        %args,
-                        seriesId => undef,
-                    );
-
-                    return;
-                };
-
-                $args{seasonId} = $req->param('seasonId') or do {
-                    @response = $Library->seasons(%args);
-                    for my $season (@response) {
-                        $season->{requestPath} = "/library?mediumId=" . $args{mediumId} . "&seriesId=" . $args{seriesId} . "&seasonId=" . $season->{id};
-                    }
-
-                    push @response, $Library->videos(
-                        %args,
-                        seasonId => undef,
-                    );
-
-                    return;
-                };
-
-                @response = $Library->videos(%args);
-            }->();
+            push @response, $Library->videos(treeId => $treeId);
 
             $res->body(encode_utf8($json->encode(\@response)));
             return $res;
