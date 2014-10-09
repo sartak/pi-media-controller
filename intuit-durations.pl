@@ -4,33 +4,69 @@ use warnings;
 use utf8::all;
 use Pi::Media::Library;
 use MP4::Info;
+use Image::ExifTool ':Public';
 
 my $library = Pi::Media::Library->new(file => $ENV{PMC_DATABASE});
-my @videos;
 
-for my $extension ('mp4', 'm4v') {
-    push @videos, $library->videos(
-        excludeViewing => 1,
-        pathLike       => "%.$extension",
-        nullDuration   => 1,
-    );
+# mp4, m4v
+{
+    my @videos;
+
+    for my $extension ('mp4', 'm4v') {
+        push @videos, $library->videos(
+            excludeViewing => 1,
+            pathLike       => "%.$extension",
+            nullDuration   => 1,
+        );
+    }
+
+    for my $video (@videos) {
+        my $info = get_mp4info($video->path);
+        my $secs = $info->{SECS};
+        if (!$secs) {
+            $secs = $info->{MM} * 60 + $info->{SS};
+        }
+        if ($secs) {
+            $library->update_video($video, (
+                durationSeconds => $secs,
+            ));
+
+            print "[$secs] " . $video->path . "\n";
+        }
+        else {
+            warn $video->path
+        }
+    }
 }
 
-for my $video (@videos) {
-    my $info = get_mp4info($video->path);
-    my $secs = $info->{SECS};
-    if (!$secs) {
-        $secs = $info->{MM} * 60 + $info->{SS};
-    }
-    if ($secs) {
-        $library->update_video($video, (
-            durationSeconds => $secs,
-        ));
+# mkv
+{
+    my @videos;
 
-        print "[$secs] " . $video->path . "\n";
+    for my $extension ('mkv') {
+        push @videos, $library->videos(
+            excludeViewing => 1,
+            pathLike       => "%.$extension",
+            nullDuration   => 1,
+        );
     }
-    else {
-        warn $video->path
+
+    for my $video (@videos) {
+        my $info = ImageInfo($video->path);
+        my $secs;
+        if (my ($h, $m, $s) = $info->{Duration} =~ /^(\d+):(\d+):(\d+)$/) {
+            $secs = $h * 3600 + $m * 60 + $s;
+        }
+
+        if ($secs) {
+            $library->update_video($video, (
+                durationSeconds => $secs,
+            ));
+
+            print "[$secs] " . $video->path . "\n";
+        }
+        else {
+            warn $video->path
+        }
     }
 }
-
