@@ -43,7 +43,7 @@ my $library = Pi::Media::Library->new(file => $ENV{PMC_DATABASE});
 {
     my @videos;
 
-    for my $extension ('mkv') {
+    for my $extension ('mkv', 'avi') {
         push @videos, $library->videos(
             excludeViewing => 1,
             pathLike       => "%.$extension",
