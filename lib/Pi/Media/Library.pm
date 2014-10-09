@@ -134,6 +134,33 @@ sub insert_tree {
 sub tree_from_segments {
     my ($self, @segments) = @_;
 
+    # when @segments = ('A')
+    #   SELECT tree0.id
+    #   FROM tree AS tree0
+    #   WHERE
+    #     (tree0.label_en = A OR tree0.label_ja = A)
+    #   LIMIT 1
+
+    # when @segments = ('A', 'B')
+    #   SELECT tree0.id
+    #   FROM tree AS tree0
+    #   JOIN tree AS tree1 ON tree0.parentId = tree1.id
+    #   WHERE
+    #         (tree0.label_en = B OR tree0.label_ja = B)
+    #     AND (tree1.label_en = A OR tree1.label_ja = A)
+    #   LIMIT 1;
+
+    # when @segments = ('A', 'B', 'C')
+    #   SELECT tree0.id
+    #   FROM tree AS tree0
+    #   JOIN tree AS tree1 ON tree0.parentId = tree1.id
+    #   JOIN tree AS tree2 ON tree1.parentId = tree2.id
+    #   WHERE
+    #         (tree0.label_en = C OR tree0.label_ja = C)
+    #     AND (tree1.label_en = B OR tree1.label_ja = B)
+    #     AND (tree2.label_en = A OR tree2.label_ja = A)
+    #   LIMIT 1;
+
     my (@join, @where, @bind);
 
     my $i = 0;
@@ -142,7 +169,7 @@ sub tree_from_segments {
         push @bind, $segment, $segment;
 
         ++$i;
-        push @join, " JOIN tree AS tree$i ON tree" . ($i-1) . ".parentId = tree$i.id";
+        push @join, "JOIN tree AS tree$i ON tree" . ($i-1) . ".parentId = tree$i.id";
     }
 
     pop @join;
