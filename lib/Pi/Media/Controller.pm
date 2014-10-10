@@ -177,7 +177,7 @@ sub _play_video {
                      + 3600 * $h;
 
             # close enough
-            if ($video->durationSeconds && $seconds > $video->durationSeconds * .9) {
+            if ($video->duration_seconds && $seconds > $video->duration_seconds * .9) {
                 $seconds = undef;
             }
         }
