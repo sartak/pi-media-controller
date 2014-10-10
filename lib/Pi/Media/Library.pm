@@ -286,7 +286,7 @@ sub random_video_for_immersion {
 
     my $sth = $self->_dbh->prepare('
         SELECT
-            id, path, identifier, label_en, label_ja, spoken_langs, subtitle_langs, immersible, streamable, treeId
+            id, path, identifier, label_en, label_ja, spoken_langs, subtitle_langs, immersible, streamable, durationSeconds, treeId
         FROM video
         WHERE immersible = 1 AND streamable = 1
         ORDER BY RANDOM()
