@@ -28,6 +28,11 @@ has file => (
     default => 'library.sqlite',
 );
 
+sub disconnect {
+    my ($self) = @_;
+    $self->_dbh->disconnect;
+}
+
 sub _inflate_videos_from_sth {
     my ($self, $sth, %args) = @_;
 

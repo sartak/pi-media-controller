@@ -223,9 +223,13 @@ my %endpoints = (
             my $req = shift;
             my $res = $req->new_response(204);
 
+            $Library->disconnect;
+
+            system("sudo", "umount", $ENV{PMC_DATABASE});
+
             system("sudo reboot");
 
-            exit(0):
+            exit(0);
         },
     },
 
