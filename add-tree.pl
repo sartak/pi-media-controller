@@ -22,11 +22,13 @@ if (!$parent) {
     $parent = $library->tree_from_segments(@$segments);
 }
 
-$library->insert_tree(
+my $id = $library->insert_tree(
     label_en       => $label_en,
     label_ja       => $label_ja,
     parentId       => $parent,
 );
+
+print "Added " . ($label_ja || $label_en) . " as tree $id\n";
 
 sub usage {
     my $reason = shift;

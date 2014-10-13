@@ -134,6 +134,8 @@ sub insert_tree {
         $args{label_ja},
         $args{parentId},
     ));
+
+    return $self->_dbh->sqlite_last_insert_rowid;
 }
 
 sub tree_from_segments {
