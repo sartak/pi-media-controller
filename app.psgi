@@ -225,7 +225,7 @@ my %endpoints = (
 
             system("sudo reboot");
 
-            return $res;
+            exit(0):
         },
     },
 
