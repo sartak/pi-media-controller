@@ -22,6 +22,8 @@ my $library = Pi::Media::Library->new(file => $ENV{PMC_DATABASE});
     }
 
     for my $video (@videos) {
+        next unless -e $video->path;
+
         my $info = get_mp4info($video->path);
         my $secs = $info->{SECS};
         if (!$secs) {
@@ -54,6 +56,8 @@ my $library = Pi::Media::Library->new(file => $ENV{PMC_DATABASE});
     }
 
     for my $video (@videos) {
+        next unless -e $video->path;
+
         my $info = ImageInfo($video->path);
         my $secs;
         if (my ($h, $m, $s) = $info->{Duration} =~ /^(\d+):(\d+):(\d+)$/) {
