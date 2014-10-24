@@ -28,10 +28,10 @@ my $notify_cb = sub {
     my $json = encode_utf8($json->encode($event));
 
     for my $writer (@Watchers) {
-	eval {
-            $writer->write($json);
-            $writer->write("\n");
-	};
+        eval {
+                $writer->write($json);
+                $writer->write("\n");
+        };
     }
 };
 
@@ -43,6 +43,7 @@ my $Controller = Pi::Media::Controller->new(
     notify_cb => $notify_cb,
 );
 my $Television = Pi::Media::Television->new;
+
 my %endpoints = (
     '/current' => {
         GET => sub {
