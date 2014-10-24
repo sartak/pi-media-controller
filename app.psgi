@@ -8,6 +8,7 @@ use JSON;
 use Twiggy::Server;
 use Encode;
 use Scalar::Util 'blessed';
+use File::Slurp 'slurp';
 
 use Pi::Media::Queue::Autofilling;
 use Pi::Media::Controller;
@@ -15,6 +16,9 @@ use Pi::Media::Library;
 use Pi::Media::Television;
 
 my $json = JSON->new->convert_blessed(1);
+
+die "Need config.json" unless -r "config.json";
+my $config = $json->decode(scalar slurp "config.json");
 
 my $server = Twiggy::Server->new(
     host => $ENV{PMC_HOST},
@@ -259,6 +263,21 @@ my %endpoints = (
 
 $server->register_service(sub {
     my $req = Plack::Request->new(shift);
+
+    my $auth_ok = 0;
+    if (my $user = $req->header('X-PMC-Username')) {
+        if (my $pass = $req->header('X-PMC-Password')) {
+            if ($config->{users}{$user} eq $pass) {
+                $auth_ok = 1;
+            }
+        }
+    }
+
+    if (!$auth_ok) {
+        my $res = $req->new_response(401);
+        $res->body("unauthorized");
+        return $res->finalize;
+    }
 
     if ($req->path_info eq '/status') {
         if ($req->method eq 'GET') {
