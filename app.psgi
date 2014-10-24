@@ -265,7 +265,8 @@ $server->register_service(sub {
     my $req = Plack::Request->new(shift);
 
     my $auth_ok = 0;
-    if (my $user = $req->header('X-PMC-Username')) {
+    my $user;
+    if ($user = $req->header('X-PMC-Username')) {
         if (my $pass = $req->header('X-PMC-Password')) {
             if ($config->{users}{$user} eq $pass) {
                 $auth_ok = 1;
@@ -274,6 +275,7 @@ $server->register_service(sub {
     }
 
     if (!$auth_ok) {
+        warn "Unauthorized request" . ($user ? " from user '$user'" : "") . "\n";
         my $res = $req->new_response(401);
         $res->body("unauthorized");
         return $res->finalize;
