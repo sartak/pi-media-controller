@@ -222,13 +222,33 @@ sub trees {
     return $self->_inflate_trees_from_sth($sth, %args);
 }
 
+sub tags {
+    my ($self) = @_;
+
+    my $query = 'SELECT id FROM tags ORDER BY sort_order IS NULL, sort_order ASC, id ASC;';
+
+    my $sth = $self->_dbh->prepare($query);
+
+    $sth->execute(@bind);
+
+    while (my ($id) = $sth->fetchrow_array) {
+        push @tags, $id;
+    }
+
+    return @tags;
+}
+
 sub videos {
     my ($self, %args) = @_;
 
     my @bind;
     my @where;
 
-    if (!$args{all}) {
+    if ($args{tag}) {
+        push @where, 'video.tag LIKE ?';
+        push @bind, "%`" . $args{tag} . "`%";
+    }
+    elsif (!$args{all}) {
         push @where, 'video.treeId = ?';
         push @bind, $args{treeId};
     }
