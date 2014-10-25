@@ -147,6 +147,7 @@ my %endpoints = (
             my @videos;
             for my $original ($Queue->videos) {
                 my $copy = \%$original;
+                $copy->{type} = 'video';
                 $copy->{removePath} = "/queue?queue_id=" . $original->{queue_id};
                 push @videos, $copy;
             }
@@ -217,6 +218,7 @@ my %endpoints = (
             if ($treeId || !$tag) {
                 push @response, $Library->trees(parentId => $treeId);
                 for my $tree (@response) {
+                    $tree->{type} = 'tree';
                     $tree->{requestPath} = "/library?tree=" . $tree->{id};
                 }
             }
@@ -226,6 +228,7 @@ my %endpoints = (
                 my @tags = $Library->tags;
                 for my $id (@tags) {
                     push @response, {
+                        type  => 'tag',
                         label => {
                             en => $id,
                         },
@@ -234,12 +237,18 @@ my %endpoints = (
                 }
             }
 
+            my @videos;
             if ($tag) {
-                push @response, $Library->videos(tag => $tag);
+                @videos = $Library->videos(tag => $tag);
             }
             else {
-                push @response, $Library->videos(treeId => $treeId);
+                @videos = $Library->videos(treeId => $treeId);
             }
+
+            for my $video (@videos) {
+                $video->{type} = 'video';
+            }
+            push @response, @videos;
 
             $res->body(encode_utf8($json->encode(\@response)));
             return $res;
