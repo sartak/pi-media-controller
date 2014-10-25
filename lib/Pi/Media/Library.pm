@@ -39,10 +39,11 @@ sub _inflate_videos_from_sth {
     my @videos;
     my %video_by_id;
 
-    while (my ($id, $path, $identifier, $label_en, $label_ja, $spoken_langs, $subtitle_langs, $immersible, $streamable, $durationSeconds, $treeId) = $sth->fetchrow_array) {
+    while (my ($id, $path, $identifier, $label_en, $label_ja, $spoken_langs, $subtitle_langs, $immersible, $streamable, $durationSeconds, $treeId, $tags) = $sth->fetchrow_array) {
         my %label;
         $label{en} = $label_en if $label_en;
         $label{ja} = $label_ja if $label_ja;
+        $tags = [grep { length } split '`', $tags];
 
         my $video = Pi::Media::Video->new(
             id               => $id,
@@ -55,6 +56,7 @@ sub _inflate_videos_from_sth {
             streamable       => $streamable,
             duration_seconds => $durationSeconds,
             treeId           => $treeId,
+            tags             => $tags,
         );
 
         $video_by_id{$id} = $video;
@@ -242,7 +244,7 @@ sub videos {
 
     my $query = '
         SELECT
-            id, path, identifier, label_en, label_ja, spoken_langs, subtitle_langs, immersible, streamable, durationSeconds, treeId
+            id, path, identifier, label_en, label_ja, spoken_langs, subtitle_langs, immersible, streamable, durationSeconds, treeId, tags
         FROM video
     ';
 
@@ -276,7 +278,7 @@ sub video_with_id {
 
     my $sth = $self->_dbh->prepare('
         SELECT
-            id, path, identifier, label_en, label_ja, spoken_langs, subtitle_langs, immersible, streamable, durationSeconds, treeId
+            id, path, identifier, label_en, label_ja, spoken_langs, subtitle_langs, immersible, streamable, durationSeconds, treeId, tags
         FROM video
         WHERE id = ?
         LIMIT 1
@@ -293,7 +295,7 @@ sub random_video_for_immersion {
 
     my $sth = $self->_dbh->prepare('
         SELECT
-            id, path, identifier, label_en, label_ja, spoken_langs, subtitle_langs, immersible, streamable, durationSeconds, treeId
+            id, path, identifier, label_en, label_ja, spoken_langs, subtitle_langs, immersible, streamable, durationSeconds, treeId, tags
         FROM video
         WHERE immersible = 1 AND streamable = 1
         ORDER BY RANDOM()
