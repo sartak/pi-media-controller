@@ -9,6 +9,7 @@ use Twiggy::Server;
 use Encode;
 use Scalar::Util 'blessed';
 use File::Slurp 'slurp';
+use URI::Escape;
 
 use Pi::Media::Queue::Autofilling;
 use Pi::Media::Controller;
@@ -211,7 +212,7 @@ my %endpoints = (
             $res->content_type("application/json");
 
             my $treeId = $req->param('tree') || 0;
-            my $tag    = $req->param('tag');
+            my $tag    = decode_utf8($req->param('tag'));
             my @response;
 
             if ($treeId || !$tag) {
@@ -226,7 +227,7 @@ my %endpoints = (
             if (!$treeId && !$tag) {
                 my @tags = $Library->tags;
                 for my $tag (@tags) {
-                    $tag->{requestPath} = "/library?tag=" . $tag->{id};
+                    $tag->{requestPath} = "/library?tag=" . uri_escape_utf8($tag->{id});
                     push @response, $tag;
                 }
             }
