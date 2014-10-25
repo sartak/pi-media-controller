@@ -18,7 +18,13 @@ CREATE TABLE IF NOT EXISTS video (
     streamable BOOLEAN NOT NULL DEFAULT 1,
     treeId INTEGER NOT NULL,
     sort_order INTEGER,
-    durationSeconds INTEGER
+    durationSeconds INTEGER,
+    tags TEXT DEFAULT ""
+);
+
+CREATE TABLE IF NOT EXISTS tag (
+    id TEXT PRIMARY KEY NOT NULL,
+    sort_order INTEGER
 );
 
 CREATE TABLE IF NOT EXISTS viewing (
