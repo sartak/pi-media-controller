@@ -1,10 +1,10 @@
-package Pi::Media::Tree;
+package Pi::Media::Tag;
 use 5.14.0;
 use Mouse;
 
 has id => (
     is  => 'ro',
-    isa => 'Int',
+    isa => 'Str',
 );
 
 has label => (
@@ -12,17 +12,12 @@ has label => (
     isa => 'HashRef[Str]',
 );
 
-has parentId => (
-    is  => 'ro',
-    isa => 'Int',
-);
-
 sub TO_JSON {
     my $self = shift;
-    my $frozen = { map { $_ => $self->$_ } qw/id label parentId/ };
+    my $frozen = { map { $_ => $self->$_ } qw/id label/ };
 
     $frozen->{requestPath} = $self->{requestPath} if $self->{requestPath};
-    $frozen->{type} = 'tree';
+    $frozen->{type} = 'tag';
 
     return $frozen;
 }

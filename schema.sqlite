@@ -24,6 +24,7 @@ CREATE TABLE IF NOT EXISTS video (
 
 CREATE TABLE IF NOT EXISTS tag (
     id TEXT PRIMARY KEY NOT NULL,
+    label_ja TEXT,
     sort_order INTEGER
 );
 

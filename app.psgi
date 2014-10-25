@@ -147,7 +147,6 @@ my %endpoints = (
             my @videos;
             for my $original ($Queue->videos) {
                 my $copy = \%$original;
-                $copy->{type} = 'video';
                 $copy->{removePath} = "/queue?queue_id=" . $original->{queue_id};
                 push @videos, $copy;
             }
@@ -216,39 +215,28 @@ my %endpoints = (
             my @response;
 
             if ($treeId || !$tag) {
-                push @response, $Library->trees(parentId => $treeId);
-                for my $tree (@response) {
-                    $tree->{type} = 'tree';
+                my @trees = $Library->trees(parentId => $treeId);
+                for my $tree (@trees) {
                     $tree->{requestPath} = "/library?tree=" . $tree->{id};
+                    push @response, $tree;
                 }
             }
 
             # only at the very top level
             if (!$treeId && !$tag) {
                 my @tags = $Library->tags;
-                for my $id (@tags) {
-                    push @response, {
-                        type  => 'tag',
-                        label => {
-                            en => $id,
-                        },
-                        requestPath => "/library?tag=$id",
-                    };
+                for my $tag (@tags) {
+                    $tag->{requestPath} = "/library?tag=" . $tag->{id};
+                    push @response, $tag;
                 }
             }
 
-            my @videos;
             if ($tag) {
-                @videos = $Library->videos(tag => $tag);
+                push @response, $Library->videos(tag => $tag);
             }
             else {
-                @videos = $Library->videos(treeId => $treeId);
+                push @response, $Library->videos(treeId => $treeId);
             }
-
-            for my $video (@videos) {
-                $video->{type} = 'video';
-            }
-            push @response, @videos;
 
             $res->body(encode_utf8($json->encode(\@response)));
             return $res;

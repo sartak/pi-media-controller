@@ -76,6 +76,7 @@ sub TO_JSON {
 
     $frozen->{queue_id} = $self->{queue_id} if $self->{queue_id};
     $frozen->{removePath} = $self->{removePath} if $self->{removePath};
+    $frozen->{video} = 'video';
 
     return $frozen;
 }

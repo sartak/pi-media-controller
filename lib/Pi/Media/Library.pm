@@ -3,6 +3,7 @@ use 5.14.0;
 use Mouse;
 use Pi::Media::Video;
 use Pi::Media::Tree;
+use Pi::Media::Tag;
 use DBI;
 use Path::Class;
 use Unicode::Normalize 'NFC';
@@ -100,6 +101,27 @@ sub _inflate_trees_from_sth {
     }
 
     return @trees;
+}
+
+sub _inflate_tags_from_sth {
+    my ($self, $sth, %args) = @_;
+
+    my @tags;
+
+    while (my ($id, $label_ja) = $sth->fetchrow_array) {
+        my %label;
+        $label{en} = $id;
+        $label{ja} = $label_ja if $label_ja;
+
+        my $tag = Pi::Media::Tag->new(
+            id       => $id,
+            label    => \%label,
+        );
+
+        push @tags, $tag;
+    }
+
+    return @tags;
 }
 
 sub insert_video {
@@ -225,17 +247,11 @@ sub trees {
 sub tags {
     my ($self) = @_;
 
-    my $query = 'SELECT id FROM tag ORDER BY sort_order IS NULL, sort_order ASC, id ASC;';
+    my $query = 'SELECT id, label_ja FROM tag ORDER BY sort_order IS NULL, sort_order ASC, rowid ASC;';
 
     my $sth = $self->_dbh->prepare($query);
     $sth->execute;
-
-    my @tags;
-    while (my ($id) = $sth->fetchrow_array) {
-        push @tags, $id;
-    }
-
-    return @tags;
+    return $self->_inflate_tags_from_sth($sth);
 }
 
 sub videos {
