@@ -213,10 +213,11 @@ my %endpoints = (
 
             my $treeId = $req->param('tree') || 0;
             my $tag    = decode_utf8($req->param('tag'));
+            my $query  = $req->param('query');
             my @response;
 
             if ($treeId || !$tag) {
-                my @trees = $Library->trees(parentId => $treeId);
+                my @trees = $Library->trees(parentId => $treeId, query => $query);
                 for my $tree (@trees) {
                     $tree->{requestPath} = "/library?tree=" . $tree->{id};
                     push @response, $tree;
@@ -225,7 +226,7 @@ my %endpoints = (
 
             # only at the very top level
             if (!$treeId && !$tag) {
-                my @tags = $Library->tags;
+                my @tags = $Library->tags(query => $query);
                 for my $tag (@tags) {
                     $tag->{requestPath} = "/library?tag=" . uri_escape_utf8($tag->{id});
                     push @response, $tag;
@@ -234,6 +235,9 @@ my %endpoints = (
 
             if ($tag) {
                 push @response, $Library->videos(tag => $tag);
+            }
+            elsif ($query) {
+                push @response, $Library->videos(query => $query);
             }
             else {
                 push @response, $Library->videos(treeId => $treeId);

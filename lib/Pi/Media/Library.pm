@@ -227,7 +227,12 @@ sub trees {
     my @bind;
     my @where;
 
-    if (!$args{all}) {
+    if ($args{query}) {
+        push @where, '(label_en LIKE ? OR label_ja LIKE ?)';
+        push @bind, "%" . $args{query} . "%";
+        push @bind, "%" . $args{query} . "%";
+    }
+    elsif (!$args{all}) {
         push @where, 'parentId = ?';
         push @bind, $args{parentId};
     }
@@ -245,12 +250,24 @@ sub trees {
 }
 
 sub tags {
-    my ($self) = @_;
+    my ($self, %args) = @_;
 
-    my $query = 'SELECT id, label_ja FROM tag ORDER BY sort_order IS NULL, sort_order ASC, rowid ASC;';
+    my @bind;
+    my @where;
+
+    if ($args{query}) {
+        push @where, '(id LIKE ? OR label_ja LIKE ?)';
+        push @bind, "%" . $args{query} . "%";
+        push @bind, "%" . $args{query} . "%";
+    }
+
+    my $query = 'SELECT id, label_ja FROM tag';
+    $query .= ' WHERE ' . join(' AND ', @where) if @where;
+    $query .= ' ORDER BY sort_order IS NULL, sort_order ASC, rowid ASC'
+    $query .= ';';
 
     my $sth = $self->_dbh->prepare($query);
-    $sth->execute;
+    $sth->execute(@bind);
     return $self->_inflate_tags_from_sth($sth);
 }
 
@@ -263,6 +280,11 @@ sub videos {
     if ($args{tag}) {
         push @where, 'tags LIKE ?';
         push @bind, "%`" . $args{tag} . "`%";
+    }
+    elsif ($args{query}) {
+        push @where, '(label_en LIKE ? OR label_ja LIKE ?)';
+        push @bind, "%" . $args{query} . "%";
+        push @bind, "%" . $args{query} . "%";
     }
     elsif (!$args{all}) {
         push @where, 'treeId = ?';
