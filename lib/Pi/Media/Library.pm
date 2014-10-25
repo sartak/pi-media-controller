@@ -225,12 +225,12 @@ sub trees {
 sub tags {
     my ($self) = @_;
 
-    my $query = 'SELECT id FROM tags ORDER BY sort_order IS NULL, sort_order ASC, id ASC;';
+    my $query = 'SELECT id FROM tag ORDER BY sort_order IS NULL, sort_order ASC, id ASC;';
 
     my $sth = $self->_dbh->prepare($query);
+    $sth->execute;
 
-    $sth->execute(@bind);
-
+    my @tags;
     while (my ($id) = $sth->fetchrow_array) {
         push @tags, $id;
     }
@@ -245,21 +245,21 @@ sub videos {
     my @where;
 
     if ($args{tag}) {
-        push @where, 'video.tag LIKE ?';
+        push @where, 'tags LIKE ?';
         push @bind, "%`" . $args{tag} . "`%";
     }
     elsif (!$args{all}) {
-        push @where, 'video.treeId = ?';
+        push @where, 'treeId = ?';
         push @bind, $args{treeId};
     }
 
     if ($args{pathLike}) {
         push @bind, $args{pathLike};
-        push @where, 'video.path LIKE ?';
+        push @where, 'path LIKE ?';
     }
 
     if ($args{nullDuration}) {
-        push @where, 'video.durationSeconds IS NULL';
+        push @where, 'durationSeconds IS NULL';
     }
 
     my $query = '

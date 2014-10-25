@@ -211,12 +211,35 @@ my %endpoints = (
             $res->content_type("application/json");
 
             my $treeId = $req->param('tree') || 0;
-            my @response = $Library->trees(parentId => $treeId);
-            for my $tree (@response) {
-                $tree->{requestPath} = "/library?tree=" . $tree->{id};
+            my $tag    = $req->param('tag');
+            my @response;
+
+            if ($treeId || !$tag) {
+                push @response, $Library->trees(parentId => $treeId);
+                for my $tree (@response) {
+                    $tree->{requestPath} = "/library?tree=" . $tree->{id};
+                }
             }
 
-            push @response, $Library->videos(treeId => $treeId);
+            # only at the very top level
+            if (!$treeId && !$tag) {
+                my @tags = $Library->tags;
+                for my $id (@tags) {
+                    push @response, {
+                        label => {
+                            en => $id,
+                        },
+                        requestPath => "/library?tag=$id",
+                    };
+                }
+            }
+
+            if ($tag) {
+                push @response, $Library->videos(tag => $tag);
+            }
+            else {
+                push @response, $Library->videos(treeId => $treeId);
+            }
 
             $res->body(encode_utf8($json->encode(\@response)));
             return $res;
