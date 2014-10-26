@@ -4,6 +4,8 @@ use warnings;
 use utf8::all;
 use Getopt::Whatever;
 use Pi::Media::Library;
+use MP4::Info;
+use Image::ExifTool ':Public';
 
 my $treeId = $ARGV{treeId};
 my $segments = ref $ARGV{segments} ? $ARGV{segments} : [$ARGV{segments}];
@@ -44,15 +46,16 @@ if (!$treeId) {
 }
 
 my $id = $library->insert_video(
-    path           => $path,
-    identifier     => $identifier,
-    label_en       => $label_en,
-    label_ja       => $label_ja,
-    spoken_langs   => [split ',', $spoken_langs],
-    subtitle_langs => [split ',', $subtitle_langs],
-    immersible     => $immersible,
-    streamable     => $streamable,
-    treeId         => $treeId,
+    path            => $path,
+    identifier      => $identifier,
+    label_en        => $label_en,
+    label_ja        => $label_ja,
+    spoken_langs    => [split ',', $spoken_langs],
+    subtitle_langs  => [split ',', $subtitle_langs],
+    immersible      => $immersible,
+    streamable      => $streamable,
+    durationSeconds => duration_of($path),
+    treeId          => $treeId,
 );
 
 print "Added " . ($label_ja || $label_en) . " as video $id\n";
@@ -60,5 +63,33 @@ print "Added " . ($label_ja || $label_en) . " as video $id\n";
 sub usage {
     my $reason = shift;
     die "$reason\nusage: $0 [--treeId=treeId OR --segments=foo --segments=bar] [--label_en=LABEL --label_ja=LABEL] [--identifier=IDENTIFIER] --spoken_langs=en,ja --subtitle_langs=en,ja --immersible|--noimmersible --streamable|--unstreamable PATH";
+}
+
+sub duration_of {
+    my $path = shift;
+    my $secs;
+    if ($path =~ /\.(mp4|m4v)$/) {
+        my $info = get_mp4info($video->path);
+        $secs = $info->{SECS};
+        if (!$secs) {
+            $secs = $info->{MM} * 60 + $info->{SS};
+        }
+    }
+    elsif ($path =~ /\.(mkv|avi)$/) {
+        my $info = ImageInfo($video->path);
+        my $secs;
+        if (my ($h, $m, $s) = $info->{Duration} =~ /^(\d+):(\d+):(\d+)$/) {
+            $secs = $h * 3600 + $m * 60 + $s;
+        }
+    }
+    else {
+        die "Unable to intuit duration of file type $path\n";
+    }
+
+    if (!$secs) {
+        die "Unable to intuit duration of $path\n";
+    }
+
+    return $secs;
 }
 

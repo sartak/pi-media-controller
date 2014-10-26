@@ -129,8 +129,8 @@ sub insert_video {
 
     $self->_dbh->do('
         INSERT INTO video
-            (path, identifier, label_en, label_ja, spoken_langs, subtitle_langs, immersible, streamable, treeId)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ? )
+            (path, identifier, label_en, label_ja, spoken_langs, subtitle_langs, immersible, streamable, durationSeconds, treeId)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ? )
     ;', {}, (
         $self->_relativify_path($args{path}),
         $args{identifier},
@@ -140,6 +140,7 @@ sub insert_video {
         (join ',', @{$args{subtitle_langs}}),
         $args{immersible} ? 1 : 0,
         $args{streamable} ? 1 : 0,
+        $args{durationSeconds},
         $args{treeId},
     ));
 
