@@ -264,7 +264,7 @@ sub tags {
 
     my $query = 'SELECT id, label_ja FROM tag';
     $query .= ' WHERE ' . join(' AND ', @where) if @where;
-    $query .= ' ORDER BY sort_order IS NULL, sort_order ASC, rowid ASC'
+    $query .= ' ORDER BY sort_order IS NULL, sort_order ASC, rowid ASC';
     $query .= ';';
 
     my $sth = $self->_dbh->prepare($query);

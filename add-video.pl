@@ -69,14 +69,14 @@ sub duration_of {
     my $path = shift;
     my $secs;
     if ($path =~ /\.(mp4|m4v)$/) {
-        my $info = get_mp4info($video->path);
+        my $info = get_mp4info($path);
         $secs = $info->{SECS};
         if (!$secs) {
             $secs = $info->{MM} * 60 + $info->{SS};
         }
     }
     elsif ($path =~ /\.(mkv|avi)$/) {
-        my $info = ImageInfo($video->path);
+        my $info = ImageInfo($path);
         my $secs;
         if (my ($h, $m, $s) = $info->{Duration} =~ /^(\d+):(\d+):(\d+)$/) {
             $secs = $h * 3600 + $m * 60 + $s;
