@@ -4,8 +4,6 @@ use warnings;
 use utf8::all;
 use Getopt::Whatever;
 use Pi::Media::Library;
-use MP4::Info;
-use Image::ExifTool ':Public';
 
 my $treeId = $ARGV{treeId};
 my $segments = ref $ARGV{segments} ? $ARGV{segments} : [$ARGV{segments}];
@@ -69,14 +67,16 @@ sub duration_of {
     my $path = shift;
     my $secs;
     if ($path =~ /\.(mp4|m4v)$/) {
-        my $info = get_mp4info($path);
+        require MP4::Info;
+        my $info = MP4::Info::get_mp4info($path);
         $secs = $info->{SECS};
         if (!$secs) {
             $secs = $info->{MM} * 60 + $info->{SS};
         }
     }
     elsif ($path =~ /\.(mkv|avi)$/) {
-        my $info = ImageInfo($path);
+        require Image::ExifTool;
+        my $info = Image::ExifTool::ImageInfo($path);
         my $secs;
         if (my ($h, $m, $s) = $info->{Duration} =~ /^(\d+):(\d+):(\d+)$/) {
             $secs = $h * 3600 + $m * 60 + $s;
