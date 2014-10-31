@@ -80,6 +80,10 @@ sub duration_of {
         if (my ($h, $m, $s) = $info->{Duration} =~ /^(\d+):(\d+):(\d+)$/) {
             $secs = $h * 3600 + $m * 60 + $s;
         }
+
+        if (my ($s) = $info->{Duration} =~ /^(\d+)(?:\.\d*)? s$/) {
+            $secs = $s;
+        }
     }
     else {
         die "Unable to intuit duration of file type $path\n";

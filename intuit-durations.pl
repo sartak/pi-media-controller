@@ -64,6 +64,10 @@ my $library = Pi::Media::Library->new(file => $ENV{PMC_DATABASE});
             $secs = $h * 3600 + $m * 60 + $s;
         }
 
+        if (my ($s) = $info->{Duration} =~ /^(\d+)(?:\.\d*)? s$/) {
+            $secs = $s;
+        }
+
         if ($secs) {
             $library->update_video($video, (
                 durationSeconds => $secs,
