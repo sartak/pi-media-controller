@@ -77,7 +77,6 @@ sub duration_of {
     elsif ($path =~ /\.(mkv|avi)$/) {
         require Image::ExifTool;
         my $info = Image::ExifTool::ImageInfo($path);
-        my $secs;
         if (my ($h, $m, $s) = $info->{Duration} =~ /^(\d+):(\d+):(\d+)$/) {
             $secs = $h * 3600 + $m * 60 + $s;
         }
