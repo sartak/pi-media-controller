@@ -354,9 +354,10 @@ sub random_video_for_immersion {
 
     my $sth = $self->_dbh->prepare('
         SELECT
-            id, path, identifier, label_en, label_ja, spoken_langs, subtitle_langs, immersible, streamable, durationSeconds, treeId, tags
+            video.id, video.path, video.identifier, video.label_en, video.label_ja, video.spoken_langs, video.subtitle_langs, video.immersible, video.streamable, video.durationSeconds, video.treeId, video.tags
         FROM video
-        WHERE immersible = 1 AND streamable = 1
+        JOIN viewing ON viewing.videoId = video.id AND viewing.elapsedSeconds IS NULL
+        WHERE video.immersible = 1 AND video.streamable = 1
         ORDER BY RANDOM()
         LIMIT 1
     ;');
