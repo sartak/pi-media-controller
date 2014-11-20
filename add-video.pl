@@ -5,6 +5,11 @@ use utf8::all;
 use Getopt::Whatever;
 use Pi::Media::Library;
 
+for my $key (keys %ARGV) {
+    next if $key eq 'segments';
+    die "Argument $key repeated. Accident?" if ref $ARGV{$key} eq 'ARRAY';
+}
+
 my $treeId = $ARGV{treeId};
 my $segments = ref $ARGV{segments} ? $ARGV{segments} : [$ARGV{segments}];
 
