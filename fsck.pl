@@ -13,6 +13,11 @@ my %seen_tags;
 for my $video ($library->videos(all => 1, excludeViewing => 1)) {
     push @{ $want_tree{$video->treeId} }, $video;
 
+    for my $label (values %{ $video->label }) {
+        next unless $label =~ /^\s|\s$/;
+        warn $video->id . ": label has extraneous space\n";
+    }
+
     for my $tag ($video->tags) {
         $seen_tags{$tag} = 1;
     }
