@@ -7,9 +7,15 @@ use Pi::Media::Library;
 my $library = Pi::Media::Library->new(file => $ENV{PMC_DATABASE});
 my %want_tree;
 my %seen_tree;
+my %want_tags;
+my %seen_tags;
 
 for my $video ($library->videos(all => 1, excludeViewing => 1)) {
     push @{ $want_tree{$video->treeId} }, $video;
+
+    for my $tag ($video->tags) {
+        $seen_tags{$tag} = 1;
+    }
 
     unless (-r $video->path && !-d _) {
         warn $video->id . ': cannot read ' . $video->path . "\n";
@@ -38,3 +44,10 @@ for my $want (sort keys %want_tree) {
         }
     }
 }
+
+for my $tag ($library->tags) {
+    delete $seen_tags{$tag};
+}
+
+warn "Unknown tags found in videos: " . join ', ', keys %seen_tags
+    if %seen_tags;
