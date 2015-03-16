@@ -87,6 +87,8 @@ sub stop_playing {
 sub stop_current {
     my $self = shift;
 
+    warn $self->current_media;
+
     if ($self->current_media->isa('Pi::Media::File::Video')) {
         $self->_run_command('q');
     }
