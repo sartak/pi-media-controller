@@ -146,7 +146,10 @@ sub _play_media {
     });
 
     $handle->on_eof(undef);
-    $handle->on_error(sub { $self->_finished_media($media) });
+    $handle->on_error(sub {
+        $self->_finished_media($media);
+        undef $handle;
+    });
 }
 
 sub _handle_for_media {
@@ -210,7 +213,6 @@ sub _finished_media {
     $self->_clear_handle;
     $self->_buffer('');
     $self->_clear_start_time;
-    undef $handle;
 
     if ($self->_temporarily_stopped) {
         $self->_temporarily_stopped(0);
