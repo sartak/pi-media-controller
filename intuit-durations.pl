@@ -13,8 +13,9 @@ my $library = Pi::Media::Library->new(file => $ENV{PMC_DATABASE});
     my @videos;
 
     for my $extension ('mp4', 'm4v') {
-        push @videos, $library->videos(
+        push @videos, $library->media(
             all            => 1,
+            type           => 'video',
             excludeViewing => 1,
             pathLike       => "%.$extension",
             nullDuration   => 1,
@@ -30,7 +31,7 @@ my $library = Pi::Media::Library->new(file => $ENV{PMC_DATABASE});
             $secs = $info->{MM} * 60 + $info->{SS};
         }
         if ($secs) {
-            $library->update_video($video, (
+            $library->update_media($video, (
                 durationSeconds => $secs,
             ));
 
@@ -47,8 +48,9 @@ my $library = Pi::Media::Library->new(file => $ENV{PMC_DATABASE});
     my @videos;
 
     for my $extension ('mkv', 'avi') {
-        push @videos, $library->videos(
+        push @videos, $library->media(
             all            => 1,
+            type           => 'video',
             excludeViewing => 1,
             pathLike       => "%.$extension",
             nullDuration   => 1,
@@ -69,7 +71,7 @@ my $library = Pi::Media::Library->new(file => $ENV{PMC_DATABASE});
         }
 
         if ($secs) {
-            $library->update_video($video, (
+            $library->update_media($video, (
                 durationSeconds => $secs,
             ));
 

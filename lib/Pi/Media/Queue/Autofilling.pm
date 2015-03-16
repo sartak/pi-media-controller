@@ -5,13 +5,13 @@ extends 'Pi::Media::Queue';
 
 sub shift {
     my $self = shift;
-    my $video = $self->SUPER::shift;
-    return $video if $video;
+    my $media = $self->SUPER::shift;
+    return $media if $media;
 
     return $self->library->random_video_for_immersion;
 }
 
-sub has_videos {
+sub has_media {
     return 1;
 }
 

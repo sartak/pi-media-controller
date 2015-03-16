@@ -10,20 +10,20 @@ my %seen_tree;
 my %want_tags;
 my %seen_tags;
 
-for my $video ($library->videos(all => 1, excludeViewing => 1)) {
-    push @{ $want_tree{$video->treeId} }, $video;
+for my $media ($library->media(all => 1, excludeViewing => 1)) {
+    push @{ $want_tree{$media->treeId} }, $media;
 
-    for my $label (values %{ $video->label }) {
+    for my $label (values %{ $media->label }) {
         next unless $label =~ /^\s|\s$/;
-        warn $video->id . ": label has extraneous space\n";
+        warn $media->id . ": label has extraneous space\n";
     }
 
-    for my $tag ($video->tags) {
+    for my $tag ($media->tags) {
         $seen_tags{$tag} = 1;
     }
 
-    unless (-r $video->path && !-d _) {
-        warn $video->id . ': cannot read ' . $video->path . "\n";
+    unless (-r $media->path && !-d _) {
+        warn $media->id . ': cannot read ' . $media->path . "\n";
     }
 }
 
@@ -41,8 +41,11 @@ for my $want (sort keys %want_tree) {
         if ($by->isa('Pi::Media::Tree')) {
             warn "    tree " . $by->id . " (" . ($by->label->{en} || $by->label->{ja}) . ")";
         }
-        elsif ($by->isa('Pi::Media::Video')) {
+        elsif ($by->isa('Pi::Media::File::Video')) {
             warn "    video " . $by->id . " (" . ($by->label->{en} || $by->label->{ja}) . ")";
+        }
+        elsif ($by->isa('Pi::Media::File::Game')) {
+            warn "    game " . $by->id . " (" . ($by->label->{en} || $by->label->{ja}) . ")";
         }
         else {
             die $by;
@@ -54,5 +57,5 @@ for my $tag ($library->tags) {
     delete $seen_tags{$tag};
 }
 
-warn "Unknown tags found in videos: " . join ', ', keys %seen_tags
+warn "Unknown tags found in media " . join ', ', keys %seen_tags
     if %seen_tags;

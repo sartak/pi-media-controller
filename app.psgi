@@ -53,20 +53,20 @@ my %endpoints = (
     '/current' => {
         GET => sub {
             my $req = shift;
-            if (!$Controller->current_video) {
+            if (!$Controller->current_media) {
                 return $req->new_response(204);
             }
 
             my $res = $req->new_response(200);
-            $res->body(encode_utf8($json->encode($Controller->current_video)));
+            $res->body(encode_utf8($json->encode($Controller->current_media)));
             return $res;
         },
         DELETE => sub {
             my $req = shift;
-            if (!$Controller->current_video) {
+            if (!$Controller->current_media) {
                 $Television->set_active_source;
 
-                if (!$Controller->current_video) {
+                if (!$Controller->current_media) {
                     $Controller->play_next_in_queue;
                 }
 
@@ -82,7 +82,7 @@ my %endpoints = (
                 # unpaused
                 $Television->set_active_source;
 
-                if (!$Controller->current_video) {
+                if (!$Controller->current_media) {
                     $Controller->play_next_in_queue;
                 }
             }
@@ -108,7 +108,7 @@ my %endpoints = (
             my $req = shift;
             $Television->set_active_source;
             if ($Controller->unpause) {
-                if (!$Controller->current_video) {
+                if (!$Controller->current_media) {
                     $Controller->play_next_in_queue;
                 }
 
@@ -138,45 +138,45 @@ my %endpoints = (
     '/queue' => {
         GET => sub {
             my $req = shift;
-            if (!$Queue->has_videos) {
+            if (!$Queue->has_media) {
                 return $req->new_response(204);
             }
 
             my $res = $req->new_response(200);
             $res->content_type("application/json");
 
-            my @videos;
-            for my $original ($Queue->videos) {
+            my @media;
+            for my $original ($Queue->media) {
                 my $copy = \%$original;
                 $copy->{removePath} = "/queue?queue_id=" . $original->{queue_id};
-                push @videos, $copy;
+                push @media, $copy;
             }
 
-            $res->body(encode_utf8($json->encode(\@videos)));
+            $res->body(encode_utf8($json->encode(\@media)));
             return $res;
         },
         POST => sub {
             my $req = shift;
-            my $id = $req->param('video') or do {
+            my $id = $req->param('media') or do {
                 my $res = $req->new_response(400);
-                $res->body("video required");
+                $res->body("media required");
                 return $res;
             };
 
-            my $video = $Library->video_with_id($id) or do {
+            my $media = $Library->media_with_id($id) or do {
                 my $res = $req->new_response(404);
-                $res->body("video not found");
+                $res->body("media not found");
                 return $res;
             };
 
-            warn "Queued $video ...\n";
+            warn "Queued $media ...\n";
 
             $Television->set_active_source;
-            $Queue->push($video);
+            $Queue->push($media);
 
             my $res = $req->new_response;
 
-            if ($Controller->current_video) {
+            if ($Controller->current_media) {
                 $res->redirect('/queue');
             }
             else {
@@ -196,7 +196,7 @@ my %endpoints = (
         REMOVE => sub {
             my $req = shift;
             if (my $queue_id = $req->param('queue_id')) {
-                $Queue->remove_video_with_queue_id($queue_id);
+                $Queue->remove_media_with_queue_id($queue_id);
             }
 
             my $res = $req->new_response;
@@ -234,13 +234,13 @@ my %endpoints = (
             }
 
             if ($tag) {
-                push @response, $Library->videos(tag => $tag);
+                push @response, $Library->media(tag => $tag);
             }
             elsif ($query) {
-                push @response, $Library->videos(query => $query);
+                push @response, $Library->media(query => $query);
             }
             else {
-                push @response, $Library->videos(treeId => $treeId);
+                push @response, $Library->media(treeId => $treeId);
             }
 
             $res->body(encode_utf8($json->encode(\@response)));
@@ -260,28 +260,6 @@ my %endpoints = (
             system("sudo reboot");
 
             exit(0);
-        },
-    },
-
-    '/stream' => {
-        GET => sub {
-            my $req = shift;
-
-            my $id = $req->param('video') or do {
-                my $res = $req->new_response(400);
-                $res->body("video required");
-                return $res;
-            };
-
-            my $video = $Library->video_with_id($id) or do {
-                my $res = $req->new_response(404);
-                $res->body("video not found");
-                return $res;
-            };
-
-            my $path = $video->path;
-
-            return Plack::App::File->new->serve_path($req->env, $path);
         },
     },
 );
@@ -344,7 +322,7 @@ $server->register_service(sub {
 
 warn "Ready!\n";
 
-if ($ENV{PMC_AUTOPLAY} && $Queue->has_videos) {
+if ($ENV{PMC_AUTOPLAY} && $Queue->has_media) {
     $Television->set_active_source;
     $Controller->play_next_in_queue;
 }

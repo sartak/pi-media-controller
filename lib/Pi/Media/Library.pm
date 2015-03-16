@@ -1,7 +1,8 @@
 package Pi::Media::Library;
 use 5.14.0;
 use Mouse;
-use Pi::Media::Video;
+use Pi::Media::File::Video;
+use Pi::Media::File::Game;
 use Pi::Media::Tree;
 use Pi::Media::Tag;
 use DBI;
@@ -34,51 +35,70 @@ sub disconnect {
     $self->_dbh->disconnect;
 }
 
-sub _inflate_videos_from_sth {
+sub _inflate_media_from_sth {
     my ($self, $sth, %args) = @_;
 
-    my @videos;
-    my %video_by_id;
+    my @media;
+    my %media_by_id;
 
-    while (my ($id, $path, $identifier, $label_en, $label_ja, $spoken_langs, $subtitle_langs, $immersible, $streamable, $durationSeconds, $treeId, $tags) = $sth->fetchrow_array) {
+    while (my ($id, $type, $path, $identifier, $label_en, $label_ja, $spoken_langs, $subtitle_langs, $immersible, $streamable, $durationSeconds, $treeId, $tags) = $sth->fetchrow_array) {
         my %label;
         $label{en} = $label_en if $label_en;
         $label{ja} = $label_ja if $label_ja;
         $tags = [grep { length } split '`', $tags];
 
-        my $video = Pi::Media::Video->new(
-            id               => $id,
-            path             => $self->_absolutify_path($path),
-            identifier       => $identifier,
-            label            => \%label,
-            spoken_langs     => [split ',', $spoken_langs],
-            subtitle_langs   => [split ',', $subtitle_langs],
-            immersible       => $immersible,
-            streamable       => $streamable,
-            duration_seconds => $durationSeconds,
-            treeId           => $treeId,
-            tags             => $tags,
-        );
+        my $media;
+        if ($type eq 'video') {
+            $media = Pi::Media::File::Video->new(
+                id               => $id,
+                type             => $type,
+                path             => $self->_absolutify_path($path),
+                identifier       => $identifier,
+                label            => \%label,
+                spoken_langs     => [split ',', $spoken_langs],
+                subtitle_langs   => [split ',', $subtitle_langs],
+                immersible       => $immersible,
+                streamable       => $streamable,
+                duration_seconds => $durationSeconds,
+                treeId           => $treeId,
+                tags             => $tags,
+            );
+        }
+        elsif ($type eq 'game') {
+            $media = Pi::Media::File::Game->new(
+                id               => $id,
+                type             => $type,
+                path             => $self->_absolutify_path($path),
+                identifier       => $identifier,
+                label            => \%label,
+                streamable       => $streamable,
+                treeId           => $treeId,
+                tags             => $tags,
+            );
+        }
+        else {
+            die "Unknown type '$type' for row id $id";
+        }
 
-        $video_by_id{$id} = $video;
+        $media_by_id{$id} = $media;
 
-        push @videos, $video;
+        push @media, $media;
     }
 
-    if (!$args{excludeViewing} && keys %video_by_id) {
-        my $query = 'SELECT videoId FROM viewing WHERE (';
-        $query .= join ' OR ', map { 'videoId=?' } keys %video_by_id;
-        $query .= ') AND elapsedSeconds IS NULL GROUP BY videoId;';
+    if (!$args{excludeViewing} && keys %media_by_id) {
+        my $query = 'SELECT mediaId FROM viewing WHERE (';
+        $query .= join ' OR ', map { 'mediaId=?' } keys %media_by_id;
+        $query .= ') AND elapsedSeconds IS NULL GROUP BY mediaId;';
 
         my $sth = $self->_dbh->prepare($query);
-        $sth->execute(keys %video_by_id);
+        $sth->execute(keys %media_by_id);
 
         while (my ($id) = $sth->fetchrow_array) {
-            $video_by_id{$id}->watched(1);
+            $media_by_id{$id}->watched(1);
         }
     }
 
-    return @videos;
+    return @media;
 }
 
 sub _inflate_trees_from_sth {
@@ -128,9 +148,9 @@ sub insert_video {
     my ($self, %args) = @_;
 
     $self->_dbh->do('
-        INSERT INTO video
-            (path, identifier, label_en, label_ja, spoken_langs, subtitle_langs, immersible, streamable, durationSeconds, treeId)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ? )
+        INSERT INTO media
+            (path, type, identifier, label_en, label_ja, spoken_langs, subtitle_langs, immersible, streamable, durationSeconds, treeId)
+        VALUES (?, "video", ?, ?, ?, ?, ?, ?, ?, ?, ? )
     ;', {}, (
         $self->_relativify_path($args{path}),
         $args{identifier},
@@ -141,6 +161,25 @@ sub insert_video {
         $args{immersible} ? 1 : 0,
         $args{streamable} ? 1 : 0,
         $args{durationSeconds},
+        $args{treeId},
+    ));
+
+    return $self->_dbh->sqlite_last_insert_rowid;
+}
+
+sub insert_game {
+    my ($self, %args) = @_;
+
+    $self->_dbh->do('
+        INSERT INTO media
+            (path, type, identifier, label_en, label_ja, streamable, treeId)
+        VALUES (?, "game", ?, ?, ?, ?, ?)
+    ;', {}, (
+        $self->_relativify_path($args{path}),
+        $args{identifier},
+        $args{label_en},
+        $args{label_ja},
+        $args{streamable} ? 1 : 0,
         $args{treeId},
     ));
 
@@ -272,7 +311,7 @@ sub tags {
     return $self->_inflate_tags_from_sth($sth);
 }
 
-sub videos {
+sub media {
     my ($self, %args) = @_;
 
     my @bind;
@@ -303,8 +342,8 @@ sub videos {
 
     my $query = '
         SELECT
-            id, path, identifier, label_en, label_ja, spoken_langs, subtitle_langs, immersible, streamable, durationSeconds, treeId, tags
-        FROM video
+            id, type, path, identifier, label_en, label_ja, spoken_langs, subtitle_langs, immersible, streamable, durationSeconds, treeId, tags
+        FROM media
     ';
 
     $query .= 'WHERE ' . join(' AND ', @where) if @where;
@@ -315,13 +354,13 @@ sub videos {
 
     $sth->execute(@bind);
 
-    return $self->_inflate_videos_from_sth($sth, %args);
+    return $self->_inflate_media_from_sth($sth, %args);
 }
 
 sub paths {
     my ($self) = @_;
 
-    my $sth = $self->_dbh->prepare('SELECT path FROM video;');
+    my $sth = $self->_dbh->prepare('SELECT path FROM media;');
     $sth->execute;
 
     my @paths;
@@ -332,21 +371,21 @@ sub paths {
     return @paths;
 }
 
-sub video_with_id {
+sub media_with_id {
     my ($self, $id, %args) = @_;
 
     my $sth = $self->_dbh->prepare('
         SELECT
-            id, path, identifier, label_en, label_ja, spoken_langs, subtitle_langs, immersible, streamable, durationSeconds, treeId, tags
-        FROM video
+            id, type, path, identifier, label_en, label_ja, spoken_langs, subtitle_langs, immersible, streamable, durationSeconds, treeId, tags
+        FROM media
         WHERE id = ?
         LIMIT 1
     ;');
 
     $sth->execute($id);
 
-    my @videos = $self->_inflate_videos_from_sth($sth, %args);
-    return $videos[0];
+    my @media = $self->_inflate_media_from_sth($sth, %args);
+    return $media[0];
 }
 
 sub random_video_for_immersion {
@@ -354,36 +393,36 @@ sub random_video_for_immersion {
 
     my $sth = $self->_dbh->prepare('
         SELECT
-            video.id, video.path, video.identifier, video.label_en, video.label_ja, video.spoken_langs, video.subtitle_langs, video.immersible, video.streamable, video.durationSeconds, video.treeId, video.tags
-        FROM video
-        JOIN viewing ON viewing.videoId = video.id AND viewing.elapsedSeconds IS NULL
-        WHERE video.immersible = 1 AND video.streamable = 1
+            media.id, media.type, media.path, media.identifier, media.label_en, media.label_ja, media.spoken_langs, media.subtitle_langs, media.immersible, media.streamable, media.durationSeconds, media.treeId, media.tags
+        FROM media
+        JOIN viewing ON viewing.mediaId = media.id AND viewing.elapsedSeconds IS NULL
+        WHERE media.type = "video" AND media.immersible = 1 AND media.streamable = 1
         ORDER BY RANDOM()
         LIMIT 1
     ;');
 
     $sth->execute;
 
-    my @videos = $self->_inflate_videos_from_sth($sth);
-    return $videos[0];
+    my @media = $self->_inflate_media_from_sth($sth);
+    return $media[0];
 }
 
 sub add_viewing {
     my ($self, %args) = @_;
     $self->_dbh->do('
         INSERT INTO viewing
-            (videoId, startTime, endTime, elapsedSeconds)
+            (mediaId, startTime, endTime, elapsedSeconds)
         VALUES (?, ?, ?, ?)
     ;', {}, (
-        $args{video}->id,
+        $args{media}->id,
         $args{start_time},
         $args{end_time},
         $args{elapsed_seconds},
     ));
 }
 
-sub update_video {
-    my ($self, $video, %args) = @_;
+sub update_media {
+    my ($self, $media, %args) = @_;
     my (@columns, @bind);
 
     for my $column (keys %args) {
@@ -391,10 +430,10 @@ sub update_video {
         push @bind, $args{$column};
     }
 
-    my $query = 'UPDATE video SET ';
+    my $query = 'UPDATE media SET ';
     $query .= join ', ', map { "$_=?" } @columns;
     $query .= ' WHERE rowid=?;';
-    $self->_dbh->do($query, {}, @bind, $video->id);
+    $self->_dbh->do($query, {}, @bind, $media->id);
 }
 
 sub _absolutify_path {

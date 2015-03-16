@@ -3,7 +3,7 @@ use 5.14.0;
 use Mouse;
 use AnyEvent::Run;
 use Pi::Media::Queue;
-use Pi::Media::Video;
+use Pi::Media::File;
 use Pi::Media::Library;
 use JSON::Types;
 
@@ -12,17 +12,11 @@ has notify_cb => (
     default => sub { sub {} },
 );
 
-has current_video => (
+has current_media => (
     is      => 'ro',
-    isa     => 'Pi::Media::Video',
-    writer  => '_set_current_video',
-    clearer => '_clear_current_video',
-);
-
-has is_paused => (
-    is     => 'ro',
-    isa    => 'Bool',
-    writer => '_set_is_paused',
+    isa     => 'Pi::Media::File',
+    writer  => '_set_current_media',
+    clearer => '_clear_current_media',
 );
 
 has queue => (
@@ -60,13 +54,21 @@ has _buffer => (
     default => '',
 );
 
+# video specific
+
+has is_paused => (
+    is     => 'ro',
+    isa    => 'Bool',
+    writer => '_set_is_paused',
+);
+
 sub play_next_in_queue {
     my $self = shift;
 
-    my $video = $self->queue->shift
+    my $media = $self->queue->shift
         or return;
 
-    $self->_play_video($video);
+    $self->_play_media($media);
 }
 
 sub stop_playing {
@@ -76,23 +78,135 @@ sub stop_playing {
     $self->stop_current;
 }
 
-sub decrease_speed          { shift->_run_command('1') }
-sub increase_speed          { shift->_run_command('2') }
-sub rewind                  { shift->_run_command('<') }
-sub fast_forward            { shift->_run_command('>') }
-sub show_info               { shift->_run_command('z') }
-sub previous_audio          { shift->_run_command('j') }
-sub next_audio              { shift->_run_command('k') }
-sub previous_chapter        { shift->_run_command('i') }
-sub next_chapter            { shift->_run_command('o') }
-sub previous_subtitles      { shift->_run_command('n') }
-sub next_subtitles          { shift->_run_command('m') }
-sub toggle_subtitles        { shift->_run_command('s') }
-sub decrease_subtitle_delay { shift->_run_command('d') }
-sub increase_subtitle_delay { shift->_run_command('f') }
-sub stop_current            { shift->_run_command('q') }
-sub decrease_volume         { shift->_run_command('-') }
-sub increase_volume         { shift->_run_command('+') }
+sub stop_current {
+    my $self = shift;
+
+    if ($self->current_media->isa('Pi::Media::File::Video')) {
+        $self->_run_command('q');
+    }
+    elsif ($self->current_media->isa('Pi::Media::File::Game')) {
+        # kill emu
+    }
+}
+
+sub notify {
+    my $self = shift;
+    $self->notify_cb->(@_);
+}
+
+sub _run_command {
+    my $self = shift;
+    my $command = shift;
+
+    return unless $self->_handle;
+    $self->_handle->push_write($command);
+}
+
+sub _play_media {
+    my $self = shift;
+    my $media = shift;
+
+    if (!-r $media->path) {
+        $self->notify({
+            error => "Media file " . $media->path . " not found",
+            media => $media,
+        });
+        return;
+    }
+
+    warn "Playing $media ...\n";
+
+    $self->_set_is_paused(0);
+    $self->_set_current_media($media);
+    $self->_start_time(time);
+
+    $self->notify({
+        started => $media,
+    });
+
+    my $handle = $self->_handle_for_media($media);
+    $self->_handle($handle);
+
+    # set things up to just wait until player exits
+    $handle->on_read(sub {
+        my ($handle) = @_;
+        my $buf = $handle->{rbuf};
+        $handle->{rbuf} = '';
+
+        $self->_buffer($self->_buffer . $buf);
+    });
+
+    $handle->on_eof(undef);
+    $handle->on_error(sub { $self->_finished_media($media) });
+}
+
+sub _handle_for_media {
+    my $self = shift;
+    my $media = shift;
+
+    if ($media->isa('Pi::Media::File::Video')) {
+        return AnyEvent::Run->new(
+            cmd => ['omxplayer', '-b', $media->path],
+        );
+    }
+    elsif ($media->isa('Pi::Media::File::Game')) {
+        return AnyEvent::Run->new(
+            cmd => ['omxplayer', '-b', $media->path],
+        );
+    }
+    else {
+        die "Unable to handle media of type " . $media->type . " in _handle_for_media";
+    }
+}
+
+
+sub _finished_media {
+    my $self = shift;
+    my $media = shift;
+
+    my $end_time = time;
+
+    my $seconds;
+    if ($media->isa('Pi::Media::File::Video')) {
+        if (my ($h, $m, $s) = $self->_buffer =~ /Stopped at: (\d+):(\d\d):(\d\d)/) {
+            $seconds = $s
+                        + 60 * $m
+                        + 3600 * $h;
+
+            # close enough
+            if ($video->duration_seconds && $seconds > $video->duration_seconds * .9) {
+                $seconds = undef;
+            }
+        }
+
+    }
+    else {
+        $seconds = $end_time - $self->_start_time;
+    }
+
+    $self->library->add_viewing(
+        media           => $self->current_media,
+        start_time      => $self->_start_time,
+        end_time        => $end_time,
+        elapsed_seconds => $seconds,
+    );
+
+    warn "Done playing $media\n";
+    $self->_clear_current_media;
+    $self->_clear_handle;
+    $self->_buffer('');
+    $self->_clear_start_time;
+    undef $handle;
+
+    if ($self->_temporarily_stopped) {
+        $self->_temporarily_stopped(0);
+    }
+    else {
+        $self->play_next_in_queue;
+    }
+}
+
+# video specific
 
 sub toggle_pause {
     my $self = shift;
@@ -119,92 +233,22 @@ sub pause {
     return 1;
 }
 
-sub notify {
-    my $self = shift;
-    $self->notify_cb->(@_);
-}
-
-sub _run_command {
-    my $self = shift;
-    my $command = shift;
-
-    return unless $self->_handle;
-    $self->_handle->push_write($command);
-}
-
-sub _play_video {
-    my $self = shift;
-    my $video = shift;
-
-    if (!-r $video->path) {
-        $self->notify({
-            error => "Video file " . $video->path . " not found",
-            video => $video,
-        });
-        return;
-    }
-
-    warn "Playing $video ...\n";
-
-    $self->_set_is_paused(0);
-    $self->_set_current_video($video);
-    $self->_start_time(time);
-
-    $self->notify({
-        started => $video,
-    });
-
-    my $handle = AnyEvent::Run->new(
-        cmd => ['omxplayer', '-b', $video->path],
-    );
-    $self->_handle($handle);
-
-    # set things up to just wait until omxplayer exits
-    $handle->on_read(sub {
-        my ($handle) = @_;
-        my $buf = $handle->{rbuf};
-        $handle->{rbuf} = '';
-
-        $self->_buffer($self->_buffer . $buf);
-    });
-
-    $handle->on_eof(undef);
-    $handle->on_error(sub {
-        my $seconds;
-        if (my ($h, $m, $s) = $self->_buffer =~ /Stopped at: (\d+):(\d\d):(\d\d)/) {
-            $seconds = $s
-                     + 60 * $m
-                     + 3600 * $h;
-
-            # close enough
-            if ($video->duration_seconds && $seconds > $video->duration_seconds * .9) {
-                $seconds = undef;
-            }
-        }
-
-
-        $self->library->add_viewing(
-            video           => $self->current_video,
-            start_time      => $self->_start_time,
-            end_time        => time,
-            elapsed_seconds => $seconds,
-        );
-
-        warn "Done playing $video\n";
-        $self->_clear_current_video;
-        $self->_clear_handle;
-        $self->_buffer('');
-        $self->_clear_start_time;
-        undef $handle;
-
-        if ($self->_temporarily_stopped) {
-            $self->_temporarily_stopped(0);
-        }
-        else {
-            $self->play_next_in_queue;
-        }
-    });
-}
+sub decrease_speed          { shift->_run_command('1') }
+sub increase_speed          { shift->_run_command('2') }
+sub rewind                  { shift->_run_command('<') }
+sub fast_forward            { shift->_run_command('>') }
+sub show_info               { shift->_run_command('z') }
+sub previous_audio          { shift->_run_command('j') }
+sub next_audio              { shift->_run_command('k') }
+sub previous_chapter        { shift->_run_command('i') }
+sub next_chapter            { shift->_run_command('o') }
+sub previous_subtitles      { shift->_run_command('n') }
+sub next_subtitles          { shift->_run_command('m') }
+sub toggle_subtitles        { shift->_run_command('s') }
+sub decrease_subtitle_delay { shift->_run_command('d') }
+sub increase_subtitle_delay { shift->_run_command('f') }
+sub decrease_volume         { shift->_run_command('-') }
+sub increase_volume         { shift->_run_command('+') }
 
 1;
 

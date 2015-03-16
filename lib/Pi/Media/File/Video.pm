@@ -1,4 +1,4 @@
-package Pi::Media::Video;
+package Pi::Media::File::Video;
 use 5.14.0;
 use Mouse;
 extends 'Pi::Media::File';
@@ -33,8 +33,6 @@ sub TO_JSON {
     for (qw/spoken_langs subtitle_langs immersible duration_seconds/) {
         $frozen->{$_} = $self->$_;
     };
-
-    $frozen->{video} = 'video';
 
     return $frozen;
 }

@@ -1,7 +1,7 @@
 package Pi::Media::Queue;
 use 5.14.0;
 use Mouse;
-use Pi::Media::Video;
+use Pi::Media::File;
 use Pi::Media::Library;
 
 has library => (
@@ -10,15 +10,15 @@ has library => (
     required => 1,
 );
 
-has _videos => (
+has _media => (
     is      => 'bare',
-    isa     => 'ArrayRef[Pi::Media::Video]',
+    isa     => 'ArrayRef[Pi::Media::File]',
     default => sub { [] },
 );
 
-sub videos {
+sub media {
     my $self = shift;
-    return @{ $self->{_videos} };
+    return @{ $self->{_media} };
 }
 
 my $Serial = 0;
@@ -30,29 +30,29 @@ sub push {
         my $copy = \%$original;
 
         $copy->{queue_id} = $$ . "-" . $Serial++;
-        push @{ $self->{_videos} }, $copy;
+        push @{ $self->{_media} }, $copy;
     }
 }
 
-sub remove_video_with_queue_id {
+sub remove_media_with_queue_id {
     my ($self, $queue_id) = @_;
 
-    @{ $self->{_videos} } = grep { $_->{queue_id} ne $queue_id } @{ $self->{_videos} };
+    @{ $self->{_media} } = grep { $_->{queue_id} ne $queue_id } @{ $self->{_media} };
 }
 
-sub has_videos {
+sub has_media {
     my $self = shift;
-    return scalar @{ $self->{_videos} };
+    return scalar @{ $self->{_media} };
 }
 
 sub clear {
     my $self = shift;
-    @{ $self->{_videos} } = ();
+    @{ $self->{_media} } = ();
 }
 
 sub shift {
     my $self = shift;
-    return shift @{ $self->{_videos} };
+    return shift @{ $self->{_media} };
 }
 
 1;
