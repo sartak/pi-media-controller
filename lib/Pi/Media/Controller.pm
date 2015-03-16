@@ -17,12 +17,7 @@ has current_media => (
     isa     => 'Pi::Media::File',
     writer  => '_set_current_media',
     clearer => '_clear_current_media',
-    trigger => sub {
-        warn "Set current media to " . shift;
-    },
 );
-
-after _clear_current_media => sub { warn "Cleared current media" };
 
 has config => (
     is       => 'ro',
@@ -92,13 +87,10 @@ sub stop_playing {
 sub stop_current {
     my $self = shift;
 
-    warn $self->current_media;
-
     if ($self->current_media->isa('Pi::Media::File::Video')) {
         $self->_run_command('q');
     }
     elsif ($self->current_media->isa('Pi::Media::File::Game')) {
-        warn "Sending SIGTERM to child pid " . $self->_handle->{child_pid};
         kill 'TERM', $self->_handle->{child_pid};
     }
     else {
@@ -151,13 +143,11 @@ sub _play_media {
         $handle->{rbuf} = '';
 
         $self->_buffer($self->_buffer . $buf);
-        warn $self->current_media . " on read: $buf";
     });
 
     $handle->on_eof(undef);
     $handle->on_error(sub {
         undef $handle;
-        warn $media . " on error";
         $self->_finished_media($media);
     });
 }

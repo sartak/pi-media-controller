@@ -64,18 +64,14 @@ my %endpoints = (
         },
         DELETE => sub {
             my $req = shift;
-            warn "DELETE /current";
 
             if (!$Controller->current_media) {
-                warn "No current media, so playing next in queue";
                 $Television->set_active_source;
-
                 $Controller->play_next_in_queue;
 
                 return $req->new_response(204);
             }
 
-            warn "So I'm stopping current";
             $Controller->stop_current;
             return $req->new_response(200);
         },
@@ -180,11 +176,9 @@ my %endpoints = (
             my $res = $req->new_response;
 
             if ($Controller->current_media) {
-                warn "have current media: " . $Controller->current_media;
                 $res->redirect('/queue');
             }
             else {
-                warn "playing next because no current media";
                 $Controller->play_next_in_queue;
                 $res->redirect('/current');
             }
@@ -271,7 +265,6 @@ my %endpoints = (
 
 $server->register_service(sub {
     my $req = Plack::Request->new(shift);
-    warn "Got a new request";
 
     my $auth_ok = 0;
     my $user;
@@ -290,7 +283,7 @@ $server->register_service(sub {
         return $res->finalize;
     }
 
-    warn "for " . $req->path_info;
+    warn $req->method . ' ' . $req->path_info;
 
     if ($req->path_info eq '/status') {
         if ($req->method eq 'GET') {
@@ -315,7 +308,6 @@ $server->register_service(sub {
     }
 
     my $action = $spec->{uc $req->method};
-    warn "with action " . $action;
     if (!$action) {
         my $res = $req->new_response(405);
         $res->body("allowed methods: " . (join ', ', sort keys %$spec));
@@ -323,7 +315,6 @@ $server->register_service(sub {
     }
 
     my $res = $action->($req);
-    warn "generated response";
 
     if (blessed($res)) {
         return $res->finalize;
