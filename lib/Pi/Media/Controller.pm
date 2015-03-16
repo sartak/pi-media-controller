@@ -98,8 +98,8 @@ sub stop_current {
         $self->_run_command('q');
     }
     elsif ($self->current_media->isa('Pi::Media::File::Game')) {
-        warn "Sending SIGINT to child pid " . $self->_handle->{child_pid};
-        kill 'INT', $self->_handle->{child_pid};
+        warn "Sending SIGTERM to child pid " . $self->_handle->{child_pid};
+        kill 'TERM', $self->_handle->{child_pid};
     }
     else {
         die "Unable to stop_current for " . $self->current_media;
