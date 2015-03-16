@@ -91,6 +91,7 @@ sub stop_current {
         $self->_run_command('q');
     }
     elsif ($self->current_media->isa('Pi::Media::File::Game')) {
+        warn "Sending SIGINT to child pid " . $self->_handle->{child_pid};
         kill 'INT', $self->_handle->{child_pid};
     }
     else {
