@@ -85,7 +85,10 @@ sub stop_current {
         $self->_run_command('q');
     }
     elsif ($self->current_media->isa('Pi::Media::File::Game')) {
-        # kill emu
+        kill 'INT', $self->_handle->{child_pid};
+    }
+    else {
+        die "Unable to stop_current for " . $self->current_media;
     }
 }
 
