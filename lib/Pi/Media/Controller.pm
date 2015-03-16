@@ -162,7 +162,7 @@ sub _handle_for_media {
         );
     }
     elsif ($media->isa('Pi::Media::File::Game')) {
-        my @emulator_cmd = $self->config->{emulator_for}{$media->extension};
+        my @emulator_cmd = @{ $self->config->{emulator_for}{$media->extension} || [] };
         if (@emulator_cmd == 0) {
             die "No emulator for type " . $media->extension;
         }
