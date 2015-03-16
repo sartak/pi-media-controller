@@ -94,7 +94,7 @@ sub _inflate_media_from_sth {
         $sth->execute(keys %media_by_id);
 
         while (my ($id) = $sth->fetchrow_array) {
-            $media_by_id{$id}->watched(1);
+            $media_by_id{$id}->completed(1);
         }
     }
 

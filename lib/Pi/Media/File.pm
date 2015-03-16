@@ -40,7 +40,7 @@ has treeId => (
     isa => 'Int',
 );
 
-has watched => (
+has completed => (
     is  => 'rw',
     isa => 'Bool',
 );
@@ -54,7 +54,7 @@ has tags => (
 sub TO_JSON {
     my $self = shift;
     my $frozen = {
-        map { $_ => $self->$_ } qw/id type path identifier label streamable treeId watched tags/
+        map { $_ => $self->$_ } qw/id type path identifier label streamable treeId completed tags/
     };
 
     $frozen->{queue_id} = $self->{queue_id} if $self->{queue_id};
