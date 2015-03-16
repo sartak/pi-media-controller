@@ -188,7 +188,7 @@ sub _finished_media {
                         + 3600 * $h;
 
             # close enough
-            if ($video->duration_seconds && $seconds > $video->duration_seconds * .9) {
+            if ($media->duration_seconds && $seconds > $media->duration_seconds * .9) {
                 $seconds = undef;
             }
         }
