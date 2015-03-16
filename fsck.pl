@@ -18,7 +18,7 @@ for my $media ($library->media(all => 1, excludeViewing => 1)) {
         warn $media->id . ": label has extraneous space\n";
     }
 
-    for my $tag ($media->tags) {
+    for my $tag (@{ $media->tags }) {
         $seen_tags{$tag} = 1;
     }
 
