@@ -178,9 +178,11 @@ my %endpoints = (
             my $res = $req->new_response;
 
             if ($Controller->current_media) {
+                warn "have current media: " . $Controller->current_media;
                 $res->redirect('/queue');
             }
             else {
+                warn "playing next because no current media";
                 $Controller->play_next_in_queue;
                 $res->redirect('/current');
             }
