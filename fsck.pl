@@ -54,7 +54,8 @@ for my $want (sort keys %want_tree) {
 }
 
 for my $tag ($library->tags) {
-    delete $seen_tags{$tag};
+    delete $seen_tags{$tag->label->{en}} if defined $tag->label->{en};
+    delete $seen_tags{$tag->label->{ja}} if defined $tag->label->{ja};
 }
 
 warn "Unknown tags found in media " . join ', ', keys %seen_tags
