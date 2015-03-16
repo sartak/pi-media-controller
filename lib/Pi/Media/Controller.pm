@@ -17,7 +17,12 @@ has current_media => (
     isa     => 'Pi::Media::File',
     writer  => '_set_current_media',
     clearer => '_clear_current_media',
+    trigger => sub {
+        warn "Set current media to " . shift;
+    },
 );
+
+after _clear_current_media => sub { warn "Cleared current media" };
 
 has config => (
     is       => 'ro',
@@ -146,11 +151,13 @@ sub _play_media {
         $handle->{rbuf} = '';
 
         $self->_buffer($self->_buffer . $buf);
+        warn $self->current_media . " on read: $buf";
     });
 
     $handle->on_eof(undef);
     $handle->on_error(sub {
         undef $handle;
+        warn $media . " on error";
         $self->_finished_media($media);
     });
 }
