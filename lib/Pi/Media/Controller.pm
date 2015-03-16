@@ -150,6 +150,8 @@ sub _play_media {
         undef $handle;
         $self->_finished_media($media);
     });
+
+    warn "Child pid is " . $handle->{child_pid};
 }
 
 sub _handle_for_media {
