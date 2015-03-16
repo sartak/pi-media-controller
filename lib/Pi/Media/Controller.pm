@@ -19,6 +19,12 @@ has current_media => (
     clearer => '_clear_current_media',
 );
 
+has config => (
+    is       => 'ro',
+    isa      => 'HashRef',
+    required => 1,
+);
+
 has queue => (
     is       => 'ro',
     isa      => 'Pi::Media::Queue',
@@ -153,8 +159,13 @@ sub _handle_for_media {
         );
     }
     elsif ($media->isa('Pi::Media::File::Game')) {
+        my @emulator_cmd = $self->config->{emulator_for}{$media->extension};
+        if (@emulator_cmd == 0) {
+            die "No emulator for type " . $media->extension;
+        }
+
         return AnyEvent::Run->new(
-            cmd => ['omxplayer', '-b', $media->path],
+            cmd => [@emulator_cmd, $media->path],
         );
     }
     else {

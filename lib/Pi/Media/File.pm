@@ -51,6 +51,12 @@ has tags => (
     required => 1,
 );
 
+sub extension {
+    my $self = shift;
+    my ($extension) = $self->path =~ /^.+\.(\w+)$/;
+    return $extension;
+}
+
 sub TO_JSON {
     my $self = shift;
     my $frozen = {
