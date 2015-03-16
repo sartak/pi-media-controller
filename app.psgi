@@ -64,16 +64,18 @@ my %endpoints = (
         },
         DELETE => sub {
             my $req = shift;
+            warn "DELETE /current";
+
             if (!$Controller->current_media) {
+                warn "No current media, so playing next in queue";
                 $Television->set_active_source;
 
-                if (!$Controller->current_media) {
-                    $Controller->play_next_in_queue;
-                }
+                $Controller->play_next_in_queue;
 
                 return $req->new_response(204);
             }
 
+            warn "So I'm stopping current";
             $Controller->stop_current;
             return $req->new_response(200);
         },
