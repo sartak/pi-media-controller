@@ -150,8 +150,8 @@ sub _play_media {
 
     $handle->on_eof(undef);
     $handle->on_error(sub {
-        $self->_finished_media($media);
         undef $handle;
+        $self->_finished_media($media);
     });
 }
 
