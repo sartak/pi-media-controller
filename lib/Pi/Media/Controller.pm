@@ -68,6 +68,14 @@ has is_paused => (
     writer => '_set_is_paused',
 );
 
+# game specific
+
+has _game_home_button_pressed => (
+    is      => 'rw',
+    isa     => 'Bool',
+    default => 1,
+);
+
 sub play_next_in_queue {
     my $self = shift;
 
@@ -91,6 +99,7 @@ sub stop_current {
         $self->_run_command('q');
     }
     elsif ($self->current_media->isa('Pi::Media::File::Game')) {
+        $self->_game_home_button_pressed(0);
         kill 'TERM', $self->_handle->{child_pid};
     }
     else {
@@ -128,6 +137,7 @@ sub _play_media {
     $self->_set_is_paused(0);
     $self->_set_current_media($media);
     $self->_start_time(time);
+    $self->_game_home_button_pressed(1);
 
     $self->notify({
         started => $media,
@@ -201,6 +211,10 @@ sub _finished_media {
     }
     else {
         $seconds = $end_time - $self->_start_time;
+
+        if ($self->_game_home_button_pressed) {
+            $self->_temporarily_stopped(1);
+        }
     }
 
     $self->library->add_viewing(
