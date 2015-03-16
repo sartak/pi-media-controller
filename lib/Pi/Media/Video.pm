@@ -1,27 +1,7 @@
 package Pi::Media::Video;
 use 5.14.0;
 use Mouse;
-
-has id => (
-    is  => 'ro',
-    isa => 'Int',
-);
-
-has path => (
-    is       => 'ro',
-    isa      => 'Str',
-    required => 1,
-);
-
-has identifier => (
-    is  => 'ro',
-    isa => 'Maybe[Str]',
-);
-
-has label => (
-    is  => 'ro',
-    isa => 'HashRef[Str]',
-);
+extends 'Pi::Media::File';
 
 has spoken_langs => (
     is       => 'ro',
@@ -41,41 +21,19 @@ has immersible => (
     required => 1,
 );
 
-has streamable => (
-    is       => 'ro',
-    isa      => 'Bool',
-    required => 1,
-);
-
-has treeId => (
-    is  => 'ro',
-    isa => 'Int',
-);
-
 has duration_seconds => (
     is  => 'ro',
     isa => 'Maybe[Int]',
 );
 
-has watched => (
-    is  => 'rw',
-    isa => 'Bool',
-);
-
-has tags => (
-    is       => 'ro',
-    isa      => 'ArrayRef[Str]',
-    required => 1,
-);
-
 sub TO_JSON {
     my $self = shift;
-    my $frozen = {
-        map { $_ => $self->$_ } qw/id path identifier label spoken_langs subtitle_langs immersible streamable treeId duration_seconds watched tags/
+    my $frozen = $self->SUPER::TO_JSON(@_);
+
+    for (qw/spoken_langs subtitle_langs immersible duration_seconds/) {
+        $frozen->{$_} = $self->$_;
     };
 
-    $frozen->{queue_id} = $self->{queue_id} if $self->{queue_id};
-    $frozen->{removePath} = $self->{removePath} if $self->{removePath};
     $frozen->{video} = 'video';
 
     return $frozen;
