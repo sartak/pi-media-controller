@@ -6,20 +6,22 @@ CREATE TABLE IF NOT EXISTS tree (
     sort_order INTEGER
 );
 
-CREATE TABLE IF NOT EXISTS video (
+CREATE TABLE IF NOT EXISTS media (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
+    type TEXT NOT NULL,
+    treeId INTEGER NOT NULL,
     identifier TEXT,
     label_en TEXT,
     label_ja TEXT,
-    path TEXT UNIQUE NOT NULL,
-    spoken_langs TEXT NOT NULL,
-    subtitle_langs TEXT NOT NULL,
-    immersible BOOLEAN NOT NULL,
     streamable BOOLEAN NOT NULL DEFAULT 1,
-    treeId INTEGER NOT NULL,
+    tags TEXT DEFAULT "",
     sort_order INTEGER,
-    durationSeconds INTEGER,
-    tags TEXT DEFAULT ""
+    path TEXT UNIQUE NOT NULL,
+
+    spoken_langs TEXT,
+    subtitle_langs TEXT,
+    immersible BOOLEAN,
+    durationSeconds INTEGER
 );
 
 CREATE TABLE IF NOT EXISTS tag (
@@ -29,7 +31,7 @@ CREATE TABLE IF NOT EXISTS tag (
 );
 
 CREATE TABLE IF NOT EXISTS viewing (
-    videoId INTEGER,
+    mediaId INTEGER,
     startTime INTEGER NOT NULL,
     endTime INTEGER NOT NULL,
     elapsedSeconds INTEGER
