@@ -158,8 +158,6 @@ sub _handle_for_media {
     my $self = shift;
     my $media = shift;
 
-    warn "Forking with \$^F at $^F";
-
     if ($media->isa('Pi::Media::File::Video')) {
         return AnyEvent::Run->new(
             cmd => ['omxplayer', '-b', $media->path],
