@@ -271,6 +271,7 @@ my %endpoints = (
 
 $server->register_service(sub {
     my $req = Plack::Request->new(shift);
+    warn "Got a new request";
 
     my $auth_ok = 0;
     my $user;
@@ -288,6 +289,8 @@ $server->register_service(sub {
         $res->body("unauthorized");
         return $res->finalize;
     }
+
+    warn "for " . $req->path_info;
 
     if ($req->path_info eq '/status') {
         if ($req->method eq 'GET') {
@@ -312,6 +315,7 @@ $server->register_service(sub {
     }
 
     my $action = $spec->{uc $req->method};
+    warn "with action " . $action;
     if (!$action) {
         my $res = $req->new_response(405);
         $res->body("allowed methods: " . (join ', ', sort keys %$spec));
@@ -319,6 +323,8 @@ $server->register_service(sub {
     }
 
     my $res = $action->($req);
+    warn "generated response";
+
     if (blessed($res)) {
         return $res->finalize;
     }
