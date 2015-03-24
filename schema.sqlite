@@ -34,7 +34,8 @@ CREATE TABLE IF NOT EXISTS viewing (
     mediaId INTEGER,
     startTime INTEGER NOT NULL,
     endTime INTEGER NOT NULL,
-    elapsedSeconds INTEGER
+    elapsedSeconds INTEGER,
+    location TEXT
 );
 
 INSERT INTO tree (label_en, label_ja) VALUES

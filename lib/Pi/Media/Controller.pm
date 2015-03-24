@@ -222,6 +222,7 @@ sub _finished_media {
         start_time      => $self->_start_time,
         end_time        => $end_time,
         elapsed_seconds => $seconds,
+        location        => $self->config->{location},
     );
 
     warn "Done playing $media\n";
