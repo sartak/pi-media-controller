@@ -45,6 +45,11 @@ has completed => (
     isa => 'Bool',
 );
 
+has last_played => (
+    is  => 'rw',
+    isa => 'Int',
+);
+
 has tags => (
     is       => 'ro',
     isa      => 'ArrayRef[Str]',
@@ -60,7 +65,7 @@ sub extension {
 sub TO_JSON {
     my $self = shift;
     my $frozen = {
-        map { $_ => $self->$_ } qw/id type path identifier label streamable treeId completed tags/
+        map { $_ => $self->$_ } qw/id type path identifier label streamable treeId completed last_played tags/
     };
 
     $frozen->{queue_id} = $self->{queue_id} if $self->{queue_id};

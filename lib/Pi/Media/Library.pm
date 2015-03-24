@@ -88,15 +88,16 @@ sub _inflate_media_from_sth {
 
     if (!$args{excludeViewing}) {
         if (keys %video_by_id) {
-            my $query = 'SELECT mediaId FROM viewing WHERE (';
+            my $query = 'SELECT mediaId, MAX(endTime) FROM viewing WHERE (';
             $query .= join ' OR ', map { 'mediaId=?' } keys %video_by_id;
             $query .= ') AND elapsedSeconds IS NULL GROUP BY mediaId;';
 
             my $sth = $self->_dbh->prepare($query);
             $sth->execute(keys %video_by_id);
 
-            while (my ($id) = $sth->fetchrow_array) {
+            while (my ($id, $date) = $sth->fetchrow_array) {
                 $video_by_id{$id}->completed(1);
+                $video_by_id{$id}->last_played($date);
             }
         }
 
