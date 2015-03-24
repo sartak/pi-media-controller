@@ -21,6 +21,8 @@ my $json = JSON->new->convert_blessed(1);
 die "Need config.json" unless -r "config.json";
 my $config = $json->decode(scalar slurp "config.json");
 
+$config->{location} = $ENV{PMC_LOCATION} if $ENV{PMC_LOCATION};
+
 my $server = Twiggy::Server->new(
     host => $ENV{PMC_HOST},
     port => ($ENV{PMC_PORT}||5000),
