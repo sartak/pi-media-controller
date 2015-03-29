@@ -14,7 +14,11 @@ find(sub {
     return if -d $_;
 
     my $file = decode_utf8($File::Find::name);
-    return if $file =~ /\.DS_Store/;
+
+    return if $file =~ /\.DS_Store/
+           || $file =~ /\.state\.auto$/
+           || $file =~ /\.srm$/;
+
     return if $seen{$file};
 
     warn encode_utf8($file);
