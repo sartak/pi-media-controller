@@ -126,7 +126,7 @@ my %endpoints = (
         },
         NEXTSUBS => sub {
             my $req = shift;
-            $Controller->next_subtitles;
+            $Controller->toggle_or_next_subtitles;
             return $req->new_response(200);
         },
         # decrease_speed increase_speed rewind fast_forward show_info
