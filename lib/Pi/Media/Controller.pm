@@ -68,6 +68,12 @@ has is_paused => (
     writer => '_set_is_paused',
 );
 
+has has_toggled_subtitles => (
+    is     => 'ro',
+    isa    => 'Bool',
+    writer => '_set_has_toggled_subtitles',
+);
+
 # game specific
 
 has _game_home_button_pressed => (
@@ -230,6 +236,7 @@ sub _finished_media {
     $self->_clear_handle;
     $self->_buffer('');
     $self->_clear_start_time;
+    $self->_set_has_toggled_subtitles(0);
 
     if ($self->_temporarily_stopped) {
         $self->_temporarily_stopped(0);
@@ -283,5 +290,15 @@ sub increase_subtitle_delay { shift->_run_command('f') }
 sub decrease_volume         { shift->_run_command('-') }
 sub increase_volume         { shift->_run_command('+') }
 
+sub toggle_or_next_subtitles {
+    my $self = shift;
+    if ($self->has_toggled_subtitles) {
+        return $self->next_subtitles;
+    }
+    else {
+        $self->_set_has_toggled_subtitles(1);
+        return $self->toggle_subtitles;
+    }
+}
 1;
 
