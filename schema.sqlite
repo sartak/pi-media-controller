@@ -38,6 +38,9 @@ CREATE TABLE IF NOT EXISTS viewing (
     location TEXT
 );
 
+CREATE INDEX media_treeId ON media(treeId);
+CREATE INDEX viewing_mediaId_endTime_elapsedSeconds ON viewing(mediaId, endTime, elapsedSeconds);
+
 INSERT INTO tree (label_en, label_ja) VALUES
     ("Movies", "映画"),
     ("TV", "テレビ"),
