@@ -102,15 +102,32 @@ sub _inflate_media_from_sth {
         }
 
         if (keys %game_by_id) {
-            my $query = 'SELECT mediaId, SUM(elapsedSeconds) FROM viewing WHERE (';
-            $query .= join ' OR ', map { 'mediaId=?' } keys %game_by_id;
-            $query .= ') GROUP BY mediaId;';
+            # playtime
+            {
+                my $query = 'SELECT mediaId, SUM(elapsedSeconds) FROM viewing WHERE (';
+                $query .= join ' OR ', map { 'mediaId=?' } keys %game_by_id;
+                $query .= ') GROUP BY mediaId;';
 
-            my $sth = $self->_dbh->prepare($query);
-            $sth->execute(keys %game_by_id);
+                my $sth = $self->_dbh->prepare($query);
+                $sth->execute(keys %game_by_id);
 
-            while (my ($id, $playtime) = $sth->fetchrow_array) {
-                $game_by_id{$id}->playtime($playtime);
+                while (my ($id, $playtime) = $sth->fetchrow_array) {
+                    $game_by_id{$id}->playtime($playtime);
+                }
+            }
+
+            # completed
+            {
+                my $query = 'SELECT mediaId FROM viewing WHERE (';
+                $query .= join ' OR ', map { 'mediaId=?' } keys %game_by_id;
+                $query .= ') AND elapsedSeconds IS NULL GROUP BY mediaId;';
+
+                my $sth = $self->_dbh->prepare($query);
+                $sth->execute(keys %game_by_id);
+
+                while (my ($id) = $sth->fetchrow_array) {
+                    $game_by_id{$id}->completed(1);
+                }
             }
         }
     }
