@@ -63,8 +63,6 @@ my $Television = $TelevisionClass->new(
     config => $config,
 );
 
-die $Television;
-
 my %endpoints = (
     '/current' => {
         GET => sub {
