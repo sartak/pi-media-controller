@@ -1,6 +1,7 @@
 package Pi::Media::Television::WeMo;
 use 5.14.0;
 use Mouse;
+use Power::Outlet::WeMo;
 extends 'Pi::Media::Television::HDMI';
 
 sub host {
