@@ -3,6 +3,12 @@ use 5.14.0;
 use Mouse;
 use AnyEvent::Run;
 
+has config => (
+    is       => 'ro',
+    isa      => 'HashRef',
+    required => 1,
+);
+
 has _handle => (
     is      => 'rw',
     clearer => '_clear_handle',

@@ -14,7 +14,6 @@ use URI::Escape;
 use Pi::Media::Queue::Autofilling;
 use Pi::Media::Controller;
 use Pi::Media::Library;
-use Pi::Media::Television;
 
 my $json = JSON->new->convert_blessed(1);
 
@@ -57,7 +56,14 @@ my $Controller = Pi::Media::Controller->new(
     library   => $Library,
     notify_cb => $notify_cb,
 );
-my $Television = Pi::Media::Television->new;
+
+my $TelevisionClass = $config->{television}{class} || 'Pi::Media::Television::HDMI';
+Mouse::load_class($TelevisionClass);
+my $Television = $TelevisionClass->new(
+    config => $config,
+);
+
+die $Television;
 
 my %endpoints = (
     '/current' => {
