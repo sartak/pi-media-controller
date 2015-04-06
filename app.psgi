@@ -23,6 +23,13 @@ my $config = $json->decode(scalar slurp "config.json");
 
 $config->{location} = $ENV{PMC_LOCATION} if $ENV{PMC_LOCATION};
 
+if ($config->{by_location}) {
+    %$config = (
+        %$config,
+        %{ $config->{by_location}{$config->{location}} || {} },
+    );
+}
+
 my $server = Twiggy::Server->new(
     host => $ENV{PMC_HOST},
     port => ($ENV{PMC_PORT}||5000),
