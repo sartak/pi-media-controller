@@ -17,6 +17,7 @@ CREATE TABLE IF NOT EXISTS media (
     tags TEXT DEFAULT "",
     sort_order INTEGER,
     path TEXT UNIQUE NOT NULL,
+    checksum TEXT,
 
     spoken_langs TEXT,
     subtitle_langs TEXT,
