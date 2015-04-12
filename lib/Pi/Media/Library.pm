@@ -378,6 +378,11 @@ sub media {
         push @where, 'checksum IS NULL';
     }
 
+    if ($args{type}) {
+        push @bind, $args{type};
+        push @where, 'type=?';
+    }
+
     my $query = '
         SELECT
             id, type, path, identifier, label_en, label_ja, spoken_langs, subtitle_langs, immersible, streamable, durationSeconds, treeId, tags
