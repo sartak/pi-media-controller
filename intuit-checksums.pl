@@ -3,7 +3,7 @@ use 5.14.0;
 use warnings;
 use utf8::all;
 use Pi::Media::Library;
-use Digest::SHA1;
+use Digest::SHA;
 
 my $library = Pi::Media::Library->new(file => $ENV{PMC_DATABASE});
 
@@ -18,7 +18,7 @@ for my $media (@media) {
 
     open my $handle, '<', $media->path;
 
-    my $sha = Digest::SHA1->new;
+    my $sha = Digest::SHA->new(1);
     $sha->addfile($handle);
     my $checksum = lc($sha->hexdigest);
 
