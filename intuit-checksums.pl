@@ -16,7 +16,7 @@ my @media = $library->media(
 for my $media (@media) {
     next unless -e $media->path;
 
-    open my $handle, '<', $media->path;
+    open my $handle, '<:raw', $media->path;
 
     my $sha = Digest::SHA->new(1);
     $sha->addfile($handle);
