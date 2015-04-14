@@ -12,12 +12,14 @@ sub set_active_source {
     my $self = shift;
     my $then = shift;
 
-    warn "Setting self as active source for TV ... \n";
-
+    print STDERR "Turning on television ... ";
     my $outlet = Power::Outlet::WeMo->new(host => $self->host);
     $outlet->on;
+    print STDERR "ok.\n";
 
+    print STDERR "Setting self as active source for TV ... ";
     $self->_handle->push_write("as\n");
+    print STDERR "ok.\n";
 
     $then->() if $then;
 }
@@ -26,8 +28,10 @@ sub power_off {
     my $self = shift;
     my $then = shift;
 
+    print STDERR "Turning on television ... ";
     my $outlet = Power::Outlet::WeMo->new(host => $self->host);
     $outlet->off;
+    print STDERR "ok.\n";
 
     $then->() if $then;
 }

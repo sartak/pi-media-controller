@@ -32,10 +32,10 @@ sub set_active_source {
     my $self = shift;
     my $then = shift;
 
-    warn "Setting self as active source for TV ... \n";
-
+    print STDERR "Setting self as active source for TV ... ";
     $self->_handle->push_write("on\n");
     $self->_handle->push_write("as\n");
+    print STDERR "ok.\n";
 
     $then->() if $then;
 }
