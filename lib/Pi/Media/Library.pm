@@ -381,14 +381,11 @@ sub media {
         push @where, 'checksum IS NULL';
     }
 
-    if ($args{type}) {
-        push @bind, $args{type};
-        push @where, 'type=?';
-    }
-
-    if ($args{path}) {
-        push @bind, $args{path};
-        push @where, 'path=?';
+    for my $column (qw/id type path identifier label_en label_ja spoken_langs subtitle_langs immersible streamable durationSeconds checksum/) {
+        if ($args{$column}) {
+            push @bind, $args{$column};
+            push @where, "$column=?";
+        }
     }
 
     my $query = '

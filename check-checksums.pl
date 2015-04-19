@@ -39,6 +39,15 @@ find(sub {
 
     if ($got ne $expected) {
         print STDERR "checksum mismatch\ngot      $got\nexpected $expected\n";
+
+        my ($match) = $library->media(
+            all      => 1,
+            checksum => $got,
+        );
+
+        if ($match) {
+            print STDERR "you know, " . $match->path . " has that checksum!\n";
+        }
     }
     else {
         print STDERR "ok\n";
