@@ -57,9 +57,8 @@ has tags => (
 );
 
 has checksum => (
-    is       => 'ro',
-    isa      => 'Str',
-    required => 1,
+    is  => 'ro',
+    isa => 'Maybe[Str]',
 );
 
 sub extension {
