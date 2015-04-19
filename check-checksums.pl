@@ -24,9 +24,9 @@ find(sub {
            || $file =~ /\.state\.auto$/
            || $file =~ /\.srm$/;
 
-    print STDERR "$file ... ";
+    print STDERR encode_utf8 "$file ... ";
     if (!$media) {
-        print "no media\n";
+        print STDERR encode_utf8 "no media\n";
         return;
     }
 
@@ -38,7 +38,7 @@ find(sub {
     my $expected = $media->checksum;
 
     if ($got ne $expected) {
-        print STDERR "checksum mismatch\ngot      $got\nexpected $expected\n";
+        print STDERR encode_utf8 "checksum mismatch\ngot      $got\nexpected $expected\n";
 
         my ($match) = $library->media(
             all      => 1,
@@ -46,11 +46,11 @@ find(sub {
         );
 
         if ($match) {
-            print STDERR "you know, " . $match->path . " has that checksum!\n";
+            print STDERR encode_utf8("you know, " . $match->path . " has that checksum!\n");
         }
     }
     else {
-        print STDERR "ok\n";
+        print STDERR encode_utf8 "ok\n";
     }
 
 }, @ARGV);
