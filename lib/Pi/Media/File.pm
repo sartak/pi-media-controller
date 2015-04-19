@@ -56,6 +56,12 @@ has tags => (
     required => 1,
 );
 
+has checksum => (
+    is       => 'ro',
+    isa      => 'Str',
+    required => 1,
+);
+
 sub extension {
     my $self = shift;
     my ($extension) = $self->path =~ /^.+\.(\w+)$/;
@@ -65,7 +71,7 @@ sub extension {
 sub TO_JSON {
     my $self = shift;
     my $frozen = {
-        map { $_ => $self->$_ } qw/id type path identifier label streamable treeId completed last_played tags/
+        map { $_ => $self->$_ } qw/id type path identifier label streamable treeId completed last_played tags checksum/
     };
 
     $frozen->{queue_id} = $self->{queue_id} if $self->{queue_id};

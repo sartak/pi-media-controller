@@ -42,7 +42,7 @@ sub _inflate_media_from_sth {
     my %video_by_id;
     my %game_by_id;
 
-    while (my ($id, $type, $path, $identifier, $label_en, $label_ja, $spoken_langs, $subtitle_langs, $immersible, $streamable, $durationSeconds, $treeId, $tags) = $sth->fetchrow_array) {
+    while (my ($id, $type, $path, $identifier, $label_en, $label_ja, $spoken_langs, $subtitle_langs, $immersible, $streamable, $durationSeconds, $treeId, $tags, $checksum) = $sth->fetchrow_array) {
         my %label;
         $label{en} = $label_en if $label_en;
         $label{ja} = $label_ja if $label_ja;
@@ -63,6 +63,7 @@ sub _inflate_media_from_sth {
                 duration_seconds => $durationSeconds,
                 treeId           => $treeId,
                 tags             => $tags,
+                checksum         => $checksum,
             );
             $video_by_id{$id} = $media;
         }
@@ -76,6 +77,7 @@ sub _inflate_media_from_sth {
                 streamable       => $streamable,
                 treeId           => $treeId,
                 tags             => $tags,
+                checksum         => $checksum,
             );
             $game_by_id{$id} = $media;
         }
@@ -391,7 +393,7 @@ sub media {
 
     my $query = '
         SELECT
-            id, type, path, identifier, label_en, label_ja, spoken_langs, subtitle_langs, immersible, streamable, durationSeconds, treeId, tags
+            id, type, path, identifier, label_en, label_ja, spoken_langs, subtitle_langs, immersible, streamable, durationSeconds, treeId, tags, checksum
         FROM media
     ';
 
@@ -425,7 +427,7 @@ sub media_with_id {
 
     my $sth = $self->_dbh->prepare('
         SELECT
-            id, type, path, identifier, label_en, label_ja, spoken_langs, subtitle_langs, immersible, streamable, durationSeconds, treeId, tags
+            id, type, path, identifier, label_en, label_ja, spoken_langs, subtitle_langs, immersible, streamable, durationSeconds, treeId, tags, checksum
         FROM media
         WHERE id = ?
         LIMIT 1
@@ -442,7 +444,7 @@ sub random_video_for_immersion {
 
     my $sth = $self->_dbh->prepare('
         SELECT
-            media.id, media.type, media.path, media.identifier, media.label_en, media.label_ja, media.spoken_langs, media.subtitle_langs, media.immersible, media.streamable, media.durationSeconds, media.treeId, media.tags
+            media.id, media.type, media.path, media.identifier, media.label_en, media.label_ja, media.spoken_langs, media.subtitle_langs, media.immersible, media.streamable, media.durationSeconds, media.treeId, media.tags, media.checksum
         FROM media
         JOIN viewing ON viewing.mediaId = media.id AND viewing.elapsedSeconds IS NULL
         WHERE media.type = "video" AND media.immersible = 1 AND media.streamable = 1
