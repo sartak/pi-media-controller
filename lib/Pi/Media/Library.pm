@@ -383,6 +383,11 @@ sub media {
         push @where, 'type=?';
     }
 
+    if ($args{path}) {
+        push @bind, $args{path};
+        push @where, 'path=?';
+    }
+
     my $query = '
         SELECT
             id, type, path, identifier, label_en, label_ja, spoken_langs, subtitle_langs, immersible, streamable, durationSeconds, treeId, tags
