@@ -15,7 +15,7 @@ find(sub {
 
     my $file = decode_utf8($File::Find::name);
 
-    my ($media) = $library->media(path => $file);
+    my ($media) = $library->media(path => $library->_relativify_path($file));
     if (!$media) {
         warn "no media at path $file\n";
         return;
