@@ -14,7 +14,11 @@ find(sub {
 
     my $file = decode_utf8($File::Find::name);
 
-    my $media = $library->media(path => $file);
+    my ($media) = $library->media(path => $file);
+    if (!$media) {
+        warn "no media at path $file\n";
+        return;
+    }
 
     return if $file =~ /\.DS_Store/
            || $file =~ /\.state\.auto$/
