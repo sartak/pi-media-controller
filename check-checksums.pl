@@ -20,14 +20,15 @@ find(sub {
         path => $library->_relativify_path($file),
     );
 
-    if (!$media) {
-        warn "no media at path $file\n";
-        return;
-    }
-
     return if $file =~ /\.DS_Store/
            || $file =~ /\.state\.auto$/
            || $file =~ /\.srm$/;
+
+    print STDERR "$file ... ";
+    if (!$media) {
+        print "no media\n";
+        return;
+    }
 
     open my $handle, '<:raw', $file;
 
@@ -37,7 +38,10 @@ find(sub {
     my $expected = $media->checksum;
 
     if ($got ne $expected) {
-        warn "$file\ngot      $got\nexpected $expected\n";
+        print STDERR "checksum mismatch\ngot      $got\nexpected $expected\n";
+    }
+    else {
+        print STDERR "ok\n";
     }
 
 }, @ARGV);
