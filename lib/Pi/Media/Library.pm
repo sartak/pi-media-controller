@@ -363,7 +363,6 @@ sub media {
         push @bind, "%" . $args{query} . "%";
     }
     elsif (!$args{all}) {
-        die "no treeId provided. use `all` option?\n" unless $args{treeId};
         push @where, 'treeId = ?';
         push @bind, $args{treeId};
     }
