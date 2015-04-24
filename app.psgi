@@ -215,6 +215,23 @@ my %endpoints = (
             $res->redirect('/queue');
             return $res;
         },
+        SOURCE => sub {
+            my $req = shift;
+
+            if ($req->param('tree')) {
+                my ($tree) = $Library->trees(id => $req->param('tree'));
+                if ($tree) {
+                    $Queue->source($tree);
+                }
+            }
+            else {
+                $Queue->clear_autofill_source;
+            }
+
+            my $res = $req->new_response;
+            $res->redirect('/queue');
+            return $res;
+        },
     },
 
     '/library' => {
