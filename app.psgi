@@ -225,17 +225,27 @@ my %endpoints = (
 
             my $treeId = $req->param('tree') || 0;
             my $query  = $req->param('query');
+            my $where;
             my @response;
 
             if ($treeId) {
-                my @trees = $Library->trees(parentId => $treeId, query => $query);
-                for my $tree (@trees) {
-                    $tree->{requestPath} = "/library?tree=" . $tree->{id};
-                    push @response, $tree;
+                my ($tree) = $Library->trees(id => $treeId);
+                if ($tree->query) {
+                    $where = $tree->query;
+                }
+                else {
+                    my @trees = $Library->trees(parentId => $treeId, query => $query);
+                    for my $tree (@trees) {
+                        $tree->{requestPath} = "/library?tree=" . $tree->{id};
+                        push @response, $tree;
+                    }
                 }
             }
 
-            if ($query) {
+            if ($where) {
+                push @response, $Library->media(where => $where);
+            }
+            elsif ($query) {
                 push @response, $Library->media(query => $query);
             }
             else {
