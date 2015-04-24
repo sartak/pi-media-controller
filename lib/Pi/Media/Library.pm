@@ -286,6 +286,10 @@ sub trees {
         push @bind, "%" . $args{query} . "%";
         push @bind, "%" . $args{query} . "%";
     }
+    elsif ($args{id}) {
+        push @where, 'id = ?';
+        push @bind, $args{id};
+    }
     elsif (!$args{all}) {
         push @where, 'parentId = ?';
         push @bind, $args{parentId};
