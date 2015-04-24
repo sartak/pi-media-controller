@@ -359,7 +359,7 @@ sub media {
         FROM media
     ';
 
-    if ($args{where} =~ /^JOIN /) {
+    if (($args{where}||'') =~ /^JOIN /) {
         $query .= $args{where};
     }
     else {
