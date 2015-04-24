@@ -402,25 +402,6 @@ sub media_with_id {
     return $media[0];
 }
 
-sub random_video_for_immersion {
-    my ($self) = @_;
-
-    my $sth = $self->_dbh->prepare('
-        SELECT
-            media.id, media.type, media.path, media.identifier, media.label_en, media.label_ja, media.spoken_langs, media.subtitle_langs, media.immersible, media.streamable, media.durationSeconds, media.treeId, media.tags, media.checksum
-        FROM media
-        JOIN viewing ON viewing.mediaId = media.id AND viewing.elapsedSeconds IS NULL
-        WHERE media.type = "video" AND media.immersible = 1 AND media.streamable = 1
-        ORDER BY RANDOM()
-        LIMIT 1
-    ;');
-
-    $sth->execute;
-
-    my @media = $self->_inflate_media_from_sth($sth);
-    return $media[0];
-}
-
 sub add_viewing {
     my ($self, %args) = @_;
     $self->_dbh->do('
