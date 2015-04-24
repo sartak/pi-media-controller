@@ -10,8 +10,8 @@ has source => (
 );
 
 sub shift {
-    my $self = shift;
-    my $media = $self->SUPER::shift;
+    my $self = CORE::shift(@_);
+    my $media = $self->SUPER::shift(@_);
     return $media if $media;
 
     return unless $self->source;
@@ -21,7 +21,7 @@ sub shift {
 }
 
 sub has_media {
-    my $self = shift;
+    my $self = CORE::shift(@_);
 
     if ($self->source) {
         return 1;
