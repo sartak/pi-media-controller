@@ -360,7 +360,7 @@ sub media {
     ';
 
     $query .= 'WHERE ' . join(' AND ', @where) if @where;
-    $query .= ' ORDER BY sort_order IS NULL, sort_order ASC, rowid ASC';
+    $query .= ' ORDER BY media.sort_order IS NULL, media.sort_order ASC, media.rowid ASC';
     $query .= ' LIMIT ' . $limit if $limit;
     $query .= ';';
 
