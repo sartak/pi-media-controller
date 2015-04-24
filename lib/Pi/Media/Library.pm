@@ -355,7 +355,7 @@ sub media {
 
     my $query = '
         SELECT
-            id, type, path, identifier, label_en, label_ja, spoken_langs, subtitle_langs, immersible, streamable, durationSeconds, treeId, tags, checksum
+            media.id, media.type, media.path, media.identifier, media.label_en, media.label_ja, media.spoken_langs, media.subtitle_langs, media.immersible, media.streamable, media.durationSeconds, media.treeId, media.tags, media.checksum
         FROM media
     ';
 
