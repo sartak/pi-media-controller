@@ -215,7 +215,9 @@ my %endpoints = (
             $res->redirect('/queue');
             return $res;
         },
-        SOURCE => sub {
+    },
+    '/queue/source' => {
+        PUT => sub {
             my $req = shift;
 
             if ($req->param('tree')) {
