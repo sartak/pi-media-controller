@@ -3,6 +3,7 @@ CREATE TABLE IF NOT EXISTS tree (
     parentId INTEGER,
     label_en TEXT,
     label_ja TEXT,
+    color TEXT,
     sort_order INTEGER
 );
 

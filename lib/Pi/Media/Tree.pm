@@ -12,6 +12,11 @@ has label => (
     isa => 'HashRef[Str]',
 );
 
+has color => (
+    is  => 'ro',
+    isa => 'Str',
+);
+
 has parentId => (
     is  => 'ro',
     isa => 'Int',
@@ -19,7 +24,7 @@ has parentId => (
 
 sub TO_JSON {
     my $self = shift;
-    my $frozen = { map { $_ => $self->$_ } qw/id label parentId/ };
+    my $frozen = { map { $_ => $self->$_ } qw/id label color parentId/ };
 
     $frozen->{requestPath} = $self->{requestPath} if $self->{requestPath};
     $frozen->{type} = 'tree';
