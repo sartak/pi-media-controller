@@ -233,23 +233,24 @@ my %endpoints = (
                 if ($tree->query) {
                     $where = $tree->query;
                 }
-                else {
-                    my @trees = $Library->trees(parentId => $treeId, query => $query);
-                    for my $tree (@trees) {
-                        $tree->{requestPath} = "/library?tree=" . $tree->{id};
-                        push @response, $tree;
-                    }
-                }
             }
 
             if ($where) {
                 push @response, $Library->media(where => $where);
             }
-            elsif ($query) {
-                push @response, $Library->media(query => $query);
-            }
             else {
-                push @response, $Library->media(treeId => $treeId);
+                my @trees = $Library->trees(parentId => $treeId, query => $query);
+                for my $tree (@trees) {
+                    $tree->{requestPath} = "/library?tree=" . $tree->{id};
+                    push @response, $tree;
+                }
+
+                if ($query) {
+                    push @response, $Library->media(query => $query);
+                }
+                else {
+                    push @response, $Library->media(treeId => $treeId);
+                }
             }
 
             $res->body(encode_utf8($json->encode(\@response)));
