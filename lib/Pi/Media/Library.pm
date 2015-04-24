@@ -141,7 +141,7 @@ sub _inflate_trees_from_sth {
 
     my @trees;
 
-    while (my ($id, $label_en, $label_ja, $parentId) = $sth->fetchrow_array) {
+    while (my ($id, $label_en, $label_ja, $parentId, $color, $query) = $sth->fetchrow_array) {
         my %label;
         $label{en} = $label_en if $label_en;
         $label{ja} = $label_ja if $label_ja;
@@ -150,6 +150,8 @@ sub _inflate_trees_from_sth {
             id       => $id,
             label    => \%label,
             parentId => $parentId,
+            color    => $color,
+            query    => $query,
         );
 
         push @trees, $tree;
@@ -295,7 +297,7 @@ sub trees {
         push @bind, $args{parentId};
     }
 
-    my $query = 'SELECT id, label_en, label_ja, parentId FROM tree';
+    my $query = 'SELECT id, label_en, label_ja, parentId, color, query FROM tree';
 
     $query .= ' WHERE ' . join(' AND ', @where) if @where;
     $query .= ' ORDER BY sort_order IS NULL, sort_order ASC, id ASC';
