@@ -27,12 +27,6 @@ CREATE TABLE IF NOT EXISTS media (
     durationSeconds INTEGER
 );
 
-CREATE TABLE IF NOT EXISTS tag (
-    id TEXT PRIMARY KEY NOT NULL,
-    label_ja TEXT,
-    sort_order INTEGER
-);
-
 CREATE TABLE IF NOT EXISTS viewing (
     mediaId INTEGER,
     startTime INTEGER NOT NULL,

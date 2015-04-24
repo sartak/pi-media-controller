@@ -4,7 +4,6 @@ use Mouse;
 use Pi::Media::File::Video;
 use Pi::Media::File::Game;
 use Pi::Media::Tree;
-use Pi::Media::Tag;
 use DBI;
 use Path::Class;
 use Unicode::Normalize 'NFC';
@@ -159,27 +158,6 @@ sub _inflate_trees_from_sth {
     return @trees;
 }
 
-sub _inflate_tags_from_sth {
-    my ($self, $sth, %args) = @_;
-
-    my @tags;
-
-    while (my ($id, $label_ja) = $sth->fetchrow_array) {
-        my %label;
-        $label{en} = $id;
-        $label{ja} = $label_ja if $label_ja;
-
-        my $tag = Pi::Media::Tag->new(
-            id       => $id,
-            label    => \%label,
-        );
-
-        push @tags, $tag;
-    }
-
-    return @tags;
-}
-
 sub insert_video {
     my ($self, %args) = @_;
 
@@ -325,39 +303,13 @@ sub trees {
     return $self->_inflate_trees_from_sth($sth, %args);
 }
 
-sub tags {
-    my ($self, %args) = @_;
-
-    my @bind;
-    my @where;
-
-    if ($args{query}) {
-        push @where, '(id LIKE ? OR label_ja LIKE ?)';
-        push @bind, "%" . $args{query} . "%";
-        push @bind, "%" . $args{query} . "%";
-    }
-
-    my $query = 'SELECT id, label_ja FROM tag';
-    $query .= ' WHERE ' . join(' AND ', @where) if @where;
-    $query .= ' ORDER BY sort_order IS NULL, sort_order ASC, rowid ASC';
-    $query .= ';';
-
-    my $sth = $self->_dbh->prepare($query);
-    $sth->execute(@bind);
-    return $self->_inflate_tags_from_sth($sth);
-}
-
 sub media {
     my ($self, %args) = @_;
 
     my @bind;
     my @where;
 
-    if ($args{tag}) {
-        push @where, 'tags LIKE ?';
-        push @bind, "%`" . $args{tag} . "`%";
-    }
-    elsif ($args{query}) {
+    if ($args{query}) {
         push @where, '(label_en LIKE ? OR label_ja LIKE ?)';
         push @bind, "%" . $args{query} . "%";
         push @bind, "%" . $args{query} . "%";

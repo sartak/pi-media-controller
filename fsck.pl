@@ -7,8 +7,6 @@ use Pi::Media::Library;
 my $library = Pi::Media::Library->new(file => $ENV{PMC_DATABASE});
 my %want_tree;
 my %seen_tree;
-my %want_tags;
-my %seen_tags;
 
 for my $media ($library->media(all => 1, excludeViewing => 1)) {
     push @{ $want_tree{$media->treeId} }, $media;
@@ -16,10 +14,6 @@ for my $media ($library->media(all => 1, excludeViewing => 1)) {
     for my $label (values %{ $media->label }) {
         next unless $label =~ /^\s|\s$/;
         warn $media->id . ": label has extraneous space\n";
-    }
-
-    for my $tag (@{ $media->tags }) {
-        $seen_tags{$tag} = 1;
     }
 
     unless (-r $media->path && !-d _) {
@@ -53,10 +47,3 @@ for my $want (sort keys %want_tree) {
     }
 }
 
-for my $tag ($library->tags) {
-    delete $seen_tags{$tag->label->{en}} if defined $tag->label->{en};
-    delete $seen_tags{$tag->label->{ja}} if defined $tag->label->{ja};
-}
-
-warn "Unknown tags found in media " . join ', ', keys %seen_tags
-    if %seen_tags;
