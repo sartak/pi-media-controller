@@ -14,12 +14,12 @@ has label => (
 
 has query => (
     is  => 'ro',
-    isa => 'Str',
+    isa => 'Maybe[Str]',
 );
 
 has color => (
     is  => 'ro',
-    isa => 'Str',
+    isa => 'Maybe[Str]',
 );
 
 has parentId => (
