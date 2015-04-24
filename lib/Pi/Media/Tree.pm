@@ -37,15 +37,4 @@ sub TO_JSON {
     return $frozen;
 }
 
-sub where_clause {
-    my $self = shift;
-
-    if ($self->query) {
-        return 'WHERE ' . $self->query;
-    }
-    else {
-        return ('WHERE treeId=?', $self->id;
-    }
-}
-
 1;
