@@ -4,6 +4,7 @@ CREATE TABLE IF NOT EXISTS tree (
     label_en TEXT,
     label_ja TEXT,
     color TEXT,
+    query TEXT,
     sort_order INTEGER
 );
 

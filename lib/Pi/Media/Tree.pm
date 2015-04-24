@@ -12,6 +12,11 @@ has label => (
     isa => 'HashRef[Str]',
 );
 
+has query => (
+    is  => 'ro',
+    isa => 'Str',
+);
+
 has color => (
     is  => 'ro',
     isa => 'Str',
@@ -30,6 +35,17 @@ sub TO_JSON {
     $frozen->{type} = 'tree';
 
     return $frozen;
+}
+
+sub where_clause {
+    my $self = shift;
+
+    if ($self->query) {
+        return 'WHERE ' . $self->query;
+    }
+    else {
+        return ('WHERE treeId=?', $self->id;
+    }
 }
 
 1;
