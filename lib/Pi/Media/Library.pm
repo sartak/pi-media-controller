@@ -314,6 +314,7 @@ sub media {
 
     my @bind;
     my @where;
+    my $limit;
 
     if ($args{query}) {
         push @where, '(label_en LIKE ? OR label_ja LIKE ?)';
@@ -326,6 +327,10 @@ sub media {
     elsif (!$args{all}) {
         push @where, 'treeId = ?';
         push @bind, $args{treeId};
+    }
+
+    if ($args{limit}) {
+        $limit = $args{limit};
     }
 
     if ($args{pathLike}) {
@@ -356,6 +361,7 @@ sub media {
 
     $query .= 'WHERE ' . join(' AND ', @where) if @where;
     $query .= ' ORDER BY sort_order IS NULL, sort_order ASC, rowid ASC';
+    $query .= ' LIMIT ' . $limit if $limit;
     $query .= ';';
 
     my $sth = $self->_dbh->prepare($query);
