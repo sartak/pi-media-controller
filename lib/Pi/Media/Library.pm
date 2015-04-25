@@ -365,7 +365,7 @@ sub media {
     else {
         $query .= 'WHERE ' . join(' AND ', @where) if @where;
         if (($args{where}||'') =~ /^ORDER BY /) {
-            $query .= $args{where};
+            $query .= ' ' . $args{where};
         }
         else {
             $query .= ' ORDER BY media.sort_order IS NULL, media.sort_order ASC, media.rowid ASC';
