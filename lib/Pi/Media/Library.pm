@@ -38,8 +38,8 @@ sub _inflate_media_from_sth {
     my ($self, $sth, %args) = @_;
 
     my @media;
-    my %video_by_id;
-    my %game_by_id;
+    my %videos_by_id;
+    my %games_by_id;
 
     while (my ($id, $type, $path, $identifier, $label_en, $label_ja, $spoken_langs, $subtitle_langs, $immersible, $streamable, $durationSeconds, $treeId, $tags, $checksum) = $sth->fetchrow_array) {
         my %label;
@@ -64,7 +64,7 @@ sub _inflate_media_from_sth {
                 tags             => $tags,
                 checksum         => $checksum,
             );
-            $video_by_id{$id} = $media;
+            push @{ $videos_by_id{$id} ||= [] }, $media;
         }
         elsif ($type eq 'game') {
             $media = Pi::Media::File::Game->new(
@@ -78,7 +78,7 @@ sub _inflate_media_from_sth {
                 tags             => $tags,
                 checksum         => $checksum,
             );
-            $game_by_id{$id} = $media;
+            push @{ $games_by_id{$id} ||= [] }, $media;
         }
         else {
             die "Unknown type '$type' for row id $id";
@@ -88,46 +88,52 @@ sub _inflate_media_from_sth {
     }
 
     if (!$args{excludeViewing}) {
-        if (keys %video_by_id) {
+        if (keys %videos_by_id) {
             my $query = 'SELECT mediaId, MAX(endTime) FROM viewing WHERE (';
-            $query .= join ' OR ', map { 'mediaId=?' } keys %video_by_id;
+            $query .= join ' OR ', map { 'mediaId=?' } keys %videos_by_id;
             $query .= ') AND elapsedSeconds IS NULL GROUP BY mediaId;';
 
             my $sth = $self->_dbh->prepare($query);
-            $sth->execute(keys %video_by_id);
+            $sth->execute(keys %videos_by_id);
 
             while (my ($id, $date) = $sth->fetchrow_array) {
-                $video_by_id{$id}->completed(1);
-                $video_by_id{$id}->last_played($date);
+                for my $video (@{ $videos_by_id{$id} }) {
+                    $video->completed(1);
+                    $video->last_played($date);
+                }
             }
         }
 
-        if (keys %game_by_id) {
+        if (keys %games_by_id) {
             # playtime
             {
                 my $query = 'SELECT mediaId, SUM(elapsedSeconds) FROM viewing WHERE (';
-                $query .= join ' OR ', map { 'mediaId=?' } keys %game_by_id;
+                $query .= join ' OR ', map { 'mediaId=?' } keys %games_by_id;
                 $query .= ') GROUP BY mediaId;';
 
                 my $sth = $self->_dbh->prepare($query);
-                $sth->execute(keys %game_by_id);
+                $sth->execute(keys %games_by_id);
 
                 while (my ($id, $playtime) = $sth->fetchrow_array) {
-                    $game_by_id{$id}->playtime($playtime);
+                    for my $game (@{ $games_by_id{$id} }) {
+                        $game->playtime($playtime);
+                    }
                 }
             }
 
             # completed
             {
                 my $query = 'SELECT mediaId FROM viewing WHERE (';
-                $query .= join ' OR ', map { 'mediaId=?' } keys %game_by_id;
+                $query .= join ' OR ', map { 'mediaId=?' } keys %games_by_id;
                 $query .= ') AND elapsedSeconds IS NULL GROUP BY mediaId;';
 
                 my $sth = $self->_dbh->prepare($query);
-                $sth->execute(keys %game_by_id);
+                $sth->execute(keys %games_by_id);
 
                 while (my ($id) = $sth->fetchrow_array) {
-                    $game_by_id{$id}->completed(1);
+                    for my $game (@{ $games_by_id{$id} }) {
+                        $game->completed(1);
+                    }
                 }
             }
         }
