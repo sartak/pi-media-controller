@@ -364,7 +364,12 @@ sub media {
     }
     else {
         $query .= 'WHERE ' . join(' AND ', @where) if @where;
-        $query .= ' ORDER BY media.sort_order IS NULL, media.sort_order ASC, media.rowid ASC';
+        if ($args{where}||'') =~ /^ORDER BY /) {
+            $query .= $args{where};
+        }
+        else {
+            $query .= ' ORDER BY media.sort_order IS NULL, media.sort_order ASC, media.rowid ASC';
+        }
     }
 
     $query .= ' LIMIT ' . $limit if $limit;
