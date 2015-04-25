@@ -364,7 +364,7 @@ sub media {
     }
     else {
         $query .= 'WHERE ' . join(' AND ', @where) if @where;
-        if ($args{where}||'') =~ /^ORDER BY /) {
+        if (($args{where}||'') =~ /^ORDER BY /) {
             $query .= $args{where};
         }
         else {
