@@ -375,7 +375,10 @@ sub media {
     $query .= ' LIMIT ' . $limit if $limit;
     $query .= ';';
 
-    my $sth = $self->_dbh->prepare($query);
+    my $sth = eval { $self->_dbh->prepare($query) };
+    if ($@) {
+        die "$query\n\n$@";
+    }
 
     $sth->execute(@bind);
 
