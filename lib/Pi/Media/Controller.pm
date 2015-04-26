@@ -101,7 +101,10 @@ sub stop_playing {
 sub stop_current {
     my $self = shift;
 
-    if ($self->current_media->isa('Pi::Media::File::Video')) {
+    if (!$self->current_media) {
+        return;
+    }
+    elsif ($self->current_media->isa('Pi::Media::File::Video')) {
         $self->_run_command('q');
     }
     elsif ($self->current_media->isa('Pi::Media::File::Game')) {
