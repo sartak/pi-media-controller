@@ -455,15 +455,13 @@ sub update_media {
 sub _absolutify_path {
     my ($self, $relative) = @_;
 
-    my $path = Path::Class::file($self->file)->dir->file($relative)->stringify;
-    return NFC($path);
+    return Path::Class::file($self->file)->dir->file($relative)->stringify;
 }
 
 sub _relativify_path {
     my ($self, $absolute) = @_;
 
-    my $path = Path::Class::file($absolute)->relative(Path::Class::file($self->file)->dir)->stringify;
-    return NFC($path);
+    return Path::Class::file($absolute)->relative(Path::Class::file($self->file)->dir)->stringify;
 }
 
 1;
