@@ -208,6 +208,25 @@ sub insert_game {
     return $self->_dbh->sqlite_last_insert_rowid;
 }
 
+sub insert_book {
+    my ($self, %args) = @_;
+
+    $self->_dbh->do('
+        INSERT INTO media
+            (path, type, identifier, label_en, label_ja, streamable, treeId)
+        VALUES (?, "book", ?, ?, ?, ?, ?)
+    ;', {}, (
+        $self->_relativify_path($args{path}),
+        $args{identifier},
+        $args{label_en},
+        $args{label_ja},
+        0,
+        $args{treeId},
+    ));
+
+    return $self->_dbh->sqlite_last_insert_rowid;
+}
+
 sub insert_tree {
     my ($self, %args) = @_;
 
