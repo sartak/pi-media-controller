@@ -44,4 +44,6 @@ INSERT INTO tree (label_en, label_ja) VALUES
     ("Shorts", "短編映画"),
     ("LP", "実況プレイ"),
     ("Commercials", "広告"),
-    ("Talk", "トーク");
+    ("Talk", "トーク"),
+    ("Video Games", "テレビゲーム"),
+    ("Books", "本");
