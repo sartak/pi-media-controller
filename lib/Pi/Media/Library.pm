@@ -455,11 +455,15 @@ sub update_media {
 sub _absolutify_path {
     my ($self, $relative) = @_;
 
+    return $relative if $relative =~ /^real:/;
+
     return Path::Class::file($self->file)->dir->file($relative)->stringify;
 }
 
 sub _relativify_path {
     my ($self, $absolute) = @_;
+
+    return $absolute if $absolute =~ /^real:/;
 
     return Path::Class::file($absolute)->relative(Path::Class::file($self->file)->dir)->stringify;
 }
