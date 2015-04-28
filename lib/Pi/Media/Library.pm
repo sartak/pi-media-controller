@@ -3,6 +3,7 @@ use 5.14.0;
 use Mouse;
 use Pi::Media::File::Video;
 use Pi::Media::File::Game;
+use Pi::Media::File::Book;
 use Pi::Media::Tree;
 use DBI;
 use Path::Class;
@@ -40,6 +41,7 @@ sub _inflate_media_from_sth {
     my @media;
     my %videos_by_id;
     my %games_by_id;
+    my %books_by_id;
 
     while (my ($id, $type, $path, $identifier, $label_en, $label_ja, $spoken_langs, $subtitle_langs, $immersible, $streamable, $durationSeconds, $treeId, $tags, $checksum) = $sth->fetchrow_array) {
         my %label;
@@ -79,6 +81,20 @@ sub _inflate_media_from_sth {
                 checksum         => $checksum,
             );
             push @{ $games_by_id{$id} ||= [] }, $media;
+        }
+        elsif ($type eq 'book') {
+            $media = Pi::Media::File::Book->new(
+                id               => $id,
+                type             => $type,
+                path             => $self->_absolutify_path($path),
+                identifier       => $identifier,
+                label            => \%label,
+                streamable       => $streamable,
+                treeId           => $treeId,
+                tags             => $tags,
+                checksum         => $checksum,
+            );
+            push @{ $books_by_id{$id} ||= [] }, $media;
         }
         else {
             die "Unknown type '$type' for row id $id";
