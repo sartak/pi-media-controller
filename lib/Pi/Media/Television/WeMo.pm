@@ -28,7 +28,7 @@ sub power_off {
     my $self = shift;
     my $then = shift;
 
-    print STDERR "Turning on television ... ";
+    print STDERR "Turning off television ... ";
     my $outlet = Power::Outlet::WeMo->new(host => $self->host);
     $outlet->off;
     print STDERR "ok.\n";
