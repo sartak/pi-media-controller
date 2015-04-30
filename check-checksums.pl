@@ -15,14 +15,14 @@ find(sub {
 
     my $file = decode_utf8($File::Find::name);
 
+    return if $file =~ /\.DS_Store/
+           || $file =~ /\.state\.auto$/
+           || $file =~ /\.srm$/;
+
     my ($media) = $library->media(
         all  => 1,
         path => $library->_relativify_path($file),
     );
-
-    return if $file =~ /\.DS_Store/
-           || $file =~ /\.state\.auto$/
-           || $file =~ /\.srm$/;
 
     print STDERR encode_utf8 "$file ... ";
     if (!$media) {
