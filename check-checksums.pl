@@ -24,9 +24,8 @@ find(sub {
         path => $library->_relativify_path($file),
     );
 
-    print STDERR encode_utf8 "$file ... ";
     if (!$media) {
-        print STDERR encode_utf8 "no media\n";
+        print STDERR encode_utf8 "$file: no media\n";
         return;
     }
 
@@ -38,7 +37,7 @@ find(sub {
     my $expected = $media->checksum;
 
     if ($got ne $expected) {
-        print STDERR encode_utf8 "checksum mismatch\ngot      $got\nexpected $expected\n";
+        print STDERR encode_utf8 "$file: checksum mismatch\ngot      $got\nexpected $expected\n";
 
         my ($match) = $library->media(
             all      => 1,
