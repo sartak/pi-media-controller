@@ -16,7 +16,7 @@ for my $media ($library->media(all => 1, excludeViewing => 1)) {
         warn $media->id . ": label has extraneous space\n";
     }
 
-    unless (-r $media->path && !-d _) {
+    unless ($media->path =~ /^real:/ || (-r $media->path && !-d _)) {
         warn $media->id . ': cannot read ' . $media->path . "\n";
     }
 }
