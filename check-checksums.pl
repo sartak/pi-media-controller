@@ -49,9 +49,5 @@ find(sub {
             print STDERR encode_utf8("you know, " . $match->path . " has that checksum!\n");
         }
     }
-    else {
-        print STDERR encode_utf8 "ok\n";
-    }
-
 }, @ARGV);
 
