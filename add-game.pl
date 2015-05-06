@@ -29,7 +29,7 @@ my $path = $ARGV[0] or usage("path required");
 @ARGV == 1 or usage("must have no stray args: " . join(', ', @ARGV));
 
 $path =~ s/~/$ENV{HOME}/;
-delete $ARGV{'ignore-missing-file'} || $path =~ /^real:/ || (-r $path && !-d _)
+$ARGV{'ignore-missing-file'} || $path =~ /^real:/ || (-r $path && !-d _)
     or die "path $path must be a readable file, or real:..., or pass --ignore-missing-file";
 
 my $streamable = $ARGV{streamable} ? 1 : 0;
@@ -49,7 +49,12 @@ my $id = $library->insert_game(
     treeId          => $treeId,
 );
 
-print "Added " . ($label_ja || $label_en) . " as game $id\n";
+if ($ARGV{'ignore-missing-file'}) {
+    print "Added nonexistent " . ($label_ja || $label_en) . " as game $id\n";
+}
+else {
+    print "Added " . ($label_ja || $label_en) . " as game $id\n";
+}
 
 sub usage {
     my $reason = shift;

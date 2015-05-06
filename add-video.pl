@@ -36,7 +36,7 @@ my $path = $ARGV[0] or usage("path required");
 @ARGV == 1 or usage("must have no stray args: " . join(', ', @ARGV));
 
 $path =~ s/~/$ENV{HOME}/;
-delete $ARGV{'ignore-missing-file'} || (-r $path && !-d _)
+$ARGV{'ignore-missing-file'} || (-r $path && !-d _)
     or die "path $path must be a readable file, or pass --ignore-missing-file";
 
 my $immersible = $ARGV{immersible} ? 1 : 0;
@@ -61,7 +61,12 @@ my $id = $library->insert_video(
     treeId          => $treeId,
 );
 
-print "Added " . ($label_ja || $label_en) . " as video $id\n";
+if ($ARGV{'ignore-missing-file'}) {
+    print "Added nonexistent " . ($label_ja || $label_en) . " as video $id\n";
+}
+else {
+    print "Added " . ($label_ja || $label_en) . " as video $id\n";
+}
 
 sub usage {
     my $reason = shift;
@@ -70,6 +75,10 @@ sub usage {
 
 sub duration_of {
     my $path = shift;
+    if ($ARGV{'ignore-missing-file'}) {
+        return undef;
+    }
+
     my $secs;
     if ($path =~ /\.(mp4|m4v)$/) {
         require MP4::Info;
