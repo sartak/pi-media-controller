@@ -36,8 +36,8 @@ my $path = $ARGV[0] or usage("path required");
 @ARGV == 1 or usage("must have no stray args: " . join(', ', @ARGV));
 
 $path =~ s/~/$ENV{HOME}/;
--r $path && !-d _
-    or die "path $path must be a readable file";
+delete $ARGV{'ignore-missing-file'} || (-r $path && !-d _)
+    or die "path $path must be a readable file, or pass --ignore-missing-file";
 
 my $immersible = $ARGV{immersible} ? 1 : 0;
 my $streamable = $ARGV{streamable} ? 1 : 0;
@@ -65,7 +65,7 @@ print "Added " . ($label_ja || $label_en) . " as video $id\n";
 
 sub usage {
     my $reason = shift;
-    die "$reason\nusage: $0 [--treeId=treeId OR --segments=foo --segments=bar] [--label_en=LABEL --label_ja=LABEL] [--identifier=IDENTIFIER] --spoken_langs=en,ja --subtitle_langs=en,ja --immersible|--noimmersible --streamable|--unstreamable PATH";
+    die "$reason\nusage: $0 [--treeId=treeId OR --segments=foo --segments=bar] [--label_en=LABEL --label_ja=LABEL] [--identifier=IDENTIFIER] [--ignore-missing-file] --spoken_langs=en,ja --subtitle_langs=en,ja --immersible|--noimmersible --streamable|--unstreamable PATH";
 }
 
 sub duration_of {

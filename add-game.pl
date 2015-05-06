@@ -29,8 +29,8 @@ my $path = $ARGV[0] or usage("path required");
 @ARGV == 1 or usage("must have no stray args: " . join(', ', @ARGV));
 
 $path =~ s/~/$ENV{HOME}/;
-$path =~ /^real:/ || (-r $path && !-d _)
-    or die "path $path must be a readable file, or real:...";
+delete $ARGV{'ignore-missing-file'} || $path =~ /^real:/ || (-r $path && !-d _)
+    or die "path $path must be a readable file, or real:..., or pass --ignore-missing-file";
 
 my $streamable = $ARGV{streamable} ? 1 : 0;
 
@@ -53,6 +53,6 @@ print "Added " . ($label_ja || $label_en) . " as game $id\n";
 
 sub usage {
     my $reason = shift;
-    die "$reason\nusage: $0 [--treeId=treeId OR --segments=foo --segments=bar] [--label_en=LABEL --label_ja=LABEL] [--identifier=IDENTIFIER] --streamable|--unstreamable PATH|real:...";
+    die "$reason\nusage: $0 [--treeId=treeId OR --segments=foo --segments=bar] [--label_en=LABEL --label_ja=LABEL] [--identifier=IDENTIFIER] [--ignore-missing-file] --streamable|--unstreamable PATH|real:...";
 }
 
