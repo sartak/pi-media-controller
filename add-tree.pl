@@ -27,6 +27,17 @@ if (!$parent) {
     $parent = $library->tree_from_segments(@$segments);
 }
 
+if ($label_en) {
+    if ($library->tree_from_segments(@$segments, $label_en)) {
+        die "duplicate segments: " . join ', ', map { "'$_'" } @$segments, $label_en;
+    }
+}
+if ($label_ja) {
+    if ($library->tree_from_segments(@$segments, $label_ja)) {
+        die "duplicate segments: " . join ', ', map { "'$_'" } @$segments, $label_ja;
+    }
+}
+
 my $id = $library->insert_tree(
     label_en       => $label_en,
     label_ja       => $label_ja,
