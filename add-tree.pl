@@ -28,12 +28,12 @@ if (!$parent) {
 }
 
 if ($label_en) {
-    if ($library->tree_from_segments(@$segments, $label_en)) {
+    if (eval { $library->tree_from_segments(@$segments, $label_en) }) {
         die "duplicate segments: " . join ', ', map { "'$_'" } @$segments, $label_en;
     }
 }
 if ($label_ja) {
-    if ($library->tree_from_segments(@$segments, $label_ja)) {
+    if (eval { $library->tree_from_segments(@$segments, $label_ja) }) {
         die "duplicate segments: " . join ', ', map { "'$_'" } @$segments, $label_ja;
     }
 }
