@@ -188,6 +188,12 @@ sub _handle_for_media {
             die "No emulator for type " . $media->extension;
         }
 
+        my $cfg_path = $media->path;
+        $cfg_path =~ s/.\w+$/.cfg/;
+        if (-e $cfg_path) {
+            push @emulator_cmd, "--appendconfig", $cfg_path;
+        }
+
         return AnyEvent::Run->new(
             cmd => [@emulator_cmd, $media->path],
         );
