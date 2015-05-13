@@ -178,8 +178,9 @@ sub _handle_for_media {
     my $media = shift;
 
     if ($media->isa('Pi::Media::File::Video')) {
+        my @args = ('-b', @{ $self->config->{omxplayer_args} || [] },
         return AnyEvent::Run->new(
-            cmd => ['omxplayer', '-b', $media->path],
+            cmd => ['omxplayer', @args, $media->path],
         );
     }
     elsif ($media->isa('Pi::Media::File::Game')) {
