@@ -10,7 +10,7 @@ use Pi::Media::Library;
 my $treeId = shift or die "usage: $0 [--verbose] treeId\n";
 
 die "Need config.json" unless -r "config.json";
-my $json = JSON->new->convert_blessed(1);
+my $json = JSON->new->utf8->convert_blessed(1);
 my $config = $json->decode(scalar slurp "config.json");
 
 my $library = Pi::Media::Library->new(file => $ENV{PMC_DATABASE});
