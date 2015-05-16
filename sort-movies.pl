@@ -66,6 +66,8 @@ my %fixup = (
     "The Hobbit: The Battle of the Five Armies" => "Lord of the Rings 6",
 
     "¡Three Amigos!" => "Three Amigos",
+
+    "12 Monkeys" => "Twelve Monkeys",
 );
 my %saw_fixup;
 
