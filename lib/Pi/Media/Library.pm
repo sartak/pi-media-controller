@@ -35,6 +35,21 @@ sub disconnect {
     $self->_dbh->disconnect;
 }
 
+sub begin {
+    my ($self) = @_;
+    $self->_dbh->begin_work;
+}
+
+sub commit {
+    my ($self) = @_;
+    $self->_dbh->commit;
+}
+
+sub rollback {
+    my ($self) = @_;
+    $self->_dbh->rollback;
+}
+
 sub _inflate_media_from_sth {
     my ($self, $sth, %args) = @_;
 
