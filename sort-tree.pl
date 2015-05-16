@@ -7,15 +7,18 @@ use File::Slurp 'slurp';
 use Getopt::Whatever;
 use Pi::Media::Library;
 
+my $treeId = shift or die "usage: $0 [--verbose] treeId\n";
+
 die "Need config.json" unless -r "config.json";
+my $json = JSON->new->convert_blessed(1);
 my $config = $json->decode(scalar slurp "config.json");
 
 my $library = Pi::Media::Library->new(file => $ENV{PMC_DATABASE});
 $library->begin;
 
-my @media = $library->media(treeId => 1);
+my @media = $library->media(treeId => $treeId);
 
-my %fixup = %{ $config->{sort_fixup} };
+my %fixup = %{ $config->{sort_fixup}{$treeId} || {} };
 my %saw_fixup;
 
 @media = sort {
