@@ -25,7 +25,7 @@ find(sub {
     );
 
     if (!$media) {
-        print STDERR encode_utf8 "$file: no media\n";
+        print STDERR encode_utf8 "$file: no entry in database\n";
         return;
     }
 
