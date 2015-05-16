@@ -43,7 +43,7 @@ sub _inflate_media_from_sth {
     my %games_by_id;
     my %books_by_id;
 
-    while (my ($id, $type, $path, $identifier, $label_en, $label_ja, $spoken_langs, $subtitle_langs, $immersible, $streamable, $durationSeconds, $treeId, $tags, $checksum) = $sth->fetchrow_array) {
+    while (my ($id, $type, $path, $identifier, $label_en, $label_ja, $spoken_langs, $subtitle_langs, $immersible, $streamable, $durationSeconds, $treeId, $tags, $checksum, $sort_order) = $sth->fetchrow_array) {
         my %label;
         $label{en} = $label_en if $label_en;
         $label{ja} = $label_ja if $label_ja;
@@ -65,6 +65,7 @@ sub _inflate_media_from_sth {
                 treeId           => $treeId,
                 tags             => $tags,
                 checksum         => $checksum,
+                sort_order       => $sort_order,
             );
             push @{ $videos_by_id{$id} ||= [] }, $media;
         }
@@ -79,6 +80,7 @@ sub _inflate_media_from_sth {
                 treeId           => $treeId,
                 tags             => $tags,
                 checksum         => $checksum,
+                sort_order       => $sort_order,
             );
             push @{ $games_by_id{$id} ||= [] }, $media;
         }
@@ -93,6 +95,7 @@ sub _inflate_media_from_sth {
                 treeId           => $treeId,
                 tags             => $tags,
                 checksum         => $checksum,
+                sort_order       => $sort_order,
             );
             push @{ $books_by_id{$id} ||= [] }, $media;
         }
@@ -387,7 +390,7 @@ sub media {
         push @where, 'checksum IS NULL';
     }
 
-    for my $column (qw/id type path identifier label_en label_ja spoken_langs subtitle_langs immersible streamable durationSeconds checksum/) {
+    for my $column (qw/id type path identifier label_en label_ja spoken_langs subtitle_langs immersible streamable durationSeconds checksum sort_order/) {
         if ($args{$column}) {
             push @bind, $args{$column};
             push @where, "$column=?";
@@ -396,7 +399,7 @@ sub media {
 
     my $query = '
         SELECT
-            media.id, media.type, media.path, media.identifier, media.label_en, media.label_ja, media.spoken_langs, media.subtitle_langs, media.immersible, media.streamable, media.durationSeconds, media.treeId, media.tags, media.checksum
+            media.id, media.type, media.path, media.identifier, media.label_en, media.label_ja, media.spoken_langs, media.subtitle_langs, media.immersible, media.streamable, media.durationSeconds, media.treeId, media.tags, media.checksum, media.sort_order
         FROM media
     ';
 
@@ -445,7 +448,7 @@ sub media_with_id {
 
     my $sth = $self->_dbh->prepare('
         SELECT
-            id, type, path, identifier, label_en, label_ja, spoken_langs, subtitle_langs, immersible, streamable, durationSeconds, treeId, tags, checksum
+            id, type, path, identifier, label_en, label_ja, spoken_langs, subtitle_langs, immersible, streamable, durationSeconds, treeId, tags, checksum, sort_order
         FROM media
         WHERE id = ?
         LIMIT 1

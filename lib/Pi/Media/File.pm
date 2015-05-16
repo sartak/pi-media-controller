@@ -61,6 +61,11 @@ has checksum => (
     isa => 'Maybe[Str]',
 );
 
+has sort_order => (
+    is  => 'ro',
+    isa => 'Maybe[Int]',
+);
+
 sub extension {
     my $self = shift;
     my ($extension) = $self->path =~ /^.+\.(\w+)$/;
@@ -70,7 +75,7 @@ sub extension {
 sub TO_JSON {
     my $self = shift;
     my $frozen = {
-        map { $_ => $self->$_ } qw/id type path identifier label streamable treeId completed last_played tags checksum/
+        map { $_ => $self->$_ } qw/id type path identifier label streamable treeId completed last_played tags checksum sort_order/
     };
 
     $frozen->{queue_id} = $self->{queue_id} if $self->{queue_id};
