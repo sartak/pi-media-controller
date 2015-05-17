@@ -54,8 +54,6 @@ sub scan {
 
         $self->manager->remove_gamepad($self);
     });
-
-    sleep 1; # give wminput a chance to grab the wiimote
 }
 
 1;
