@@ -129,7 +129,6 @@ sub got_event {
         return unless $event->{media}->type eq 'game';
 
         my $handle = AnyEvent->timer(after => 10, cb => sub {
-            undef $handle;
             $self->_disconnect_handle(undef);
 
             $self->disconnect_all;
