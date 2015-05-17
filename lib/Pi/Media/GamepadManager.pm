@@ -55,8 +55,10 @@ sub scan_wiimote {
         undef $handle;
         $self->_wiimote_handle(undef);
 
-        # scan again?
         warn "on_error: " . $self->_wiimote_buffer;
+
+        # immediately start scanning again
+        $self->scan_wiimote;
     });
 }
 
