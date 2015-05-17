@@ -27,9 +27,12 @@ sub scan {
     );
     $self->_handle($handle);
 
-    $handle->on_eof(undef);
+    $handle->on_eof(sub {
+        warn "eof";
+    });
 
     $handle->on_error(sub {
+            warn "on_error";
         undef $handle;
         $self->_handle(undef);
 
