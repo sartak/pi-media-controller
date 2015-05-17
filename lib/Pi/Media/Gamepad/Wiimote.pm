@@ -54,8 +54,6 @@ sub scan {
 
         $self->manager->remove_gamepad($self);
     });
-
-    sleep 20;
 }
 
 1;
