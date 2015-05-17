@@ -20,6 +20,13 @@ has _wiimote_handle => (
     clearer => '_clear_wiimote_handle',
 );
 
+has _wiimote_buffer => (
+    is      => 'rw',
+    isa     => 'Str',
+    default => '',
+);
+
+
 sub scan {
     my $self = shift;
     $self->scan_wiimote;
@@ -27,8 +34,6 @@ sub scan {
 
 sub scan_wiimote {
     my $self = shift;
-
-    warn "launching";
 
     my $handle = AnyEvent::Run->new(
         cmd => ['hcitool', 'scan'],
@@ -40,7 +45,8 @@ sub scan_wiimote {
         my ($handle) = @_;
         my $buf = $handle->{rbuf};
         $handle->{rbuf} = '';
-        warn "on_read: $buf";
+
+        $self->_buffer($self->_buffer . $buf);
     });
 
     $handle->on_eof(undef);
@@ -50,7 +56,7 @@ sub scan_wiimote {
         $self->_wiimote_handle(undef);
 
         # scan again?
-        warn "on_error";
+        warn "on_error: " . $self->_buffer;
     });
 }
 
