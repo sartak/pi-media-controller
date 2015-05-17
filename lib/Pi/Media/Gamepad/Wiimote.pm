@@ -15,6 +15,11 @@ has _handle => (
     clearer => '_clear_handle',
 );
 
+has _explicitly_disconnected => (
+    is => 'rw',
+    isa => 'Bool',
+);
+
 sub scan {
     my $self = shift;
 
@@ -27,13 +32,14 @@ sub scan {
     );
     $self->_handle($handle);
 
-    $handle->on_read(sub {
-    });
+    # only here to make on_eof work
+    $handle->on_read(sub { });
 
     $handle->on_eof(sub {
         undef $handle;
         $self->_handle(undef);
 
+        return if $self->_explicitly_disconnected;
         $self->manager->remove_gamepad($self);
     });
 
@@ -41,6 +47,7 @@ sub scan {
         undef $handle;
         $self->_handle(undef);
 
+        return if $self->_explicitly_disconnected;
         $self->manager->remove_gamepad($self);
     });
 }
@@ -48,6 +55,7 @@ sub scan {
 sub disconnect {
     my $self = shift;
 
+    $self->_explicitly_disconnected(1);
     kill 'TERM', $self->_handle->{child_pid};
 }
 
