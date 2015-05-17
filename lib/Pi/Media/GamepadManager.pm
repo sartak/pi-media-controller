@@ -63,7 +63,7 @@ sub scan_wiimote {
             my $id = $1;
             my $gamepad = Pi::Media::Gamepad::Wiimote->new(
                 config => $self->config,
-                led    => (1 + $self->gamepads),
+                led    => (1 + @{ $self->gamepads }),
                 wii_id => $id,
             );
 
