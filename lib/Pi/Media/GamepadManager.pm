@@ -62,6 +62,7 @@ sub scan_wiimote {
         if ($self->_wiimote_buffer =~ m{(\w\w:\w\w:\w\w:\w\w:\w\w:\w\w)}) {
             my $id = $1;
             my $gamepad = Pi::Media::Gamepad::Wiimote->new(
+                config => $self->config,
                 led    => (1 + $self->gamepads),
                 wii_id => $id,
             );
