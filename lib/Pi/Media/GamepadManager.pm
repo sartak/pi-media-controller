@@ -59,8 +59,14 @@ sub scan_wiimote {
 
         warn "on_error: " . $self->_wiimote_buffer;
 
-        # immediately start scanning again
-        $self->scan_wiimote;
+        if ($self->_wiimote_buffer =~ m{(\w\w:\w\w:\w\w:\w\w:\w\w:\w\w)}) {
+            my $id = $1;
+            warn "got $id";
+        }
+        else {
+            # immediately start scanning again
+            $self->scan_wiimote;
+        }
     });
 }
 
