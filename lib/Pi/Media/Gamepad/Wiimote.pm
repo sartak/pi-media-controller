@@ -39,6 +39,7 @@ sub scan {
         $handle->{rbuf} = '';
 
         $self->_buffer($self->_buffer . $buf);
+        warn $buf;
     });
     $handle->on_eof(sub {
         warn "eof";
