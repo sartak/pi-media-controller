@@ -56,8 +56,6 @@ sub scan_wiimote {
         undef $handle;
         $self->_wiimote_handle(undef);
 
-        warn((scalar localtime) . " on_error: " . $self->_wiimote_buffer);
-
         for my $id ($self->_wiimote_buffer =~ m{(\w\w:\w\w:\w\w:\w\w:\w\w:\w\w)}g) {
             if (!$self->gamepad_with_id($id)) {
                 my $gamepad = Pi::Media::Gamepad::Wiimote->new(
@@ -96,6 +94,7 @@ sub gamepad_with_id {
 
 sub disconnect_all {
     my $self = shift;
+
     warn "Disconnecting all gamepads";
     @{ $self->gamepads } = ();
 }
