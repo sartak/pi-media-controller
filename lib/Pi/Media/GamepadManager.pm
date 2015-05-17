@@ -1,7 +1,7 @@
 package Pi::Media::GamepadManager;
 use 5.14.0;
 use Mouse;
-use Pi::Media::Gamepad;
+use Pi::Media::Gamepad::Wiimote;
 
 has config => (
     is       => 'ro',
@@ -48,7 +48,6 @@ sub scan_wiimote {
         my $buf = $handle->{rbuf};
         $handle->{rbuf} = '';
 
-        warn ((scalar localtime) . " on_read: $buf");
         $self->_wiimote_buffer($self->_wiimote_buffer . $buf);
     });
 
@@ -62,7 +61,17 @@ sub scan_wiimote {
 
         if ($self->_wiimote_buffer =~ m{(\w\w:\w\w:\w\w:\w\w:\w\w:\w\w)}) {
             my $id = $1;
-            warn "got $id";
+            my $gamepad = Pi::Media::Gamepad::Wiimote->new(
+                led    => (1 + $self->gamepads),
+                wii_id => $id,
+            );
+
+            $gamepad->scan(sub {
+                $self->scan_wiimote;
+            });
+
+            push @{ $self->gamepads }, $gamepad;
+
         }
         else {
             # immediately start scanning again
