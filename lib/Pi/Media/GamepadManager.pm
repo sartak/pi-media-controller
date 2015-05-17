@@ -96,6 +96,7 @@ sub gamepad_with_id {
 
 sub disconnect_all {
     my $self = shift;
+    warn "Disconnecting all gamepads";
     @{ $self->gamepads } = ();
 }
 
@@ -103,6 +104,7 @@ sub remove_gamepad {
     my $self = shift;
     my $pad  = shift;
 
+    warn "Removing gamepad " . $pad->led . " " . $pad->id;
     @{ $self->gamepads } = grep { $_ != $pad } @{ $self->gamepads };
 }
 
