@@ -9,11 +9,28 @@ has wii_id => (
     required => 1,
 );
 
+has _handle => (
+    is      => 'rw',
+    clearer => '_clear_handle',
+);
+
+has _buffer => (
+    is      => 'rw',
+    isa     => 'Str',
+    default => '',
+);
+
 sub scan {
     my $self = shift;
-    my $cb = shift;
+    my $cb   = shift;
 
-    warn "led " . $self->led . " scan for " . $self->wii_id;
+    my $file = $self->config->{gamepad}{wiimote}{$self->led};
+    warn $file;
+
+    my $handle = AnyEvent::Run->new(
+        cmd => ['wminput', '-c', $file, $id],
+    );
+    $self->_handle($handle);
 }
 
 1;

@@ -26,7 +26,6 @@ has _wiimote_buffer => (
     default => '',
 );
 
-
 sub scan {
     my $self = shift;
     $self->scan_wiimote;
