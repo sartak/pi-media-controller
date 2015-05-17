@@ -28,7 +28,7 @@ sub scan {
     warn $file;
 
     my $handle = AnyEvent::Run->new(
-        cmd => ['wminput', '-c', $file, $id],
+        cmd => ['wminput', '-c', $file, $self->wii_id],
     );
     $self->_handle($handle);
 }
