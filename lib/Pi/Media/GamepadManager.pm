@@ -28,6 +28,8 @@ sub scan {
 sub scan_wiimote {
     my $self = shift;
 
+    warn "launching";
+
     my $handle = AnyEvent::Run->new(
         cmd => ['hcitool', 'scan'],
     );
@@ -41,9 +43,7 @@ sub scan_wiimote {
         warn "on_read: $buf";
     });
 
-    $handle->on_eof(sub {
-        warn "on_eof";
-    });
+    $handle->on_eof(undef);
 
     $handle->on_error(sub {
         undef $handle;
