@@ -96,6 +96,11 @@ sub disconnect_all {
     my $self = shift;
 
     warn "Disconnecting all gamepads";
+
+    for my $gamepad (@{ $self->gamepads }) {
+        $gamepad->disconnect;
+    }
+
     @{ $self->gamepads } = ();
 }
 

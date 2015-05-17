@@ -45,5 +45,11 @@ sub scan {
     });
 }
 
+sub disconnect {
+    my $self = shift;
+
+    kill 'TERM', $self->_handle->{child_pid};
+}
+
 1;
 
