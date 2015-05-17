@@ -14,6 +14,7 @@ use URI::Escape;
 use Pi::Media::Queue::Autofilling;
 use Pi::Media::Controller;
 use Pi::Media::Library;
+use Pi::Media::GamepadManager;
 
 my $json = JSON->new->convert_blessed(1);
 
@@ -62,6 +63,9 @@ Mouse::load_class($TelevisionClass);
 my $Television = $TelevisionClass->new(
     config => $config,
 );
+
+my $GamepadManager = Pi::Media::GamepadManager->new(config => $config);
+$GamepadManager->scan;
 
 my %endpoints = (
     '/current' => {
