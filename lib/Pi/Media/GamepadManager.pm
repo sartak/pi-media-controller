@@ -61,9 +61,10 @@ sub scan_wiimote {
         if ($self->_wiimote_buffer =~ m{(\w\w:\w\w:\w\w:\w\w:\w\w:\w\w)}) {
             my $id = $1;
             my $gamepad = Pi::Media::Gamepad::Wiimote->new(
-                config => $self->config,
-                led    => (1 + @{ $self->gamepads }),
-                wii_id => $id,
+                config  => $self->config,
+                led     => (1 + @{ $self->gamepads }),
+                wii_id  => $id,
+                manager => $self,
             );
 
             $gamepad->scan(sub {
@@ -71,7 +72,6 @@ sub scan_wiimote {
             });
 
             push @{ $self->gamepads }, $gamepad;
-
         }
         else {
             # immediately start scanning again
@@ -83,6 +83,13 @@ sub scan_wiimote {
 sub disconnect_all {
     my $self = shift;
     @{ $self->gamepads } = ();
+}
+
+sub remove_gamepad {
+    my $self = shift;
+    my $pad  = shift;
+
+    @{ $self->gamepads } = grep { $_ != $pad } @{ $self->gamepads };
 }
 
 1;

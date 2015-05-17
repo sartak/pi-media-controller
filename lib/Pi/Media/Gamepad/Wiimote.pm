@@ -9,6 +9,13 @@ has wii_id => (
     required => 1,
 );
 
+has manager => (
+    is       => 'ro',
+    isa      => 'Pi::Media::GamepadManager',
+    required => 1,
+    weak_ref => 1,
+);
+
 has _handle => (
     is      => 'rw',
     clearer => '_clear_handle',
@@ -25,12 +32,29 @@ sub scan {
     my $cb   = shift;
 
     my $file = $self->config->{gamepad}{wiimote}{$self->led};
-    warn $file;
 
     my $handle = AnyEvent::Run->new(
         cmd => ['wminput', '-c', $file, $self->wii_id],
     );
     $self->_handle($handle);
+
+    $handle->on_read(sub {
+        my ($handle) = @_;
+        my $buf = $handle->{rbuf};
+        $handle->{rbuf} = '';
+
+        $self->_buffer($self->_buffer . $buf);
+        warn $buf;
+    });
+
+    $handle->on_eof(undef);
+
+    $handle->on_error(sub {
+        undef $handle;
+        $self->_handle(undef);
+
+        $self->manager->remove_gamepad($self);
+    });
 }
 
 1;
