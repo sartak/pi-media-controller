@@ -22,12 +22,17 @@ has _wiimote_handle => (
 
 sub scan {
     my $self = shift;
+    $self->scan_wiimote;
+}
+
+sub scan_wiimote {
+    my $self = shift;
 
     my $handle = AnyEvent::Run->new(
         cmd => ['hcitool', 'scan'],
     );
 
-    $self->_handle($handle);
+    $self->_wiimote_handle($handle);
 
     $handle->on_read(sub {
         my ($handle) = @_;
@@ -42,7 +47,7 @@ sub scan {
 
     $handle->on_error(sub {
         undef $handle;
-        $self->_handle(undef);
+        $self->_wiimote_handle(undef);
 
         # scan again?
         warn "on_error";
