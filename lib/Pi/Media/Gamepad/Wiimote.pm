@@ -28,7 +28,7 @@ sub scan {
 
     warn "Attaching wiimote " . $self->led . " (" . $self->id . ")";
     my $handle = AnyEvent::Run->new(
-        cmd => ['wminput', '-d', '-c', $file, $self->id],
+        cmd => ['wminput', '-c', $file, $self->id],
     );
     $self->_handle($handle);
 
