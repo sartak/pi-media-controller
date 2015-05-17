@@ -13,5 +13,10 @@ has led => (
     isa => 'Int',
 );
 
+has id => (
+    is  => 'ro',
+    isa => 'Str',
+);
+
 1;
 

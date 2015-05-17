@@ -3,12 +3,6 @@ use 5.14.0;
 use Mouse;
 extends 'Pi::Media::Gamepad';
 
-has wii_id => (
-    is       => 'ro',
-    isa      => 'Str',
-    required => 1,
-);
-
 has manager => (
     is       => 'ro',
     isa      => 'Pi::Media::GamepadManager',
@@ -33,7 +27,7 @@ sub scan {
     my $file = $self->config->{gamepad}{wiimote}{$self->led};
 
     my $handle = AnyEvent::Run->new(
-        cmd => ['wminput', '-d', '-c', $file, $self->wii_id],
+        cmd => ['wminput', '-d', '-c', $file, $self->id],
     );
     $self->_handle($handle);
 

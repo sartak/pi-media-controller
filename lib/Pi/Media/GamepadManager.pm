@@ -59,13 +59,11 @@ sub scan_wiimote {
         warn((scalar localtime) . " on_error: " . $self->_wiimote_buffer);
 
         for my $id ($self->_wiimote_buffer =~ m{(\w\w:\w\w:\w\w:\w\w:\w\w:\w\w)}g) {
-            warn $id;
-
-            if (!$self->wiimote_with_id($id)) {
+            if (!$self->gamepad_with_id($id)) {
                 my $gamepad = Pi::Media::Gamepad::Wiimote->new(
                     config  => $self->config,
                     led     => (1 + @{ $self->gamepads }),
-                    wii_id  => $id,
+                    id      => $id,
                     manager => $self,
                 );
 
@@ -80,12 +78,12 @@ sub scan_wiimote {
     });
 }
 
-sub wiimote_with_id {
+sub gamepad_with_id {
     my $self = shift;
     my $id   = shift;
 
     for my $gamepad (@{ $self->gamepads }) {
-        if ($gamepad->isa('Pi::Media::Gamepad::Wiimote') && $gamepad->wii_id eq $id) {
+        if ($gamepad->id eq $id) {
             return $gamepad;
         }
     }
