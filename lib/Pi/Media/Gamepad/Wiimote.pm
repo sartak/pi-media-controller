@@ -15,6 +15,12 @@ has _handle => (
     clearer => '_clear_handle',
 );
 
+has _buffer => (
+    is => 'rw',
+    isa => 'Str',
+    default => '',
+);
+
 sub scan {
     my $self = shift;
 
@@ -27,6 +33,13 @@ sub scan {
     );
     $self->_handle($handle);
 
+    $handle->on_read(sub {
+        my ($handle) = @_;
+        my $buf = $handle->{rbuf};
+        $handle->{rbuf} = '';
+
+        $self->_buffer($self->_buffer . $buf);
+    });
     $handle->on_eof(sub {
         warn "eof";
     });
