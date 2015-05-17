@@ -33,7 +33,7 @@ sub scan {
     my $file = $self->config->{gamepad}{wiimote}{$self->led};
 
     my $handle = AnyEvent::Run->new(
-        cmd => ['wminput', '-c', $file, $self->wii_id],
+        cmd => ['wminput', '-d', '-c', $file, $self->wii_id],
     );
     $self->_handle($handle);
 
