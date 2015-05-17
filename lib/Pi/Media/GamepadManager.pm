@@ -48,6 +48,7 @@ sub scan_wiimote {
         my $buf = $handle->{rbuf};
         $handle->{rbuf} = '';
 
+        warn ((scalar localtime) . " on_read: $buf");
         $self->_wiimote_buffer($self->_wiimote_buffer . $buf);
     });
 
@@ -57,7 +58,7 @@ sub scan_wiimote {
         undef $handle;
         $self->_wiimote_handle(undef);
 
-        warn((scalar localtime) . "on_error: " . $self->_wiimote_buffer);
+        warn((scalar localtime) . " on_error: " . $self->_wiimote_buffer);
 
         if ($self->_wiimote_buffer =~ m{(\w\w:\w\w:\w\w:\w\w:\w\w:\w\w)}) {
             my $id = $1;
