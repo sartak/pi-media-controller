@@ -26,6 +26,11 @@ has _wiimote_buffer => (
     default => '',
 );
 
+has _disconnect_handle => (
+    is      => 'rw',
+    clearer => '_clear_disconnect_handle',
+);
+
 sub scan {
     my $self = shift;
     $self->scan_wiimote;
@@ -118,12 +123,18 @@ sub got_event {
 
     if ($event->{type} eq 'started') {
         return unless $event->{media}->type eq 'game';
-
+        $self->_disconnect_handle(undef);
     }
     elsif ($event->{type} eq 'finished') {
         return unless $event->{media}->type eq 'game';
 
-        $self->disconnect_all;
+        my $handle = AnyEvent->timer(after => 10, cb => sub {
+            undef $handle;
+            $self->_disconnect_handle(undef);
+
+            $self->disconnect_all;
+        });
+        $self->_disconnect_handle($handle);
     }
 }
 
