@@ -148,9 +148,15 @@ sub got_event {
 
     if ($event->{type} eq 'started') {
         return unless $event->{media}->type eq 'game';
-        $self->_disconnect_handle(undef);
 
-        warn "Started a game! Turning off delayed execution of gamepads";
+        if ($self->_disconnect_handle) {
+            warn "Started a game! Turning off delayed execution of gamepads";
+        }
+        else {
+            warn "Started a game! But I don't think there are any gamepads yet";
+        }
+
+        $self->_disconnect_handle(undef);
     }
     elsif ($event->{type} eq 'finished') {
         return unless $event->{media}->type eq 'game';
