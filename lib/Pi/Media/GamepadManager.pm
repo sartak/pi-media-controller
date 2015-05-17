@@ -83,6 +83,7 @@ sub scan_wiimote {
 
                 # if there's no game, ok, but turn off wiimote in 5 minutes
                 if (!$self->controller->current_media || $self->controller->current_media->type ne 'game') {
+                    warn "But! there's no game, so I'm turning it back off in 5...";
                     $self->disconnect_all_after(5*60);
                 }
             }
@@ -148,10 +149,13 @@ sub got_event {
     if ($event->{type} eq 'started') {
         return unless $event->{media}->type eq 'game';
         $self->_disconnect_handle(undef);
+
+        warn "Started a game! Turning off delayed execution of gamepads";
     }
     elsif ($event->{type} eq 'finished') {
         return unless $event->{media}->type eq 'game';
 
+        warn "Just finished a game! Disconnecting gamepads in 5...";
         $self->disconnect_all_after(5*60);
     }
 }
