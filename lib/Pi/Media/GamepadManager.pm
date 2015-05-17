@@ -46,7 +46,7 @@ sub scan_wiimote {
         my $buf = $handle->{rbuf};
         $handle->{rbuf} = '';
 
-        $self->_buffer($self->_buffer . $buf);
+        $self->_wiimote_buffer($self->_wiimote_buffer . $buf);
     });
 
     $handle->on_eof(undef);
@@ -56,7 +56,7 @@ sub scan_wiimote {
         $self->_wiimote_handle(undef);
 
         # scan again?
-        warn "on_error: " . $self->_buffer;
+        warn "on_error: " . $self->_wiimote_buffer;
     });
 }
 
