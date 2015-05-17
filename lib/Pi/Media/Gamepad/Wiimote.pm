@@ -29,7 +29,6 @@ has _buffer => (
 
 sub scan {
     my $self = shift;
-    my $cb   = shift;
 
     my $file = $self->config->{gamepad}{wiimote}{$self->led};
 
@@ -55,6 +54,8 @@ sub scan {
 
         $self->manager->remove_gamepad($self);
     });
+
+    sleep 1; # give wminput a chance to grab the wiimote
 }
 
 1;

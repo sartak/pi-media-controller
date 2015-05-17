@@ -67,16 +67,13 @@ sub scan_wiimote {
                 manager => $self,
             );
 
-            $gamepad->scan(sub {
-                $self->scan_wiimote;
-            });
+            $gamepad->scan;
 
             push @{ $self->gamepads }, $gamepad;
         }
-        else {
-            # immediately start scanning again
-            $self->scan_wiimote;
-        }
+
+        # immediately start scanning again
+        $self->scan_wiimote;
     });
 }
 
