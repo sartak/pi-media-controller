@@ -36,9 +36,18 @@ my $server = Twiggy::Server->new(
 );
 
 my @Watchers;
+my @extra_cb;
 
 my $notify_cb = sub {
     my $event = shift;
+
+    # internal watchers
+    for my $cb (@extra_cb) {
+        $cb->($event);
+    }
+
+    # external watchers
+
     my $json = encode_utf8($json->encode($event));
 
     for my $writer (@Watchers) {
@@ -66,6 +75,7 @@ my $Television = $TelevisionClass->new(
 
 my $GamepadManager = Pi::Media::GamepadManager->new(config => $config);
 $GamepadManager->scan;
+push @extra_cb, sub { $GamepadManager->got_event(@_) };
 
 my %endpoints = (
     '/current' => {

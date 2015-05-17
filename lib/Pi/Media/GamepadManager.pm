@@ -107,5 +107,20 @@ sub remove_gamepad {
     @{ $self->gamepads } = grep { $_ != $pad } @{ $self->gamepads };
 }
 
+sub got_event {
+    my $self  = shift;
+    my $event = shift;
+
+    if ($event->{type} eq 'started') {
+        return unless $event->{media}->type eq 'game';
+
+    }
+    elsif ($event->{type} eq 'finished') {
+        return unless $event->{media}->type eq 'game';
+
+        $self->disconnect_all;
+    }
+}
+
 1;
 

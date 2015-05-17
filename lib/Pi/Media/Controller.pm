@@ -135,6 +135,7 @@ sub _play_media {
 
     if (!-r $media->path) {
         $self->notify({
+            type  => 404,
             error => "Media file " . $media->path . " not found",
             media => $media,
         });
@@ -149,7 +150,8 @@ sub _play_media {
     $self->_game_home_button_pressed(1);
 
     $self->notify({
-        started => $media,
+        type  => 'started',
+        media => $media,
     });
 
     my $handle = $self->_handle_for_media($media);
@@ -248,6 +250,11 @@ sub _finished_media {
     $self->_clear_start_time;
     $self->_set_has_toggled_subtitles(0);
 
+    $self->notify({
+        type  => 'finished',
+        media => $media,
+    });
+
     if ($self->_temporarily_stopped) {
         $self->_temporarily_stopped(0);
     }
@@ -263,6 +270,7 @@ sub toggle_pause {
     $self->_set_is_paused(!$self->is_paused);
     $self->_run_command('p');
     $self->notify({
+        type   => 'paused',
         paused => bool($self->is_paused),
     });
 
