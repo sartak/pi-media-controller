@@ -2,6 +2,7 @@ package Pi::Media::GamepadManager;
 use 5.14.0;
 use Mouse;
 use Pi::Media::Gamepad::Wiimote;
+use Pi::Media::Controller;
 
 has config => (
     is       => 'ro',
@@ -13,6 +14,12 @@ has gamepads => (
     is      => 'ro',
     isa     => 'ArrayRef[Pi::Media::Gamepad]',
     default => sub { [] },
+);
+
+has controller => (
+    is       => 'ro',
+    isa      => 'Pi::Media::Controller',
+    required => 1,
 );
 
 has _wiimote_handle => (
@@ -73,6 +80,11 @@ sub scan_wiimote {
                 $gamepad->scan;
 
                 push @{ $self->gamepads }, $gamepad;
+
+                # if there's no game, ok, but turn off wiimote in 5 minutes
+                if (!$self->controller->current_media || $self->controller->current_media->type ne 'game') {
+                    $self->disconnect_all_after(5*60);
+                }
             }
         }
 
@@ -117,6 +129,18 @@ sub remove_gamepad {
     @{ $self->gamepads } = grep { $_ != $pad } @{ $self->gamepads };
 }
 
+sub disconnect_all_after {
+    my $self = shift;
+    my $secs = shift;
+
+    my $handle = AnyEvent->timer(after => $secs, cb => sub {
+        $self->_disconnect_handle(undef);
+
+        $self->disconnect_all;
+    });
+    $self->_disconnect_handle($handle);
+}
+
 sub got_event {
     my $self  = shift;
     my $event = shift;
@@ -128,12 +152,7 @@ sub got_event {
     elsif ($event->{type} eq 'finished') {
         return unless $event->{media}->type eq 'game';
 
-        my $handle = AnyEvent->timer(after => 10, cb => sub {
-            $self->_disconnect_handle(undef);
-
-            $self->disconnect_all;
-        });
-        $self->_disconnect_handle($handle);
+        $self->disconnect_all_after(5*60);
     }
 }
 

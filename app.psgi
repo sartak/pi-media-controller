@@ -73,7 +73,10 @@ my $Television = $TelevisionClass->new(
     config => $config,
 );
 
-my $GamepadManager = Pi::Media::GamepadManager->new(config => $config);
+my $GamepadManager = Pi::Media::GamepadManager->new(
+    config => $config,
+    controller => $Controller,
+);
 $GamepadManager->scan;
 push @extra_cb, sub { $GamepadManager->got_event(@_) };
 
