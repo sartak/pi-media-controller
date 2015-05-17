@@ -35,6 +35,8 @@ sub scan {
 sub scan_wiimote {
     my $self = shift;
 
+    $self->_wiimote_buffer('');
+
     my $handle = AnyEvent::Run->new(
         cmd => ['hcitool', 'scan'],
     );
