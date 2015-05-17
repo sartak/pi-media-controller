@@ -73,6 +73,9 @@ sub scan_wiimote {
             }
         }
 
+        # take a breather
+        sleep 1;
+
         # immediately start scanning again
         $self->scan_wiimote;
     });
