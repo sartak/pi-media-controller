@@ -68,7 +68,7 @@ sub scan_wiimote {
         undef $handle;
         $self->_wiimote_handle(undef);
 
-        for my $id ($self->_wiimote_buffer =~ m{(\w\w:\w\w:\w\w:\w\w:\w\w:\w\w)}g) {
+        for my $id ($self->_wiimote_buffer =~ m{(\w\w:\w\w:\w\w:\w\w:\w\w:\w\w)[\s\t]*Nintendo}g) {
             if (!$self->gamepad_with_id($id)) {
                 my $gamepad = Pi::Media::Gamepad::Wiimote->new(
                     config  => $self->config,
