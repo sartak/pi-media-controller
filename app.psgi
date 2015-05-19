@@ -16,6 +16,8 @@ use Pi::Media::Controller;
 use Pi::Media::Library;
 use Pi::Media::GamepadManager;
 
+select((select(STDERR), $|=1)[0]);
+
 my $json = JSON->new->convert_blessed(1);
 
 die "Need config.json" unless -r "config.json";
