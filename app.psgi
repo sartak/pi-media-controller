@@ -33,7 +33,6 @@ if ($config->{by_location}) {
 }
 
 my $server = Twiggy::Server->new(
-    host => $ENV{PMC_HOST},
     port => ($ENV{PMC_PORT}||5000),
 );
 
