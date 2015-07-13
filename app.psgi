@@ -10,6 +10,7 @@ use Encode;
 use Scalar::Util 'blessed';
 use File::Slurp 'slurp';
 use URI::Escape;
+use AnyEvent::HTTP;
 
 use Pi::Media::Queue::Autofilling;
 use Pi::Media::Controller;
@@ -361,6 +362,25 @@ my %endpoints = (
             system(qw(irsend --count=3 SEND_ONCE ac KEY_SLEEP));
 
             return $req->new_response(204);
+        },
+    },
+
+    '/hue/scene' => {
+        PUT => sub {
+            my $req = shift;
+            if (my $scene = $req->param('scene')) {
+                my $url = "$config->{hue_host}/api/newdeveloper/groups/0/action";
+                my $body = encode_utf8($json->encode({ scene => $scene }));
+
+                http_request
+                    PUT => $url,
+                    body => $body,
+                    sub { "ignore" };
+
+                return $req->new_response(204);
+            }
+
+            return $req->new_response(400);
         },
     },
 );
