@@ -311,6 +311,17 @@ my %endpoints = (
             exit(0);
         },
     },
+
+    '/ac' => {
+        POWER => sub {
+            my $req = shift;
+            my $res = $req->new_response(204);
+
+            system(qw(irsend --count=3 SEND_ONCE ac KEY_POWER));
+
+	    return $req->new_response(204);
+        },
+    },
 );
 
 $server->register_service(sub {
