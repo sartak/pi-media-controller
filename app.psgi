@@ -244,13 +244,18 @@ my %endpoints = (
                 my ($tree) = $Library->trees(id => $req->param('tree'));
                 if ($tree) {
                     $Queue->source($tree);
+                    warn "Set queue source to tree $tree";
                     if (!$Controller->current_media) {
                         $Controller->play_next_in_queue;
                     }
 		    $Television->set_active_source;
                 }
+                else {
+                    warn "Unknown queue source tree " . $req->param('tree');
+                }
             }
             else {
+                warn "Cleared queue source";
                 $Queue->clear_autofill_source;
             }
 
