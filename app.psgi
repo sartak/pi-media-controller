@@ -315,11 +315,45 @@ my %endpoints = (
     '/ac' => {
         POWER => sub {
             my $req = shift;
-            my $res = $req->new_response(204);
 
             system(qw(irsend --count=3 SEND_ONCE ac KEY_POWER));
 
-	    return $req->new_response(204);
+            return $req->new_response(204);
+        },
+        TEMP_UP => sub {
+            my $req = shift;
+
+            system(qw(irsend --count=3 SEND_ONCE ac KEY_UP));
+
+            return $req->new_response(204);
+        },
+        TEMP_DOWN => sub {
+            my $req = shift;
+
+            system(qw(irsend --count=3 SEND_ONCE ac KEY_DOWN));
+
+            return $req->new_response(204);
+        },
+        MODE => sub {
+            my $req = shift;
+
+            system(qw(irsend --count=3 SEND_ONCE ac KEY_MODE));
+
+            return $req->new_response(204);
+        },
+        SPEED => sub {
+            my $req = shift;
+
+            system(qw(irsend --count=3 SEND_ONCE ac KEY_SOUND));
+
+            return $req->new_response(204);
+        },
+        TIMER => sub {
+            my $req = shift;
+
+            system(qw(irsend --count=3 SEND_ONCE ac KEY_SLEEP));
+
+            return $req->new_response(204);
         },
     },
 );
