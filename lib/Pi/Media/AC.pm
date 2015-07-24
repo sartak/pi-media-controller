@@ -53,8 +53,19 @@ sub state {
 }
 
 sub _transmit {
-    my ($self, $cmd) = @_;
-    system(qw(irsend SEND_ONCE AC), $cmd);
+    my ($self, $cmd, $count) = @_;
+
+    my @args = qw(irsend);
+
+    if ($count) {
+        push @args, "--count=$count";
+    }
+
+    push @args, qw(SEND_ONCE AC);
+    push @args, $cmd;
+
+    warn @args;
+    system @args;
 
     if ($?) {
         die "irsend failed";

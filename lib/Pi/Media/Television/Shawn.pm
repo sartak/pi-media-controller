@@ -31,8 +31,19 @@ sub state {
 }
 
 sub _transmit {
-    my ($self, $cmd) = @_;
-    system(qw(irsend SEND_ONCE TV), $cmd);
+    my ($self, $cmd, $count) = @_;
+
+    my @args = qw(irsend);
+
+    if ($count) {
+        push @args, "--count=$count";
+    }
+
+    push @args, qw(SEND_ONCE TV);
+    push @args, $cmd;
+
+    warn @args;
+    system @args;
 
     if ($?) {
         die "irsend failed";
@@ -74,37 +85,63 @@ sub toggle_mute {
 
 sub set_volume {
     my $self = shift;
-    my $temp = shift;
+    my $volume = shift;
 
-    if ($temp < $self->minimum_volume || $temp > $self->maximum_volume) {
-        die "invalid volume $temp. valid between " . $self->minimum_volume . " and " . $self->maximum_volume;
+    if ($volume < $self->minimum_volume || $volume > $self->maximum_volume) {
+        die "invalid volume $volume. valid between " . $self->minimum_volume . " and " . $self->maximum_volume;
     }
 
-    while ($self->volume < $temp) {
+    while ($self->volume + 5 < $volume) {
+        $self->volume_up(5);
+    }
+
+    while ($self->volume < $volume) {
         $self->volume_up;
     }
 
-    while ($self->volume > $temp) {
+    while ($self->volume - 5 > $volume) {
+        $self->volume_down(5);
+    }
+
+    while ($self->volume > $volume) {
         $self->volume_down;
     }
 }
 
 sub volume_up {
     my $self = shift;
+    my $by   = shift;
+
     return if $self->volume >= $self->maximum_volume;
 
-    $self->_transmit("VOLUP");
+    if ($by) {
+        $self->_transmit("VOLUP", $by);
+        $self->_set_volume($self->volume + $by);
+    }
+    else {
+        $self->_transmit("VOLUP");
+        $self->_set_volume($self->volume + 1);
+    }
+
     $self->_set_muted(0);
-    $self->_set_volume($self->volume + 1);
 }
 
 sub volume_down {
     my $self = shift;
+    my $by   = shift;
+
     return if $self->volume <= $self->minimum_volume;
 
-    $self->_transmit("VOLDOWN");
+    if ($by) {
+        $self->_transmit("VOLDOWN", $by);
+        $self->_set_volume($self->volume - $by);
+    }
+    else {
+        $self->_transmit("VOLDOWN");
+        $self->_set_volume($self->volume - 1);
+    }
+
     $self->_set_muted(0);
-    $self->_set_volume($self->volume - 1);
 }
 
 1;
