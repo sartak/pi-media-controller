@@ -54,10 +54,17 @@ sub state {
 
 sub _transmit {
     my ($self, $cmd) = @_;
+
+    # try twice before reporting failure
+
     system(qw(irsend SEND_ONCE AC), $cmd);
 
     if ($?) {
-        die "irsend failed";
+        system(qw(irsend SEND_ONCE AC), $cmd);
+
+        if ($?) {
+            die "irsend failed";
+        }
     }
 }
 
