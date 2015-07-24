@@ -6,6 +6,12 @@ extends 'Pi::Media::Television::WeMo';
 sub minimum_volume { 0 }
 sub maximum_volume { 100 }
 
+# only allow the ones I actually use, since the TV gets grumpy
+my @inputs = ("RCA", "Pi", "AppleTV");
+# my @inputs = ("TV", "RCA", "Pi", "AppleTV", "USB", "Component");
+
+my %input_index = map { $inputs[$_] => $_ } 0..$#inputs;
+
 has muted => (
     is      => 'ro',
     writer  => '_set_muted',
@@ -22,11 +28,20 @@ has volume => (
     trigger => sub { shift->_write_state },
 );
 
+has input => (
+    is      => 'ro',
+    writer  => '_set_input',
+    isa     => 'Str',
+    default => 'Pi',
+    trigger => sub { shift->_write_state },
+);
+
 sub state {
     my $self = shift;
     return {
         volume => $self->volume,
         muted  => $self->muted,
+        input  => $self->input,
     };
 }
 
@@ -105,6 +120,34 @@ sub volume_down {
     $self->_transmit("VOLDOWN");
     $self->_set_muted(0);
     $self->_set_volume($self->volume - 1);
+}
+
+sub set_input {
+    my $self = shift;
+    my $input = shift;
+
+    die "invalid input $input. valid are: @inputs" unless exists $input_index{$input};
+
+    return if $self->input eq $input;
+
+    $self->_transmit("INPUT");
+
+    my $current = $input_index{$self->input};
+    my $desired = $input_index{$input};
+
+    while ($current > $desired) {
+        $self->_transmit("LEFT");
+        $current--;
+    }
+
+    while ($current < $desired) {
+        $self->_transmit("RIGHT");
+        $current++;
+    }
+
+    $self->_transmit("OK");
+
+    $self->_set_input($input);
 }
 
 1;

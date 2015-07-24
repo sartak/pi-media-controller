@@ -404,6 +404,25 @@ my %endpoints = (
         },
     },
 
+    '/television/input' => {
+        GET => sub {
+            my $req = shift;
+
+            my $res = $req->new_response(200);
+            $res->body($Television->input);
+            return $res;
+        },
+        PUT => sub {
+            my $req = shift;
+
+            $Television->set_input($req->param('input'));
+
+            my $res = $req->new_response;
+            $res->redirect('/television/input');
+            return $res;
+        },
+    },
+
     '/ac' => {
         GET => sub {
             my $req = shift;
