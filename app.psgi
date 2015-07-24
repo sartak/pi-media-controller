@@ -16,6 +16,7 @@ use Pi::Media::Queue::Autofilling;
 use Pi::Media::Controller;
 use Pi::Media::Library;
 use Pi::Media::GamepadManager;
+use Pi::Media::AC;
 
 select((select(STDERR), $|=1)[0]);
 
@@ -74,6 +75,8 @@ Mouse::load_class($TelevisionClass);
 my $Television = $TelevisionClass->new(
     config => $config,
 );
+
+my $AC = Pi::Media::AC->new;
 
 if (!$config->{disable_gamepads}) {
     my $GamepadManager = Pi::Media::GamepadManager->new(
@@ -320,48 +323,163 @@ my %endpoints = (
         },
     },
 
-    '/ac' => {
-        POWER => sub {
+    '/ac/power' => {
+        GET => sub {
             my $req = shift;
 
-            system(qw(irsend --count=3 SEND_ONCE ac KEY_POWER));
-
-            return $req->new_response(204);
+            my $res = $req->new_response(200);
+            $res->body($AC->is_on ? "on" : "off");
+            return $res;
         },
-        TEMP_UP => sub {
+        PUT => sub {
             my $req = shift;
+            my $on  = $req->param('on');
 
-            system(qw(irsend --count=3 SEND_ONCE ac KEY_UP));
+            if (($on && !$AC->is_on) || (!$on && $AC->is_on)) {
+                $AC->toggle_power;
+            }
 
-            return $req->new_response(204);
+            my $res = $req->new_response;
+            $res->redirect('/ac/power');
+            return $res;
         },
-        TEMP_DOWN => sub {
+        TOGGLE => sub {
             my $req = shift;
 
-            system(qw(irsend --count=3 SEND_ONCE ac KEY_DOWN));
+            $AC->toggle_power;
 
-            return $req->new_response(204);
+            my $res = $req->new_response;
+            $res->redirect('/ac/power');
+            return $res;
         },
-        MODE => sub {
+        ON => sub {
             my $req = shift;
 
-            system(qw(irsend --count=3 SEND_ONCE ac KEY_MODE));
+            $AC->power_on;
 
-            return $req->new_response(204);
+            my $res = $req->new_response;
+            $res->redirect('/ac/power');
+            return $res;
         },
-        SPEED => sub {
+        OFF => sub {
             my $req = shift;
 
-            system(qw(irsend --count=3 SEND_ONCE ac KEY_SOUND));
+            $AC->power_off;
 
-            return $req->new_response(204);
+            my $res = $req->new_response;
+            $res->redirect('/ac/power');
+            return $res;
         },
-        TIMER => sub {
+    },
+
+    '/ac/temperature' => {
+        GET => sub {
             my $req = shift;
 
-            system(qw(irsend --count=3 SEND_ONCE ac KEY_SLEEP));
+            my $res = $req->new_response(200);
+            $res->body($AC->temperature);
+            return $res;
+        },
+        PUT => sub {
+            my $req = shift;
 
-            return $req->new_response(204);
+            $AC->set_temperature($req->param('temperature'));
+
+            my $res = $req->new_response;
+            $res->redirect('/ac/temperature');
+            return $res;
+        },
+        MINIMUM => sub {
+            my $req = shift;
+
+            $AC->set_temperature($AC->minimum_temperature);
+
+            my $res = $req->new_response;
+            $res->redirect('/ac/temperature');
+            return $res;
+        },
+        MAXIMUM => sub {
+            my $req = shift;
+
+            $AC->set_temperature($AC->maximum_temperature);
+
+            my $res = $req->new_response;
+            $res->redirect('/ac/temperature');
+            return $res;
+        },
+        UP => sub {
+            my $req = shift;
+
+            $AC->temperature_up;
+
+            my $res = $req->new_response;
+            $res->redirect('/ac/temperature');
+            return $res;
+        },
+        DOWN => sub {
+            my $req = shift;
+
+            $AC->temperature_down;
+
+            my $res = $req->new_response;
+            $res->redirect('/ac/temperature');
+            return $res;
+        },
+    },
+
+    '/ac/mode' => {
+        GET => sub {
+            my $req = shift;
+
+            my $res = $req->new_response(200);
+            $res->body($AC->mode);
+            return $res;
+        },
+        PUT => sub {
+            my $req = shift;
+
+            $AC->set_mode($req->param('mode'));
+
+            my $res = $req->new_response;
+            $res->redirect('/ac/mode');
+            return $res;
+        },
+        TOGGLE => sub {
+            my $req = shift;
+
+            $AC->toggle_mode;
+
+            my $res = $req->new_response;
+            $res->redirect('/ac/mode');
+            return $res;
+        },
+    },
+
+    '/ac/fanspeed' => {
+        GET => sub {
+            my $req = shift;
+
+            my $res = $req->new_response(200);
+            $res->body($AC->fanspeed);
+            return $res;
+        },
+        PUT => sub {
+            my $req = shift;
+
+            $AC->set_fanspeed($req->param('fanspeed'));
+
+            my $res = $req->new_response;
+            $res->redirect('/ac/fanspeed');
+            return $res;
+        },
+        TOGGLE => sub {
+            my $req = shift;
+
+            $AC->toggle_fanspeed;
+
+            my $res = $req->new_response;
+            $res->redirect('/ac/fanspeed');
+            return $res;
         },
     },
 
