@@ -150,4 +150,15 @@ sub set_input {
     $self->_set_input($input);
 }
 
+sub set_active_source {
+    my $self = shift;
+    my $then = shift;
+
+    $self->power_on;
+
+    $self->set_input('Pi');
+
+    $then->() if $then;
+}
+
 1;
