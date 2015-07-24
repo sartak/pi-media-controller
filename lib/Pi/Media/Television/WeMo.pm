@@ -8,13 +8,19 @@ sub host {
     return shift->config->{television}{host};
 }
 
+sub is_on {
+    my $self = shift;
+    my $outlet = Power::Outlet::WeMo->new(host => $self->host);
+    return $outlet->query =~ /on/i ? 1 : 0;
+}
+
 sub power_on {
     my $self = shift;
     my $then = shift;
 
     print STDERR "Turning on television ... ";
     my $outlet = Power::Outlet::WeMo->new(host => $self->host);
-    if ($outlet->query =~ /on/i) {
+    if ($self-is_on) {
         print STDERR "no need.\n";
         $then->() if $then;
         return 0;
