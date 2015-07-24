@@ -48,11 +48,18 @@ sub state {
 sub _transmit {
     my ($self, $cmd) = @_;
 
+    if (!$self->is_on) {
+        die "refusing to transmit with the TV being off";
+    }
+
     # try twice before reporting failure
 
+    warn(join ' ', qw(irsend SEND_ONCE TV), $cmd);
     system(qw(irsend SEND_ONCE TV), $cmd);
 
     if ($?) {
+        warn "trying again!";
+        warn(join ' ', qw(irsend SEND_ONCE TV), $cmd);
         system(qw(irsend SEND_ONCE TV), $cmd);
 
         if ($?) {
@@ -162,7 +169,8 @@ sub set_active_source {
     my $then = shift;
 
     if ($self->power_on) {
-        sleep 9;
+        warn "waiting to set active source because we just powered on";
+        sleep 15;
     }
 
     $self->set_input('Pi');

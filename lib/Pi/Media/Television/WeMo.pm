@@ -20,7 +20,7 @@ sub power_on {
 
     print STDERR "Turning on television ... ";
     my $outlet = Power::Outlet::WeMo->new(host => $self->host);
-    if ($self-is_on) {
+    if ($self->is_on) {
         print STDERR "no need.\n";
         $then->() if $then;
         return 0;
@@ -39,10 +39,17 @@ sub power_off {
 
     print STDERR "Turning off television ... ";
     my $outlet = Power::Outlet::WeMo->new(host => $self->host);
-    $outlet->off;
-    print STDERR "ok.\n";
-
-    $then->() if $then;
+    if (!$self->is_on) {
+        print STDERR "no need.\n";
+        $then->() if $then;
+        return 0;
+    }
+    else {
+        $outlet->off;
+        print STDERR "ok.\n";
+        $then->() if $then;
+        return 1;
+    }
 }
 
 sub set_active_source {

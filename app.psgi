@@ -332,7 +332,10 @@ my %endpoints = (
             my $res = $req->new_response(200);
             $res->content_type("application/json");
 
-            $res->body(encode_utf8($json->encode($Television->state)));
+            my $state = $Television->state;
+            $state->{is_on} = $Television->is_on;
+
+            $res->body(encode_utf8($json->encode($state)));
 
             return $res;
         },
@@ -431,6 +434,50 @@ my %endpoints = (
 
             my $res = $req->new_response;
             $res->redirect('/television/input');
+            return $res;
+        },
+    },
+
+    '/television/power' => {
+        GET => sub {
+            my $req = shift;
+
+            my $res = $req->new_response(200);
+            $res->body($Television->is_on ? "on" : "off");
+            return $res;
+        },
+        PUT => sub {
+            my $req = shift;
+            my $on  = $req->param('on');
+            my $is_on = $Television->is_on;
+
+            if ($on && !$is_on) {
+                $Television->power_on;
+            }
+            elsif (!$on && $is_on) {
+                $Television->power_off;
+            }
+
+            my $res = $req->new_response;
+            $res->redirect('/television/power');
+            return $res;
+        },
+        ON => sub {
+            my $req = shift;
+
+            $Television->power_on;
+
+            my $res = $req->new_response;
+            $res->redirect('/television/power');
+            return $res;
+        },
+        OFF => sub {
+            my $req = shift;
+
+            $Television->power_off;
+
+            my $res = $req->new_response;
+            $res->redirect('/television/power');
             return $res;
         },
     },

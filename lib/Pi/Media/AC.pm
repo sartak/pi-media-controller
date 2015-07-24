@@ -57,9 +57,12 @@ sub _transmit {
 
     # try twice before reporting failure
 
+    warn(join ' ', qw(irsend SEND_ONCE AC), $cmd);
     system(qw(irsend SEND_ONCE AC), $cmd);
 
     if ($?) {
+        warn "trying again!";
+        warn(join ' ', qw(irsend SEND_ONCE AC), $cmd);
         system(qw(irsend SEND_ONCE AC), $cmd);
 
         if ($?) {
