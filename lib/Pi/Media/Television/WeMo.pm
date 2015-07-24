@@ -14,10 +14,17 @@ sub power_on {
 
     print STDERR "Turning on television ... ";
     my $outlet = Power::Outlet::WeMo->new(host => $self->host);
-    $outlet->on;
-    print STDERR "ok.\n";
-
-    $then->() if $then;
+    if ($outlet->query =~ /on/i) {
+        print STDERR "no need.\n";
+        $then->() if $then;
+        return 0;
+    }
+    else {
+        $outlet->on;
+        print STDERR "ok.\n";
+        $then->() if $then;
+        return 1;
+    }
 }
 
 sub power_off {

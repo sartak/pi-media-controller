@@ -154,11 +154,30 @@ sub set_active_source {
     my $self = shift;
     my $then = shift;
 
-    $self->power_on;
+    if ($self->power_on) {
+        sleep 9;
+    }
 
     $self->set_input('Pi');
 
     $then->() if $then;
 }
+
+# cycling power disables mute
+before power_off => sub {
+    my $self = shift;
+    $self->_set_muted(0);
+};
+
+around power_on => sub {
+    my $orig = shift;
+    my $self = shift;
+
+    my $ret = $self->$orig(@_);
+    if ($ret) {
+        $self->_set_muted(0);
+    }
+    return $ret;
+};
 
 1;

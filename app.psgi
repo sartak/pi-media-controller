@@ -326,6 +326,18 @@ my %endpoints = (
         },
     },
 
+    '/television' => {
+        GET => sub {
+            my $req = shift;
+            my $res = $req->new_response(200);
+            $res->content_type("application/json");
+
+            $res->body(encode_utf8($json->encode($Television->state)));
+
+            return $res;
+        },
+    },
+
     '/television/volume' => {
         GET => sub {
             my $req = shift;
