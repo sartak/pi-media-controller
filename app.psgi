@@ -72,8 +72,10 @@ my $Controller = Pi::Media::Controller->new(
 
 my $TelevisionClass = $config->{television}{class} || 'Pi::Media::Television::HDMI';
 Mouse::load_class($TelevisionClass);
+my $tv_state = -e "tv.json" ? $json->decode(scalar slurp "tv.json") : {};
 my $Television = $TelevisionClass->new(
     config => $config,
+    %$tv_state,
 );
 
 my $ac_state = -e "ac.json" ? $json->decode(scalar slurp "ac.json") : {};
@@ -321,6 +323,84 @@ my %endpoints = (
             system("sudo reboot");
 
             exit(0);
+        },
+    },
+
+    '/television/volume' => {
+        GET => sub {
+            my $req = shift;
+
+            my $res = $req->new_response(200);
+            my $body = $Television->volume;
+            if ($Television->muted) {
+                $body .= " [mute]";
+            }
+            $res->body($body);
+
+            return $res;
+        },
+        PUT => sub {
+            my $req = shift;
+
+            $Television->set_volume($req->param('volume'));
+
+            my $res = $req->new_response;
+            $res->redirect('/television/volume');
+            return $res;
+        },
+        MINIMUM => sub {
+            my $req = shift;
+
+            $Television->set_volume($Television->minimum_volume);
+
+            my $res = $req->new_response;
+            $res->redirect('/television/volume');
+            return $res;
+        },
+        MAXIMUM => sub {
+            my $req = shift;
+
+            $Television->set_volume($Television->maximum_volume);
+
+            my $res = $req->new_response;
+            $res->redirect('/television/volume');
+            return $res;
+        },
+        UP => sub {
+            my $req = shift;
+
+            $Television->volume_up;
+
+            my $res = $req->new_response;
+            $res->redirect('/television/volume');
+            return $res;
+        },
+        DOWN => sub {
+            my $req = shift;
+
+            $Television->volume_down;
+
+            my $res = $req->new_response;
+            $res->redirect('/television/volume');
+            return $res;
+        },
+        MUTE => sub {
+            my $req = shift;
+
+            $Television->mute;
+
+            my $res = $req->new_response;
+            $res->redirect('/television/volume');
+            return $res;
+        },
+        UNMUTE => sub {
+            my $req = shift;
+
+            $Television->unmute;
+
+            my $res = $req->new_response;
+            $res->redirect('/television/volume');
+            return $res;
         },
     },
 
