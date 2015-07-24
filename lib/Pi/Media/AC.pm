@@ -42,6 +42,15 @@ has fanspeed => (
     trigger => sub { shift->_write_state },
 );
 
+sub state {
+    return {
+        is_on       => $self->is_on,
+        temperature => $self->temperature,
+        mode        => $self->mode,
+        fanspeed    => $self->fanspeed,
+    };
+}
+
 sub _transmit {
     my ($self, $cmd) = @_;
     system(qw(irsend SEND_ONCE AC), $cmd);
@@ -57,7 +66,7 @@ sub _write_state {
     use JSON 'encode_json';
     use File::Slurp 'write_file';
 
-    my $json = encode_json({ %$self });
+    my $json = encode_json($self->state);
     write_file "ac.json", $json;
 }
 

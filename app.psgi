@@ -330,7 +330,7 @@ my %endpoints = (
             my $res = $req->new_response(200);
             $res->content_type("application/json");
 
-            $res->body(encode_utf8($json->encode({ %$AC })));
+            $res->body(encode_utf8($json->encode($AC->state)));
 
             return $res;
         },
