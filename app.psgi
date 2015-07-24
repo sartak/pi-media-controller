@@ -76,7 +76,8 @@ my $Television = $TelevisionClass->new(
     config => $config,
 );
 
-my $AC = Pi::Media::AC->new;
+my $ac_state = -e "ac.json" ? $json->decode(scalar slurp "ac.json") : {};
+my $AC = Pi::Media::AC->new(%$ac_state);
 
 if (!$config->{disable_gamepads}) {
     my $GamepadManager = Pi::Media::GamepadManager->new(

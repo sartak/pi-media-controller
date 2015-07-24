@@ -15,6 +15,7 @@ has is_on => (
     writer  => '_set_is_on',
     isa     => 'Bool',
     default => 0,
+    trigger => sub { shift->_write_state },
 );
 
 has temperature => (
@@ -22,6 +23,7 @@ has temperature => (
     writer  => '_set_temperature',
     isa     => 'Int',
     default => __PACKAGE__->minimum_temperature,
+    trigger => sub { shift->_write_state },
 );
 
 has mode => (
@@ -29,6 +31,7 @@ has mode => (
     writer  => '_set_mode',
     isa     => 'Str',
     default => $modes[0],
+    trigger => sub { shift->_write_state },
 );
 
 has fanspeed => (
@@ -36,6 +39,7 @@ has fanspeed => (
     writer  => '_set_fanspeed',
     isa     => 'Int',
     default => $fanspeeds[-1],
+    trigger => sub { shift->_write_state },
 );
 
 sub _transmit {
@@ -45,6 +49,16 @@ sub _transmit {
     if ($?) {
         die "irsend failed";
     }
+}
+
+sub _write_state {
+    my $self = shift;
+
+    use JSON 'encode_json';
+    use File::Slurp 'write_file';
+
+    my $json = encode_json({ %$self });
+    write_file "ac.json", $json;
 }
 
 sub power_on {
