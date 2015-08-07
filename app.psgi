@@ -43,9 +43,11 @@ my @extra_cb;
 
 my $notify_cb = sub {
     my $event = shift;
+    my $single = shift;
 
     # internal watchers
     for my $cb (@extra_cb) {
+        next if $single && $cb != $single;
         $cb->($event);
     }
 
@@ -54,17 +56,19 @@ my $notify_cb = sub {
     my $unicode_json = $json->encode($event);
     warn $unicode_json;
 
-    my $json = encode_utf8($unicode_json);
+    my $json = encode_utf8($unicode_json) . "\n";
 
     my @ok;
 
     for my $writer (@Watchers) {
-        eval {
-            $writer->write($json);
-            $writer->write("\n");
-        };
-        warn $@ if $@;
-        push @ok, $writer if !$@;
+        if (!$single || $writer == $single) {
+            eval { $writer->write($json) };
+            warn $@ if $@;
+            push @ok, $writer if !$@;
+        }
+        else {
+            push @ok, $writer;
+        }
     }
 
     @Watchers = @ok;
@@ -667,11 +671,8 @@ $server->register_service(sub {
                 my $writer = $responder->([200, ['Content-Type', 'application/json']]);
                 push @Watchers, $writer;
 
-                $writer->write(qq[{"type":"connected"}\n]);
-
-                $notify_cb->({
-                    'type' => 'subscriber',
-                });
+                $notify_cb->({ type => 'connected' }, $writer);
+                $notify_cb->({ type => 'subscriber' });
             };
         }
         else {
