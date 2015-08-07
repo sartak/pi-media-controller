@@ -666,6 +666,8 @@ $server->register_service(sub {
                 my $writer = $responder->([200, ['Content-Type', 'application/json']]);
                 push @Watchers, $writer;
 
+                $writer->write(qq[{"type":"connected"}\n]);
+
                 $notify_cb->({
                     'type' => 'subscriber',
                 });
