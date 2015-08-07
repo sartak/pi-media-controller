@@ -79,15 +79,19 @@ sub _write_state {
     write_file "tv.json", $json;
 }
 
-sub notify_volume {
+sub volume_status {
     my $self = shift;
-
-    $self->notify({
+    return {
         type   => "television/volume",
         volume => $self->volume,
         mute   => bool($self->muted),
         @_,
-    });
+    };
+}
+
+sub notify_volume {
+    my $self = shift;
+    $self->notify($self->volume_status(@_));
 }
 
 sub mute {
@@ -159,6 +163,11 @@ sub volume_down {
     $self->notify_volume(delta => -1, @_);
 }
 
+sub input_status {
+    my $self = shift;
+    return { type => "television/input", input => $self->input, @_ };
+}
+
 sub set_input {
     my $self = shift;
     my $input = shift;
@@ -185,7 +194,7 @@ sub set_input {
     $self->_transmit("OK");
 
     $self->_set_input($input);
-    $self->notify({ type => "television/input", input => $self->input });
+    $self->notify($self->input_status);
 }
 
 sub set_active_source {

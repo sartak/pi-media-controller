@@ -672,6 +672,9 @@ $server->register_service(sub {
                 push @Watchers, $writer;
 
                 $notify_cb->({ type => 'connected' }, $writer);
+                $notify_cb->($Television->power_status, $writer);
+                $notify_cb->($Television->volume_status, $writer);
+                $notify_cb->($Television->input_status, $writer);
                 $notify_cb->({ type => 'subscriber' });
             };
         }

@@ -15,6 +15,11 @@ sub is_on {
     return $outlet->query =~ /on/i ? 1 : 0;
 }
 
+sub power_status {
+    my $self = shift;
+    return { type => "television/power", on => bool($self->is_on), @_ };
+}
+
 sub power_on {
     my $self = shift;
     my $then = shift;
@@ -29,7 +34,7 @@ sub power_on {
     else {
         $outlet->on;
         print STDERR "ok.\n";
-        $self->notify({ type => "television/power", on => bool(1) });
+        $self->notify($self->power_status);
         $then->() if $then;
         return 1;
     }
@@ -49,7 +54,7 @@ sub power_off {
     else {
         $outlet->off;
         print STDERR "ok.\n";
-        $self->notify({ type => "television/power", on => bool(0) });
+        $self->notify($self->power_status);
         $then->() if $then;
         return 1;
     }
