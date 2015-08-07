@@ -18,7 +18,8 @@ find(sub {
     return if $file =~ /\.DS_Store/
            || $file =~ /\.state\.auto$/
            || $file =~ /\.srm$/
-           || $file =~ /\.cfg$/;
+           || $file =~ /\.cfg$/
+           || $file =~ /\.sav$/;
 
     return if $seen{$file};
 
