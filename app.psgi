@@ -712,7 +712,7 @@ $server->register_service(sub {
                 push @Watchers, $writer;
 
                 $notify_cb->({
-                    'say hello to' => 'new watcher',
+                    'type' => 'subscriber',
                 });
             };
         }
