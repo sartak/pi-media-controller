@@ -79,6 +79,17 @@ sub _write_state {
     write_file "tv.json", $json;
 }
 
+sub notify_volume {
+    my $self = shift;
+
+    $self->notify({
+        type   => "television/volume",
+        volume => $self->volume,
+        mute   => bool($self->muted),
+        @_,
+    });
+}
+
 sub mute {
     my $self = shift;
     if ($self->muted) {
@@ -100,22 +111,22 @@ sub toggle_mute {
 
     $self->_transmit("MUTE");
     $self->_set_muted(!$self->muted);
-    $self->notify({ type => "television/mute", muted => bool($self->muted) });
+    $self->notify_volume;
 }
 
 sub set_volume {
     my $self = shift;
-    my $temp = shift;
+    my $volume = shift;
 
-    if ($temp < $self->minimum_volume || $temp > $self->maximum_volume) {
-        die "invalid volume $temp. valid between " . $self->minimum_volume . " and " . $self->maximum_volume;
+    if ($volume < $self->minimum_volume || $volume > $self->maximum_volume) {
+        die "invalid volume $volume. valid between " . $self->minimum_volume . " and " . $self->maximum_volume;
     }
 
-    while ($self->volume < $temp) {
+    while ($self->volume < $volume) {
         $self->volume_up;
     }
 
-    while ($self->volume > $temp) {
+    while ($self->volume > $volume) {
         $self->volume_down;
     }
 }
@@ -125,12 +136,9 @@ sub volume_up {
     return if $self->volume >= $self->maximum_volume;
 
     $self->_transmit("VOLUP");
-    if ($self->muted) {
-        $self->_set_muted(0);
-        $self->notify({ type => "television/mute", muted => bool($self->muted) });
-    }
+    $self->_set_muted(0);
     $self->_set_volume($self->volume + 1);
-    $self->notify({ type => "television/volume", volume => $self->volume, delta => 1 });
+    $self->notify_volume(delta => 1);
 }
 
 sub volume_down {
@@ -138,12 +146,9 @@ sub volume_down {
     return if $self->volume <= $self->minimum_volume;
 
     $self->_transmit("VOLDOWN");
-    if ($self->muted) {
-        $self->_set_muted(0);
-        $self->notify({ type => "television/mute", muted => bool($self->muted) });
-    }
+    $self->_set_muted(0);
     $self->_set_volume($self->volume - 1);
-    $self->notify({ type => "television/volume", volume => $self->volume, delta => -1 });
+    $self->notify_volume(delta => -1);
 }
 
 sub set_input {
@@ -195,7 +200,7 @@ before power_off => sub {
 
     if ($self->muted) {
         $self->_set_muted(0);
-        $self->notify({ type => "television/muted", muted => bool($self->muted) });
+        $self->notify_volume;
     }
 };
 
@@ -207,7 +212,7 @@ around power_on => sub {
     if ($ret) {
         if ($self->muted) {
             $self->_set_muted(0);
-            $self->notify({ type => "television/muted", muted => bool($self->muted) });
+            $self->notify_volume;
         }
     }
     return $ret;
