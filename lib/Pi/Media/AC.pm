@@ -1,6 +1,7 @@
 package Pi::Media::AC;
 use 5.14.0;
 use Mouse;
+use JSON::Types;
 
 sub minimum_temperature { 60 }
 sub maximum_temperature { 86 }
@@ -9,6 +10,11 @@ my @fanspeeds = (1, 2, 3);
 
 my %mode_index = map { $modes[$_] => $_ } 0..$#modes;
 my %fanspeed_index = map { $fanspeeds[$_] => $_ } 0..$#fanspeeds;
+
+has notify_cb => (
+    is      => 'ro',
+    default => sub { sub {} },
+);
 
 has is_on => (
     is      => 'ro',
@@ -81,6 +87,11 @@ sub _write_state {
     write_file "ac.json", $json;
 }
 
+sub notify {
+    my $self = shift;
+    $self->notify_cb->(@_);
+}
+
 sub power_on {
     my $self = shift;
     if ($self->is_on) {
@@ -102,6 +113,7 @@ sub toggle_power {
 
     $self->_transmit("POWER");
     $self->_set_is_on(!$self->is_on);
+    $self->notify({ type => "ac/power", on => bool($self->is_on) });
 }
 
 sub set_temperature {
@@ -127,6 +139,7 @@ sub temperature_up {
 
     $self->_transmit("UP");
     $self->_set_temperature($self->temperature + 1);
+    $self->notify({ type => "ac/temperature", temperature => $self->temperature, delta => 1 });
 }
 
 sub temperature_down {
@@ -135,6 +148,7 @@ sub temperature_down {
 
     $self->_transmit("DOWN");
     $self->_set_temperature($self->temperature - 1);
+    $self->notify({ type => "ac/temperature", temperature => $self->temperature, delta => -1 });
 }
 
 sub set_mode {
@@ -155,6 +169,7 @@ sub toggle_mode {
 
     $self->_transmit("MODE");
     $self->_set_mode($modes[$index]);
+    $self->notify({ type => "ac/mode", mode => $self->mode });
 }
 
 sub set_fanspeed {
@@ -175,6 +190,7 @@ sub toggle_fanspeed {
 
     $self->_transmit("FAN");
     $self->_set_fanspeed($fanspeeds[$index]);
+    $self->notify({ type => "ac/fanspeed", fanspeed => $self->fanspeed });
 }
 
 1;
