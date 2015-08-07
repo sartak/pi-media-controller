@@ -60,8 +60,8 @@ my $notify_cb = sub {
 
     for my $writer (@Watchers) {
         eval {
-                $writer->write($json);
-                $writer->write("\n");
+            $writer->write($json);
+            $writer->write("\n");
         };
         warn $@ if $@;
         push @ok, $writer if !$@;
