@@ -122,6 +122,12 @@ sub set_volume {
         die "invalid volume $volume. valid between " . $self->minimum_volume . " and " . $self->maximum_volume;
     }
 
+    # turning volume up or down will unmute, but if there's a request to set
+    # volume to current, we should helpfully unmute
+    if ($self->volume == $volume) {
+       $self->unmute;
+    }
+
     while ($self->volume < $volume) {
         $self->volume_up(target => $volume);
     }
