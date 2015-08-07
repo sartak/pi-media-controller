@@ -1,3 +1,5 @@
 library.sqlite
 config.json
+ac.json
+tv.json
 tmp/
