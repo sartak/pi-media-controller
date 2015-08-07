@@ -710,6 +710,10 @@ $server->register_service(sub {
                 my $responder = shift;
                 my $writer = $responder->([200, ['Content-Type', 'application/json']]);
                 push @Watchers, $writer;
+
+                $notify_cb->({
+                    'say hello to' => 'new watcher',
+                });
             };
         }
         else {
