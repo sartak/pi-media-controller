@@ -102,7 +102,8 @@ if (!$config->{disable_gamepads}) {
     push @extra_cb, sub { $GamepadManager->got_event(@_) };
 }
 
-my %endpoints = (
+my %endpoints;
+%endpoints = (
     '/current' => {
         GET => sub {
             my $req = shift;
@@ -371,63 +372,49 @@ my %endpoints = (
 
             $Television->set_volume($req->param('volume'));
 
-            my $res = $req->new_response;
-            $res->redirect('/television/volume');
-            return $res;
+            return $endpoints{'/television/volume'}{GET}->($req);
         },
         MINIMUM => sub {
             my $req = shift;
 
             $Television->set_volume($Television->minimum_volume);
 
-            my $res = $req->new_response;
-            $res->redirect('/television/volume');
-            return $res;
+            return $endpoints{'/television/volume'}{GET}->($req);
         },
         MAXIMUM => sub {
             my $req = shift;
 
             $Television->set_volume($Television->maximum_volume);
 
-            my $res = $req->new_response;
-            $res->redirect('/television/volume');
-            return $res;
+            return $endpoints{'/television/volume'}{GET}->($req);
         },
         UP => sub {
             my $req = shift;
 
             $Television->volume_up;
 
-            my $res = $req->new_response;
-            $res->redirect('/television/volume');
-            return $res;
+            return $endpoints{'/television/volume'}{GET}->($req);
         },
         DOWN => sub {
             my $req = shift;
 
             $Television->volume_down;
 
-            my $res = $req->new_response;
-            $res->redirect('/television/volume');
-            return $res;
+            return $endpoints{'/television/volume'}{GET}->($req);
         },
         MUTE => sub {
             my $req = shift;
 
             $Television->mute;
 
-            my $res = $req->new_response;
-            $res->redirect('/television/volume');
-            return $res;
+            return $endpoints{'/television/volume'}{GET}->($req);
         },
         UNMUTE => sub {
             my $req = shift;
 
             $Television->unmute;
 
-            my $res = $req->new_response;
-            $res->redirect('/television/volume');
-            return $res;
+            return $endpoints{'/television/volume'}{GET}->($req);
         },
     },
 
@@ -444,9 +431,7 @@ my %endpoints = (
 
             $Television->set_input($req->param('input'));
 
-            my $res = $req->new_response;
-            $res->redirect('/television/input');
-            return $res;
+            return $endpoints{'/television/input'}{GET}->($req);
         },
     },
 
@@ -470,27 +455,21 @@ my %endpoints = (
                 $Television->power_off;
             }
 
-            my $res = $req->new_response;
-            $res->redirect('/television/power');
-            return $res;
+            return $endpoints{'/television/power'}{GET}->($req);
         },
         ON => sub {
             my $req = shift;
 
             $Television->power_on;
 
-            my $res = $req->new_response;
-            $res->redirect('/television/power');
-            return $res;
+            return $endpoints{'/television/power'}{GET}->($req);
         },
         OFF => sub {
             my $req = shift;
 
             $Television->power_off;
 
-            my $res = $req->new_response;
-            $res->redirect('/television/power');
-            return $res;
+            return $endpoints{'/television/power'}{GET}->($req);
         },
     },
 
@@ -522,36 +501,28 @@ my %endpoints = (
                 $AC->toggle_power;
             }
 
-            my $res = $req->new_response;
-            $res->redirect('/ac/power');
-            return $res;
+            return $endpoints{'/ac/power'}{GET}->($req);
         },
         TOGGLE => sub {
             my $req = shift;
 
             $AC->toggle_power;
 
-            my $res = $req->new_response;
-            $res->redirect('/ac/power');
-            return $res;
+            return $endpoints{'/ac/power'}{GET}->($req);
         },
         ON => sub {
             my $req = shift;
 
             $AC->power_on;
 
-            my $res = $req->new_response;
-            $res->redirect('/ac/power');
-            return $res;
+            return $endpoints{'/ac/power'}{GET}->($req);
         },
         OFF => sub {
             my $req = shift;
 
             $AC->power_off;
 
-            my $res = $req->new_response;
-            $res->redirect('/ac/power');
-            return $res;
+            return $endpoints{'/ac/power'}{GET}->($req);
         },
     },
 
@@ -568,45 +539,35 @@ my %endpoints = (
 
             $AC->set_temperature($req->param('temperature'));
 
-            my $res = $req->new_response;
-            $res->redirect('/ac/temperature');
-            return $res;
+            return $endpoints{'/ac/temperature'}{GET}->($req);
         },
         MINIMUM => sub {
             my $req = shift;
 
             $AC->set_temperature($AC->minimum_temperature);
 
-            my $res = $req->new_response;
-            $res->redirect('/ac/temperature');
-            return $res;
+            return $endpoints{'/ac/temperature'}{GET}->($req);
         },
         MAXIMUM => sub {
             my $req = shift;
 
             $AC->set_temperature($AC->maximum_temperature);
 
-            my $res = $req->new_response;
-            $res->redirect('/ac/temperature');
-            return $res;
+            return $endpoints{'/ac/temperature'}{GET}->($req);
         },
         UP => sub {
             my $req = shift;
 
             $AC->temperature_up;
 
-            my $res = $req->new_response;
-            $res->redirect('/ac/temperature');
-            return $res;
+            return $endpoints{'/ac/temperature'}{GET}->($req);
         },
         DOWN => sub {
             my $req = shift;
 
             $AC->temperature_down;
 
-            my $res = $req->new_response;
-            $res->redirect('/ac/temperature');
-            return $res;
+            return $endpoints{'/ac/temperature'}{GET}->($req);
         },
     },
 
@@ -623,18 +584,14 @@ my %endpoints = (
 
             $AC->set_mode($req->param('mode'));
 
-            my $res = $req->new_response;
-            $res->redirect('/ac/mode');
-            return $res;
+            return $endpoints{'/ac/mode'}{GET}->($req);
         },
         TOGGLE => sub {
             my $req = shift;
 
             $AC->toggle_mode;
 
-            my $res = $req->new_response;
-            $res->redirect('/ac/mode');
-            return $res;
+            return $endpoints{'/ac/mode'}{GET}->($req);
         },
     },
 
@@ -642,27 +599,21 @@ my %endpoints = (
         GET => sub {
             my $req = shift;
 
-            my $res = $req->new_response(200);
-            $res->body($AC->fanspeed);
-            return $res;
+            return $endpoints{'/ac/fanspeed'}{GET}->($req);
         },
         PUT => sub {
             my $req = shift;
 
             $AC->set_fanspeed($req->param('fanspeed'));
 
-            my $res = $req->new_response;
-            $res->redirect('/ac/fanspeed');
-            return $res;
+            return $endpoints{'/ac/fanspeed'}{GET}->($req);
         },
         TOGGLE => sub {
             my $req = shift;
 
             $AC->toggle_fanspeed;
 
-            my $res = $req->new_response;
-            $res->redirect('/ac/fanspeed');
-            return $res;
+            return $endpoints{'/ac/fanspeed'}{GET}->($req);
         },
     },
 
