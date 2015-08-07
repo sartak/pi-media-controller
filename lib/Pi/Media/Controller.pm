@@ -154,6 +154,11 @@ sub _play_media {
         media => $media,
     });
 
+    $self->notify({
+        type => 'playpause',
+        show => 'pause',
+    });
+
     my $handle = $self->_handle_for_media($media);
     $self->_handle($handle);
 
@@ -255,6 +260,11 @@ sub _finished_media {
         media => $media,
     });
 
+    $self->notify({
+        type => 'playpause',
+        show => 'play',
+    });
+
     if ($self->_temporarily_stopped) {
         $self->_temporarily_stopped(0);
     }
@@ -270,8 +280,8 @@ sub toggle_pause {
     $self->_set_is_paused(!$self->is_paused);
     $self->_run_command('p');
     $self->notify({
-        type   => 'paused',
-        paused => bool($self->is_paused),
+        type => 'playpause',
+        show => ($self->is_paused ? "play" : "pause"),
     });
 
     return $self->is_paused;
