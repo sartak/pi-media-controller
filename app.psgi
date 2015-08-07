@@ -53,12 +53,20 @@ my $notify_cb = sub {
 
     my $json = encode_utf8($json->encode($event));
 
+    warn $json;
+
+    my @ok;
+
     for my $writer (@Watchers) {
         eval {
                 $writer->write($json);
                 $writer->write("\n");
         };
+        warn $@ if $@;
+        push @ok, $writer if !$@;
     }
+
+    @Watchers = @ok;
 };
 
 my $Library = Pi::Media::Library->new(file => $ENV{PMC_DATABASE});
