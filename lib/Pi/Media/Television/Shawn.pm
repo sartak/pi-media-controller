@@ -1,6 +1,7 @@
 package Pi::Media::Television::Shawn;
 use 5.14.0;
 use Mouse;
+use JSON::Types;
 extends 'Pi::Media::Television::WeMo';
 
 sub minimum_volume { 0 }
@@ -99,6 +100,7 @@ sub toggle_mute {
 
     $self->_transmit("MUTE");
     $self->_set_muted(!$self->muted);
+    $self->notify({ type => "television/mute", muted => bool($self->muted) });
 }
 
 sub set_volume {
@@ -123,8 +125,12 @@ sub volume_up {
     return if $self->volume >= $self->maximum_volume;
 
     $self->_transmit("VOLUP");
-    $self->_set_muted(0);
+    if ($self->muted) {
+        $self->_set_muted(0);
+        $self->notify({ type => "television/mute", muted => bool($self->muted) });
+    }
     $self->_set_volume($self->volume + 1);
+    $self->notify({ type => "television/volume", volume => $self->volume, delta => 1 });
 }
 
 sub volume_down {
@@ -132,8 +138,12 @@ sub volume_down {
     return if $self->volume <= $self->minimum_volume;
 
     $self->_transmit("VOLDOWN");
-    $self->_set_muted(0);
+    if ($self->muted) {
+        $self->_set_muted(0);
+        $self->notify({ type => "television/mute", muted => bool($self->muted) });
+    }
     $self->_set_volume($self->volume - 1);
+    $self->notify({ type => "television/volume", volume => $self->volume, delta => -1 });
 }
 
 sub set_input {
@@ -162,6 +172,7 @@ sub set_input {
     $self->_transmit("OK");
 
     $self->_set_input($input);
+    $self->notify({ type => "television/input", input => $self->input });
 }
 
 sub set_active_source {
@@ -181,7 +192,11 @@ sub set_active_source {
 # cycling power disables mute
 before power_off => sub {
     my $self = shift;
-    $self->_set_muted(0);
+
+    if ($self->muted) {
+        $self->_set_muted(0);
+        $self->notify({ type => "television/muted", muted => bool($self->muted) });
+    }
 };
 
 around power_on => sub {
@@ -190,7 +205,10 @@ around power_on => sub {
 
     my $ret = $self->$orig(@_);
     if ($ret) {
-        $self->_set_muted(0);
+        if ($self->muted) {
+            $self->_set_muted(0);
+            $self->notify({ type => "television/muted", muted => bool($self->muted) });
+        }
     }
     return $ret;
 };

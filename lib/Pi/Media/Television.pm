@@ -2,6 +2,12 @@ package Pi::Media::Television;
 use 5.14.0;
 use Mouse;
 use AnyEvent::Run;
+use JSON::Types;
+
+has notify_cb => (
+    is      => 'ro',
+    default => sub { sub {} },
+);
 
 has config => (
     is       => 'ro',
@@ -27,6 +33,11 @@ has _handle => (
         return $handle;
     },
 );
+
+sub notify {
+    my $self = shift;
+    $self->notify_cb->(@_);
+}
 
 sub set_active_source {
     my $self = shift;

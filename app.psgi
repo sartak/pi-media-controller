@@ -82,7 +82,8 @@ my $TelevisionClass = $config->{television}{class} || 'Pi::Media::Television::HD
 Mouse::load_class($TelevisionClass);
 my $tv_state = -e "tv.json" ? $json->decode(scalar slurp "tv.json") : {};
 my $Television = $TelevisionClass->new(
-    config => $config,
+    config    => $config,
+    notify_cb => $notify_cb,
     %$tv_state,
 );
 

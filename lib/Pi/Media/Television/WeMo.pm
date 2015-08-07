@@ -2,6 +2,7 @@ package Pi::Media::Television::WeMo;
 use 5.14.0;
 use Mouse;
 use Power::Outlet::WeMo;
+use JSON::Types;
 extends 'Pi::Media::Television::HDMI';
 
 sub host {
@@ -28,6 +29,7 @@ sub power_on {
     else {
         $outlet->on;
         print STDERR "ok.\n";
+        $self->notify({ type => "television/power", on => bool(1) });
         $then->() if $then;
         return 1;
     }
@@ -47,6 +49,7 @@ sub power_off {
     else {
         $outlet->off;
         print STDERR "ok.\n";
+        $self->notify({ type => "television/power", on => bool(0) });
         $then->() if $then;
         return 1;
     }
