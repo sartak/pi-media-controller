@@ -123,32 +123,34 @@ sub set_volume {
     }
 
     while ($self->volume < $volume) {
-        $self->volume_up;
+        $self->volume_up(target => $volume);
     }
 
     while ($self->volume > $volume) {
-        $self->volume_down;
+        $self->volume_down(target => $volume);
     }
 }
 
 sub volume_up {
     my $self = shift;
+
     return if $self->volume >= $self->maximum_volume;
 
     $self->_transmit("VOLUP");
     $self->_set_muted(0);
     $self->_set_volume($self->volume + 1);
-    $self->notify_volume(delta => 1);
+    $self->notify_volume(delta => 1, @_);
 }
 
 sub volume_down {
     my $self = shift;
+
     return if $self->volume <= $self->minimum_volume;
 
     $self->_transmit("VOLDOWN");
     $self->_set_muted(0);
     $self->_set_volume($self->volume - 1);
-    $self->notify_volume(delta => -1);
+    $self->notify_volume(delta => -1, @_);
 }
 
 sub set_input {
