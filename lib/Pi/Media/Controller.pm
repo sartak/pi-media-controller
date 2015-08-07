@@ -156,7 +156,7 @@ sub _play_media {
 
     $self->notify({
         type => 'playpause',
-        show => 'pause',
+        show => $media->type eq 'game' ? 'nothing' : 'pause',
     });
 
     my $handle = $self->_handle_for_media($media);
