@@ -658,6 +658,7 @@ $server->register_service(sub {
     if (!$auth_ok) {
         warn "Unauthorized request" . ($user ? " from user '$user'" : "") . "\n";
         my $res = $req->new_response(401);
+        $res->header('X-PMC-Time' => scalar gmtime);
         $res->body("unauthorized");
         return $res->finalize;
     }
@@ -668,7 +669,7 @@ $server->register_service(sub {
         if ($req->method eq 'GET') {
             return sub {
                 my $responder = shift;
-                my $writer = $responder->([200, ['Content-Type', 'application/json']]);
+                my $writer = $responder->([200, ['Content-Type', 'application/json', 'X-PMC-Time' => scalar gmtime]]);
                 push @Watchers, $writer;
 
                 $notify_cb->({ type => 'connected' }, $writer);
@@ -682,6 +683,7 @@ $server->register_service(sub {
         else {
             my $res = $req->new_response(405);
             $res->body("allowed methods: GET");
+            $res->header('X-PMC-Time' => scalar gmtime);
             return $res->finalize;
         }
     }
@@ -690,6 +692,7 @@ $server->register_service(sub {
     if (!$spec) {
         my $res = $req->new_response(404);
         $res->body("endpoint not found");
+        $res->header('X-PMC-Time' => scalar gmtime);
         return $res->finalize;
     }
 
@@ -697,12 +700,14 @@ $server->register_service(sub {
     if (!$action) {
         my $res = $req->new_response(405);
         $res->body("allowed methods: " . (join ', ', sort keys %$spec));
+        $res->header('X-PMC-Time' => scalar gmtime);
         return $res->finalize;
     }
 
     my $res = $action->($req);
 
     if (blessed($res)) {
+        $res->header('X-PMC-Time' => scalar gmtime);
         return $res->finalize;
     }
     return $res;
