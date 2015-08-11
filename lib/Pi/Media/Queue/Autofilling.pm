@@ -17,15 +17,19 @@ has requestor => (
 
 sub shift {
     my $self = CORE::shift(@_);
-    my $media = $self->SUPER::shift(@_);
-    return $media if $media;
 
-    return unless $self->source;
+    if (!$self->SUPER::has_media(@_) && $self->source) {
+        $self->notify({ type => 'queue', autofill => 1 });
 
-    ($media) = $self->library->media(where => $self->source->query, limit => 1);
-    $media->{requestor} = $self->requestor;
-    $self->notify({ type => 'queue', shift => $media, autofill => 1 });
-    return $media;
+        my @media = $self->library->media(where => $self->source->query);
+        local $main::CURRENT_USER = $self->requestor;
+        $self->push(@media);
+
+        $self->clear_autofill_source;
+        $self->clear_requestor;
+    }
+
+    return $self->SUPER::shift(@_);
 }
 
 sub has_media {
