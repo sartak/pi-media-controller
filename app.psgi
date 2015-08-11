@@ -5,6 +5,7 @@ use utf8::all;
 use Plack::Request;
 use Plack::App::File;
 use JSON;
+use JSON::Types;
 use Twiggy::Server;
 use Encode;
 use Scalar::Util 'blessed';
@@ -357,7 +358,7 @@ my %endpoints;
             $res->content_type("application/json");
 
             my $state = $Television->state;
-            $state->{is_on} = $Television->is_on;
+            $state->{is_on} = bool($Television->is_on);
 
             $res->body(encode_utf8($json->encode($state)));
 

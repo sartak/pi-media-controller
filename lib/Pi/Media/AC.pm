@@ -51,7 +51,7 @@ has fanspeed => (
 sub state {
     my $self = shift;
     return {
-        is_on       => $self->is_on,
+        is_on       => bool($self->is_on),
         temperature => $self->temperature,
         mode        => $self->mode,
         fanspeed    => $self->fanspeed,

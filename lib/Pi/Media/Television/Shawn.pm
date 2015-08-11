@@ -41,7 +41,7 @@ sub state {
     my $self = shift;
     return {
         volume => $self->volume,
-        muted  => $self->muted,
+        muted  => bool($self->muted),
         input  => $self->input,
     };
 }
