@@ -176,6 +176,8 @@ sub set_input {
 
     return if $self->input eq $input;
 
+    $self->notify($self->input_status(input => $input, prospective => 1));
+
     $self->_transmit("INPUT");
 
     my $current = $input_index{$self->input};
