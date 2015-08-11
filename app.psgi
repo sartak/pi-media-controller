@@ -259,9 +259,7 @@ my %endpoints;
                 $Queue->remove_media_with_queue_id($queue_id);
             }
 
-            my $res = $req->new_response;
-            $res->redirect('/queue');
-            return $res;
+            return $req->new_response(204);
         },
     },
     '/queue/source' => {
