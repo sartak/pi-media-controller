@@ -246,6 +246,7 @@ sub _finished_media {
         end_time        => $end_time,
         elapsed_seconds => $seconds,
         location        => $self->config->{location},
+        who             => $self->current_media->{requestor},
     );
 
     warn "Done playing $media\n";
