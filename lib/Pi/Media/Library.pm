@@ -123,12 +123,13 @@ sub _inflate_media_from_sth {
 
     if (!$args{excludeViewing}) {
         if (keys %videos_by_id) {
-            my $query = 'SELECT mediaId, MAX(endTime) FROM viewing WHERE (';
+            my $query = 'SELECT mediaId, MAX(endTime) FROM viewing WHERE';
+            $query .= ' who=? AND (';
             $query .= join ' OR ', map { 'mediaId=?' } keys %videos_by_id;
             $query .= ') AND elapsedSeconds IS NULL GROUP BY mediaId;';
 
             my $sth = $self->_dbh->prepare($query);
-            $sth->execute(keys %videos_by_id);
+            $sth->execute($main::CURRENT_USER, keys %videos_by_id);
 
             while (my ($id, $date) = $sth->fetchrow_array) {
                 for my $video (@{ $videos_by_id{$id} }) {
@@ -141,12 +142,12 @@ sub _inflate_media_from_sth {
         if (keys %games_by_id) {
             # playtime
             {
-                my $query = 'SELECT mediaId, SUM(elapsedSeconds) FROM viewing WHERE (';
+                my $query = 'SELECT mediaId, SUM(elapsedSeconds) FROM viewing WHERE who=? AND (';
                 $query .= join ' OR ', map { 'mediaId=?' } keys %games_by_id;
                 $query .= ') GROUP BY mediaId;';
 
                 my $sth = $self->_dbh->prepare($query);
-                $sth->execute(keys %games_by_id);
+                $sth->execute($main::CURRENT_USER, keys %games_by_id);
 
                 while (my ($id, $playtime) = $sth->fetchrow_array) {
                     for my $game (@{ $games_by_id{$id} }) {
@@ -157,12 +158,12 @@ sub _inflate_media_from_sth {
 
             # completed
             {
-                my $query = 'SELECT mediaId FROM viewing WHERE (';
+                my $query = 'SELECT mediaId FROM viewing WHERE who=? AND (';
                 $query .= join ' OR ', map { 'mediaId=?' } keys %games_by_id;
                 $query .= ') AND elapsedSeconds IS NULL GROUP BY mediaId;';
 
                 my $sth = $self->_dbh->prepare($query);
-                $sth->execute(keys %games_by_id);
+                $sth->execute($main::CURRENT_USER, keys %games_by_id);
 
                 while (my ($id) = $sth->fetchrow_array) {
                     for my $game (@{ $games_by_id{$id} }) {

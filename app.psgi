@@ -18,6 +18,8 @@ use Pi::Media::Library;
 use Pi::Media::GamepadManager;
 use Pi::Media::AC;
 
+our $CURRENT_USER;
+
 select((select(STDERR), $|=1)[0]);
 
 my $json = JSON->new->convert_blessed(1);
@@ -644,8 +646,6 @@ my %endpoints;
         },
     },
 );
-
-our $main::CURRENT_USER;
 
 $server->register_service(sub {
     my $req = Plack::Request->new(shift);
