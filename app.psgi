@@ -87,6 +87,7 @@ my $Controller = Pi::Media::Controller->new(
     library   => $Library,
     notify_cb => $notify_cb,
 );
+push @extra_cb, sub { $Controller->got_event(@_) };
 
 my $TelevisionClass = $config->{television}{class} || 'Pi::Media::Television::HDMI';
 Mouse::load_class($TelevisionClass);

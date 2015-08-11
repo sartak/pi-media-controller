@@ -341,5 +341,17 @@ sub toggle_or_next_subtitles {
         return $self->toggle_subtitles;
     }
 }
+
+sub got_event {
+    my $self  = shift;
+    my $event = shift;
+
+    if ($event->{type} eq 'television/input') {
+        if ($event->{input} ne 'Pi') {
+            $self->pause;
+        }
+    }
+}
+
 1;
 
