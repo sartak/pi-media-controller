@@ -60,13 +60,13 @@ has _buffer => (
     default => '',
 );
 
-# video specific
-
 has is_paused => (
     is     => 'ro',
     isa    => 'Bool',
     writer => '_set_is_paused',
 );
+
+# video specific
 
 has has_toggled_subtitles => (
     is     => 'ro',
@@ -156,7 +156,7 @@ sub _play_media {
 
     $self->notify({
         type => 'playpause',
-        show => $media->type eq 'game' ? 'nothing' : 'pause',
+        show => 'pause',
     });
 
     my $handle = $self->_handle_for_media($media);
@@ -273,12 +273,22 @@ sub _finished_media {
     }
 }
 
-# video specific
-
 sub toggle_pause {
     my $self = shift;
+
+    if ($self->current_media->isa('Pi::Media::File::Video')) {
+        $self->_run_command('p');
+    }
+    elsif ($self->current_media->isa('Pi::Media::File::Game')) {
+        if ($self->is_paused) {
+            kill 'CONT', $self->_handle->{child_pid};
+        }
+        else {
+            kill 'TSTP', $self->_handle->{child_pid};
+        }
+    }
+
     $self->_set_is_paused(!$self->is_paused);
-    $self->_run_command('p');
     $self->notify({
         type => 'playpause',
         show => ($self->is_paused ? "play" : "pause"),
@@ -300,6 +310,8 @@ sub pause {
     $self->toggle_pause;
     return 1;
 }
+
+# video specific
 
 sub decrease_speed          { shift->_run_command('1') }
 sub increase_speed          { shift->_run_command('2') }
