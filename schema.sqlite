@@ -32,7 +32,8 @@ CREATE TABLE IF NOT EXISTS viewing (
     startTime INTEGER NOT NULL,
     endTime INTEGER NOT NULL,
     elapsedSeconds INTEGER,
-    location TEXT
+    location TEXT,
+    who TEXT
 );
 
 CREATE INDEX media_treeId ON media(treeId);
