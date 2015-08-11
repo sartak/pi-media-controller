@@ -659,6 +659,7 @@ $server->register_service(sub {
         warn "Unauthorized request" . ($user ? " from user '$user'" : "") . "\n";
         my $res = $req->new_response(401);
         $res->header('X-PMC-Time' => scalar gmtime);
+        $res->header('Cache-control' => 'private, max-age=0, no-store');
         $res->body("unauthorized");
         return $res->finalize;
     }
@@ -669,7 +670,7 @@ $server->register_service(sub {
         if ($req->method eq 'GET') {
             return sub {
                 my $responder = shift;
-                my $writer = $responder->([200, ['Content-Type', 'application/json', 'X-PMC-Time' => scalar gmtime]]);
+                my $writer = $responder->([200, ['Content-Type', 'application/json', 'X-PMC-Time' => scalar(gmtime), 'Cache-control' => 'private, max-age=0, no-store']]);
                 push @Watchers, $writer;
 
                 $notify_cb->({ type => 'connected' }, $writer);
@@ -684,6 +685,7 @@ $server->register_service(sub {
             my $res = $req->new_response(405);
             $res->body("allowed methods: GET");
             $res->header('X-PMC-Time' => scalar gmtime);
+            $res->header('Cache-control' => 'private, max-age=0, no-store');
             return $res->finalize;
         }
     }
@@ -693,6 +695,7 @@ $server->register_service(sub {
         my $res = $req->new_response(404);
         $res->body("endpoint not found");
         $res->header('X-PMC-Time' => scalar gmtime);
+        $res->header('Cache-control' => 'private, max-age=0, no-store');
         return $res->finalize;
     }
 
@@ -701,6 +704,7 @@ $server->register_service(sub {
         my $res = $req->new_response(405);
         $res->body("allowed methods: " . (join ', ', sort keys %$spec));
         $res->header('X-PMC-Time' => scalar gmtime);
+        $res->header('Cache-control' => 'private, max-age=0, no-store');
         return $res->finalize;
     }
 
@@ -708,6 +712,7 @@ $server->register_service(sub {
 
     if (blessed($res)) {
         $res->header('X-PMC-Time' => scalar gmtime);
+        $res->header('Cache-control' => 'private, max-age=0, no-store');
         return $res->finalize;
     }
     return $res;
