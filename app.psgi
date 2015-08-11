@@ -651,17 +651,13 @@ my %endpoints;
 $server->register_service(sub {
     my $req = Plack::Request->new(shift);
 
-    my $auth_ok = 0;
+    my $auth_ok;
     my $user;
     if ($user = $req->header('X-PMC-Username')) {
         if (my $pass = $req->header('X-PMC-Password')) {
-            if ($config->{users}{$user} eq $pass) {
-                $auth_ok = 1;
-            }
+            $auth_ok = $Library->confirm_auth($user, $pass);
         }
     }
-
-    local $main::CURRENT_USER = $user;
 
     if (!$auth_ok) {
         warn "Unauthorized request" . ($user ? " from user '$user'" : "") . "\n";
@@ -671,6 +667,8 @@ $server->register_service(sub {
         $res->body("unauthorized");
         return $res->finalize;
     }
+
+    local $main::CURRENT_USER = $user;
 
     warn $req->method . ' ' . $req->path_info;
 

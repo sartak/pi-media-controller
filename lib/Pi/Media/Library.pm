@@ -50,6 +50,18 @@ sub rollback {
     $self->_dbh->rollback;
 }
 
+sub confirm_auth {
+    my ($self, $username, $password) = @_;
+
+    my $query = 'SELECT 1 FROM user WHERE name=? AND password=?;';
+
+    my $sth = $self->_dbh->prepare($query);
+    $sth->execute($username, $password);
+
+    return 1 if $sth->fetchrow_array;
+    return 0;
+}
+
 sub _inflate_media_from_sth {
     my ($self, $sth, %args) = @_;
 

@@ -36,6 +36,11 @@ CREATE TABLE IF NOT EXISTS viewing (
     who TEXT
 );
 
+CREATE TABLE IF NOT EXISTS user (
+    name TEXT NOT NULL,
+    password TEXT NOT NULL
+);
+
 CREATE INDEX media_treeId ON media(treeId);
 CREATE INDEX viewing_mediaId_endTime_elapsedSeconds ON viewing(mediaId, endTime, elapsedSeconds);
 
