@@ -75,7 +75,10 @@ my $notify_cb = sub {
 };
 
 my $Library = Pi::Media::Library->new(file => $ENV{PMC_DATABASE});
-my $Queue = Pi::Media::Queue::Autofilling->new(library => $Library);
+my $Queue = Pi::Media::Queue::Autofilling->new(
+    library   => $Library,
+    notify_cb => $notify_cb,
+);
 my $Controller = Pi::Media::Controller->new(
     config    => $config,
     queue     => $Queue,

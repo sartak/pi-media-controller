@@ -4,6 +4,11 @@ use Mouse;
 use Pi::Media::File;
 use Pi::Media::Library;
 
+has notify_cb => (
+    is      => 'ro',
+    default => sub { sub {} },
+);
+
 has library => (
     is       => 'ro',
     isa      => 'Pi::Media::Library',
@@ -15,6 +20,11 @@ has _media => (
     isa     => 'ArrayRef[Pi::Media::File]',
     default => sub { [] },
 );
+
+sub notify {
+    my $self = shift;
+    $self->notify_cb->(@_);
+}
 
 sub media {
     my $self = shift;
