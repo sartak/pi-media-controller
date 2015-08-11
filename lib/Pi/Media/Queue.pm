@@ -36,16 +36,12 @@ my $Serial = 0;
 sub push {
     my $self = shift;
 
-    my @added;
-    for my $original (@_) {
-        my %copy = %$original;
-
-        $copy{queue_id} = $$ . "-" . $Serial++;
-        push @added, \%copy;
-        push @{ $self->{_media} }, \%copy;
+    for my $media (@_) {
+        $media->{queue_id} = $$ . "-" . $Serial++;
+        push @{ $self->{_media} }, $media;
     }
 
-    $self->notify({ type => 'queue', added => \@added });
+    $self->notify({ type => 'queue', added => [ @_ ] });
 }
 
 sub remove_media_with_queue_id {
