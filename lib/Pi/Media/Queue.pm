@@ -27,10 +27,10 @@ sub push {
     my $self = shift;
 
     for my $original (@_) {
-        my $copy = \%$original;
+        my %copy = %$original;
 
-        $copy->{queue_id} = $$ . "-" . $Serial++;
-        push @{ $self->{_media} }, $copy;
+        $copy{queue_id} = $$ . "-" . $Serial++;
+        push @{ $self->{_media} }, \%copy;
     }
 }
 
