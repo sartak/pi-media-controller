@@ -643,6 +643,8 @@ my %endpoints;
     },
 );
 
+our $main::CURRENT_USER;
+
 $server->register_service(sub {
     my $req = Plack::Request->new(shift);
 
@@ -655,6 +657,8 @@ $server->register_service(sub {
             }
         }
     }
+
+    local $main::CURRENT_USER = $user;
 
     if (!$auth_ok) {
         warn "Unauthorized request" . ($user ? " from user '$user'" : "") . "\n";
