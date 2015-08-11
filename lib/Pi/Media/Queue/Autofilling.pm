@@ -17,6 +17,7 @@ sub shift {
     return unless $self->source;
 
     ($media) = $self->library->media(where => $self->source->query, limit => 1);
+    $self->notify({ type => 'queue', shift => $media, autofill => 1 });
     return $media;
 }
 

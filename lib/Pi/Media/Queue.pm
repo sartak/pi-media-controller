@@ -36,17 +36,22 @@ my $Serial = 0;
 sub push {
     my $self = shift;
 
+    my @added;
     for my $original (@_) {
         my %copy = %$original;
 
         $copy{queue_id} = $$ . "-" . $Serial++;
+        push @added, \%copy;
         push @{ $self->{_media} }, \%copy;
     }
+
+    $self->notify({ type => 'queue', added => \@added });
 }
 
 sub remove_media_with_queue_id {
     my ($self, $queue_id) = @_;
 
+    $self->notify({ type => 'queue', remove_id => $queue_id });
     @{ $self->{_media} } = grep { $_->{queue_id} ne $queue_id } @{ $self->{_media} };
 }
 
@@ -57,12 +62,15 @@ sub has_media {
 
 sub clear {
     my $self = shift;
+    $self->notify({ type => 'queue', clear => 1 });
     @{ $self->{_media} } = ();
 }
 
 sub shift {
     my $self = shift;
-    return shift @{ $self->{_media} };
+    my $media = shift @{ $self->{_media} };
+    $self->notify({ type => 'queue', shift => $media });
+    return $media;
 }
 
 1;
