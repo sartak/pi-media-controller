@@ -284,7 +284,7 @@ sub toggle_pause {
             kill 'CONT', $self->_handle->{child_pid};
         }
         else {
-            kill 'TSTP', $self->_handle->{child_pid};
+            kill 'STOP', $self->_handle->{child_pid};
         }
     }
 
