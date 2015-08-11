@@ -38,6 +38,7 @@ sub push {
 
     for my $media (@_) {
         $media->{queue_id} = $$ . "-" . $Serial++;
+        $media->{requestor} = $main::CURRENT_USER;
         push @{ $self->{_media} }, $media;
     }
 

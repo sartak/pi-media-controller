@@ -270,6 +270,7 @@ my %endpoints;
                 my ($tree) = $Library->trees(id => $req->param('tree'));
                 if ($tree) {
                     $Queue->source($tree);
+                    $Queue->requestor($main::CURRENT_USER);
                     warn "Set queue source to tree $tree";
                     if (!$Controller->current_media) {
                         $Controller->play_next_in_queue;
@@ -283,6 +284,7 @@ my %endpoints;
             else {
                 warn "Cleared queue source";
                 $Queue->clear_autofill_source;
+                $Queue->clear_requestor;
             }
 
             return $req->new_response(204);

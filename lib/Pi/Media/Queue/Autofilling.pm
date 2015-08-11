@@ -9,6 +9,12 @@ has source => (
     clearer => 'clear_autofill_source',
 );
 
+has requestor => (
+    is      => 'rw',
+    isa     => 'Str',
+    clearer => 'clear_requestor',
+);
+
 sub shift {
     my $self = CORE::shift(@_);
     my $media = $self->SUPER::shift(@_);
@@ -17,6 +23,7 @@ sub shift {
     return unless $self->source;
 
     ($media) = $self->library->media(where => $self->source->query, limit => 1);
+    $media->{requestor} = $self->requestor;
     $self->notify({ type => 'queue', shift => $media, autofill => 1 });
     return $media;
 }
