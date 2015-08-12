@@ -103,6 +103,7 @@ my $ac_state = -e "ac.json" ? $json->decode(scalar slurp "ac.json") : {};
 my $AC = Pi::Media::AC->new(
     notify_cb => $notify_cb,
     %$ac_state,
+    is_on => ($ac_state->{is_on} ? 1 : 0), # JSON::XS::Boolean fails type
 );
 
 if (!$config->{disable_gamepads}) {
