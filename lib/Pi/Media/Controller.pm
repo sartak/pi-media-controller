@@ -208,6 +208,10 @@ sub _handle_for_media {
                 $state_path =~ s/.\w+$/.state.auto/;
                 unlink $state_path;
             }
+
+            if ($config =~ / ^ \s* libretro_path \s* = /mx) {
+                @emulator_cmd = grep { $_ ne '-L' && !/\.so$/ } @emulator_cmd;
+            }
         }
 
         warn join ' ', @emulator_cmd, $media->path;
