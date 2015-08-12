@@ -6,6 +6,7 @@ use Pi::Media::Queue;
 use Pi::Media::File;
 use Pi::Media::Library;
 use JSON::Types;
+use File::Slurp 'slurp';
 
 has notify_cb => (
     is      => 'ro',
@@ -200,6 +201,13 @@ sub _handle_for_media {
         $cfg_path =~ s/.\w+$/.cfg/;
         if (-e $cfg_path) {
             push @emulator_cmd, "--appendconfig", $cfg_path;
+
+            my $config = slurp($cfg_path);
+            if ($config =~ / ^ \s* \# \s* pmc: \s* save_state \s* = \s* never \b /mx) {
+                my $state_path = $media->path;
+                $state_path =~ s/.\w+$/.state.auto/;
+                unlink $state_path;
+            }
         }
 
         warn join ' ', @emulator_cmd, $media->path;
