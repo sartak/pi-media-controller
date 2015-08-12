@@ -202,6 +202,8 @@ sub _handle_for_media {
             push @emulator_cmd, "--appendconfig", $cfg_path;
         }
 
+        warn join ' ', @emulator_cmd, $media->path;
+
         return AnyEvent::Run->new(
             cmd => [@emulator_cmd, $media->path],
         );
