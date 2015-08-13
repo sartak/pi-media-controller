@@ -58,5 +58,10 @@ sub power_off {
     $then->() if $then;
 }
 
+# who knows
+sub is_on {
+    return 1;
+}
+
 1;
 
