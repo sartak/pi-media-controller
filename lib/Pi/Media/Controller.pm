@@ -5,7 +5,6 @@ use AnyEvent::Run;
 use Pi::Media::Queue;
 use Pi::Media::File;
 use Pi::Media::Library;
-use JSON::Types;
 use File::Slurp 'slurp';
 
 has notify_cb => (
@@ -88,8 +87,8 @@ sub play_next_in_queue {
 
     my $media = $self->queue->shift;
     $self->notify({
-        type => 'fastforward',
-        show => bool($media),
+        type   => 'fastforward',
+        status => $media ? 'show' : 'hide',
     };
 
     if ($media) {
@@ -161,13 +160,13 @@ sub _play_media {
     });
 
     $self->notify({
-        type => 'playpause',
-        show => 'pause',
+        type   => 'playpause',
+        status => 'pause',
     });
 
     $self->notify({
-        type => 'fastforward',
-        show => bool($media),
+        type   => 'fastforward',
+        status => $media ? 'show' : 'hide',
     });
 
     my $handle = $self->_handle_for_media($media);
@@ -286,15 +285,15 @@ sub _finished_media {
     });
 
     $self->notify({
-        type => 'playpause',
-        show => 'play',
+        type   => 'playpause',
+        status => 'play',
     });
 
     if ($self->_temporarily_stopped) {
         $self->_temporarily_stopped(0);
         $self->notify({
-            type => 'fastforward',
-            show => bool(0),
+            type   => 'fastforward',
+            status => 'hide',
         });
     }
     else {
@@ -321,8 +320,8 @@ sub toggle_pause {
 
     $self->_set_is_paused(!$self->is_paused);
     $self->notify({
-        type => 'playpause',
-        show => ($self->is_paused ? "play" : "pause"),
+        type   => 'playpause',
+        status => ($self->is_paused ? 'play' : 'pause'),
     });
 
     return $self->is_paused;
@@ -388,14 +387,14 @@ sub playpause_status {
 
     if ($self->current_media && !$self->is_paused) {
         return {
-            type => 'playpause',
-            show => 'pause',
+            type   => 'playpause',
+            status => 'pause',
         };
     }
     else {
         return {
-            type => 'playpause',
-            show => 'play',
+            type   => 'playpause',
+            status => 'play',
         };
     }
 }
@@ -404,8 +403,8 @@ sub fastforward_status {
     my $self = shift;
 
     return {
-        type => 'fastforward',
-        show => bool($self->current_media),
+        type   => 'fastforward',
+        status => $self->current_media ? 'show' : 'hide',
     };
 }
 
