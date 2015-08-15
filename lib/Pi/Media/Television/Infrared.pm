@@ -7,7 +7,8 @@ extends 'Pi::Media::Television';
 sub minimum_volume { 0 }
 sub maximum_volume { 100 }
 
-# only allow the ones I actually use, since the TV gets grumpy
+# only allow the ones I actually use, since the TV gets grumpy if I select
+# an unconnected input
 my @inputs = ("RCA", "Pi", "AppleTV");
 # my @inputs = ("TV", "RCA", "Pi", "AppleTV", "USB", "Component");
 
@@ -37,22 +38,20 @@ has input => (
     trigger => sub { shift->_write_state },
 );
 
-sub state {
+around state => sub {
+    my $orig = shift;
     my $self = shift;
+    my $state = $self->$orig(@_);
     return {
-        %{ $self->SUPER::state(@_) },
+        %$state,
         volume => $self->volume,
         muted  => bool($self->muted),
         input  => $self->input,
     };
-}
+};
 
 sub _transmit {
     my ($self, $cmd) = @_;
-
-    if (!$self->is_on) {
-        die "refusing to transmit with the TV being off";
-    }
 
     # try twice before reporting failure
 
@@ -201,28 +200,36 @@ sub set_active_source {
     $self->set_input('Pi');
 }
 
-# cycling power disables mute
-before power_off => sub {
+sub power_off {
     my $self = shift;
+
+    return 0 unless $self->is_on;
 
     if ($self->muted) {
         $self->_set_muted(0);
         $self->notify_volume;
     }
-};
 
-around power_on => sub {
-    my $orig = shift;
+    $self->_transmit("POWER");
+    $self->_set_is_on(0);
+    $self->notify($self->power_status);
+    return 1;
+}
+
+sub power_on {
     my $self = shift;
 
-    my $ret = $self->$orig(@_);
-    if ($ret) {
-        if ($self->muted) {
-            $self->_set_muted(0);
-            $self->notify_volume;
-        }
+    return 0 if $self->is_on;
+
+    if ($self->muted) {
+        $self->_set_muted(0);
+        $self->notify_volume;
     }
-    return $ret;
-};
+
+    $self->_transmit("POWER");
+    $self->_set_is_on(1);
+    $self->notify($self->power_status);
+    return 1;
+}
 
 1;
