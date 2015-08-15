@@ -3,7 +3,7 @@ use 5.14.0;
 use Mouse;
 use Power::Outlet::WeMo;
 use JSON::Types;
-extends 'Pi::Media::Television::HDMI';
+extends 'Pi::Media::Television';
 
 sub host {
     return shift->config->{television}{host};
@@ -15,62 +15,38 @@ sub is_on {
     return $outlet->query =~ /on/i ? 1 : 0;
 }
 
-sub power_status {
-    my $self = shift;
-    return { type => "television/power", on => bool($self->is_on), @_ };
-}
-
 sub power_on {
     my $self = shift;
-    my $then = shift;
 
     print STDERR "Turning on television ... ";
     my $outlet = Power::Outlet::WeMo->new(host => $self->host);
     if ($self->is_on) {
         print STDERR "no need.\n";
-        $then->() if $then;
         return 0;
     }
     else {
         $outlet->on;
         print STDERR "ok.\n";
         $self->notify($self->power_status);
-        $then->() if $then;
         return 1;
     }
 }
 
 sub power_off {
     my $self = shift;
-    my $then = shift;
 
     print STDERR "Turning off television ... ";
     my $outlet = Power::Outlet::WeMo->new(host => $self->host);
     if (!$self->is_on) {
         print STDERR "no need.\n";
-        $then->() if $then;
         return 0;
     }
     else {
         $outlet->off;
         print STDERR "ok.\n";
         $self->notify($self->power_status);
-        $then->() if $then;
         return 1;
     }
-}
-
-sub set_active_source {
-    my $self = shift;
-    my $then = shift;
-
-    $self->power_on;
-
-    print STDERR "Setting self as active source for TV ... ";
-    $self->_handle->push_write("as\n");
-    print STDERR "ok.\n";
-
-    $then->() if $then;
 }
 
 1;
