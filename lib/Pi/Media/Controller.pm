@@ -89,7 +89,7 @@ sub play_next_in_queue {
     $self->notify({
         type   => 'fastforward',
         status => $media ? 'show' : 'hide',
-    };
+    });
 
     if ($media) {
         $self->_play_media($media);
