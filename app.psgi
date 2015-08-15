@@ -157,7 +157,7 @@ my %endpoints;
         STOP => sub {
             my $req = shift;
             $Controller->stop_playing;
-            $Television->power_off;
+            $Television->power_off if $Television->can('power_off');
             return $req->new_response(200);
         },
         PAUSE => sub {
