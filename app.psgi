@@ -5,6 +5,7 @@ use utf8::all;
 use Plack::Request;
 use Plack::App::File;
 use JSON;
+use JSON::Types;
 use Twiggy::Server;
 use Encode;
 use Scalar::Util 'blessed';
@@ -687,8 +688,20 @@ $server->register_service(sub {
 
                 $notify_cb->({ type => 'connected' }, $writer);
                 $notify_cb->($Television->power_status, $writer);
-                $notify_cb->($Television->volume_status, $writer);
-                $notify_cb->($Television->input_status, $writer);
+
+                if ($Television->can('volume_status')) {
+                    $notify_cb->($Television->volume_status, $writer);
+                }
+                else {
+                    $notify_cb->({ type => "television/volume", capable => bool(false) });
+                }
+
+                if ($Television->can('input_status')) {
+                    $notify_cb->($Television->input_status, $writer);
+                }
+                else {
+                    $notify_cb->({ type => "television/input", capable => bool(false) });
+                }
 
                 $notify_cb->({ type => 'subscriber' });
             };
