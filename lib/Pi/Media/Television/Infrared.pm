@@ -103,6 +103,8 @@ sub unmute {
 sub toggle_mute {
     my $self = shift;
 
+    die "tv isn't on" if !$self->is_on;
+
     $self->_transmit("MUTE");
     $self->_set_muted(!$self->muted);
     $self->notify_volume;
@@ -136,6 +138,8 @@ sub volume_up {
 
     return if $self->volume >= $self->maximum_volume;
 
+    die "tv isn't on" if !$self->is_on;
+
     $self->_transmit("VOLUP");
     $self->_set_muted(0);
     $self->_set_volume($self->volume + 1);
@@ -146,6 +150,8 @@ sub volume_down {
     my $self = shift;
 
     return if $self->volume <= $self->minimum_volume;
+
+    die "tv isn't on" if !$self->is_on;
 
     $self->_transmit("VOLDOWN");
     $self->_set_muted(0);
@@ -165,6 +171,8 @@ sub set_input {
     die "invalid input $input. valid are: @inputs" unless exists $input_index{$input};
 
     return if $self->input eq $input;
+
+    die "tv isn't on" if !$self->is_on;
 
     $self->notify($self->input_status(input => $input, prospective => 1));
 
