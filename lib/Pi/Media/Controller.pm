@@ -168,7 +168,7 @@ sub _play_media {
     $self->notify({
         type => 'fastforward',
         show => bool($media),
-    };
+    });
 
     my $handle = $self->_handle_for_media($media);
     $self->_handle($handle);
@@ -295,7 +295,7 @@ sub _finished_media {
         $self->notify({
             type => 'fastforward',
             show => bool(0),
-        };
+        });
     }
     else {
         $self->play_next_in_queue;
