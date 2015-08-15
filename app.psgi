@@ -693,14 +693,14 @@ $server->register_service(sub {
                     $notify_cb->($Television->volume_status, $writer);
                 }
                 else {
-                    $notify_cb->({ type => "television/volume", capable => bool(false) });
+                    $notify_cb->({ type => "television/volume", hide => bool(1) });
                 }
 
                 if ($Television->can('input_status')) {
                     $notify_cb->($Television->input_status, $writer);
                 }
                 else {
-                    $notify_cb->({ type => "television/input", capable => bool(false) });
+                    $notify_cb->({ type => "television/input", hide => bool(1) });
                 }
 
                 $notify_cb->({ type => 'subscriber' });
