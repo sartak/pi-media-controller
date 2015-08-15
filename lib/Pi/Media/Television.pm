@@ -39,7 +39,7 @@ sub _write_state {
 
 sub power_status {
     my $self = shift;
-    return { type => "television/power", on => bool($self->is_on), @_ };
+    return { type => "television/power", is_on => bool($self->is_on), @_ };
 }
 
 sub state {

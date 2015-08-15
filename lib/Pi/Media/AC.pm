@@ -113,7 +113,7 @@ sub toggle_power {
 
     $self->_transmit("POWER");
     $self->_set_is_on(!$self->is_on);
-    $self->notify({ type => "ac/power", on => bool($self->is_on) });
+    $self->notify({ type => "ac/power", is_on => bool($self->is_on) });
 }
 
 sub set_temperature {
