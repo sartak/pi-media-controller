@@ -3,6 +3,8 @@ use 5.14.0;
 use Mouse;
 use AnyEvent::Run;
 use JSON::Types;
+use JSON 'encode_json';
+use File::Slurp 'write_file';
 
 has notify_cb => (
     is      => 'ro',
@@ -15,23 +17,12 @@ has config => (
     required => 1,
 );
 
-has _handle => (
-    is      => 'rw',
-    clearer => '_clear_handle',
-    lazy    => 1,
-    builder => sub {
-        my $self = shift;
-
-        my $handle = AnyEvent::Run->new(cmd => "cec-client");
-        $handle->on_read(sub {});
-        $handle->on_eof(undef);
-        $handle->on_error(sub {
-            $self->_clear_handle;
-            undef $handle;
-        });
-
-        return $handle;
-    },
+has is_on => (
+    is      => 'ro',
+    writer  => '_set_is_on',
+    isa     => 'Bool',
+    default => 1,
+    trigger => sub { shift->_write_state },
 );
 
 sub notify {
@@ -39,28 +30,23 @@ sub notify {
     $self->notify_cb->(@_);
 }
 
-sub set_active_source {
+sub _write_state {
     my $self = shift;
-    my $then = shift;
 
-    print STDERR "Setting self as active source for TV ... ";
-    $self->_handle->push_write("on\n");
-    $self->_handle->push_write("as\n");
-    print STDERR "ok.\n";
-
-    $then->() if $then;
+    my $json = encode_json($self->state);
+    write_file "tv.json", $json;
 }
 
-sub power_off {
+sub power_status {
     my $self = shift;
-    my $then = shift;
-
-    $then->() if $then;
+    return { type => "television/power", on => bool($self->is_on), @_ };
 }
 
-# who knows
-sub is_on {
-    return 1;
+sub state {
+    my $self = shift;
+    return {
+        is_on => bool($self->is_on),
+    };
 }
 
 1;

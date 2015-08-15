@@ -2,7 +2,7 @@ package Pi::Media::Television::Shawn;
 use 5.14.0;
 use Mouse;
 use JSON::Types;
-extends 'Pi::Media::Television::WeMo';
+extends 'Pi::Media::Television';
 
 sub minimum_volume { 0 }
 sub maximum_volume { 100 }
@@ -40,6 +40,7 @@ has input => (
 sub state {
     my $self = shift;
     return {
+        %{ $self->SUPER::state(@_) },
         volume => $self->volume,
         muted  => bool($self->muted),
         input  => $self->input,
@@ -67,16 +68,6 @@ sub _transmit {
             die "irsend failed";
         }
     }
-}
-
-sub _write_state {
-    my $self = shift;
-
-    use JSON 'encode_json';
-    use File::Slurp 'write_file';
-
-    my $json = encode_json($self->state);
-    write_file "tv.json", $json;
 }
 
 sub volume_status {
@@ -201,7 +192,6 @@ sub set_input {
 
 sub set_active_source {
     my $self = shift;
-    my $then = shift;
 
     if ($self->power_on) {
         warn "waiting to set active source because we just powered on";
@@ -209,8 +199,6 @@ sub set_active_source {
     }
 
     $self->set_input('Pi');
-
-    $then->() if $then;
 }
 
 # cycling power disables mute
