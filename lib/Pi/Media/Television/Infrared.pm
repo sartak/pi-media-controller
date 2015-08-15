@@ -1,4 +1,4 @@
-package Pi::Media::Television::Shawn;
+package Pi::Media::Television::Infrared;
 use 5.14.0;
 use Mouse;
 use JSON::Types;
