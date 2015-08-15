@@ -132,7 +132,8 @@ my %endpoints;
             my $req = shift;
 
             if (!$Controller->current_media) {
-                $Television->set_active_source;
+                $Television->set_active_source
+                    if $Television->can('set_active_source');
                 $Controller->play_next_in_queue;
 
                 return $req->new_response(204);
@@ -145,7 +146,8 @@ my %endpoints;
             my $req = shift;
             if ($Controller->toggle_pause) {
                 # unpaused
-                $Television->set_active_source;
+                $Television->set_active_source
+                    if $Television->can('set_active_source');
 
                 if (!$Controller->current_media) {
                     $Controller->play_next_in_queue;
@@ -171,7 +173,8 @@ my %endpoints;
         },
         UNPAUSE => sub {
             my $req = shift;
-            $Television->set_active_source;
+            $Television->set_active_source
+                if $Television->can('set_active_source');
             if ($Controller->unpause) {
                 if (!$Controller->current_media) {
                     $Controller->play_next_in_queue;
@@ -236,7 +239,8 @@ my %endpoints;
 
             warn "Queued $media ...\n";
 
-            $Television->set_active_source;
+            $Television->set_active_source
+                if $Television->can('set_active_source');
             $Queue->push($media);
 
             my $res = $req->new_response;
@@ -277,10 +281,11 @@ my %endpoints;
                     $Queue->source($tree);
                     $Queue->requestor($main::CURRENT_USER);
                     warn "Set queue source to tree $tree";
+                    $Television->set_active_source
+                        if $Television->can('set_active_source');
                     if (!$Controller->current_media) {
                         $Controller->play_next_in_queue;
                     }
-		    $Television->set_active_source;
                 }
                 else {
                     warn "Unknown queue source tree " . $req->param('tree');
@@ -728,7 +733,8 @@ $server->register_service(sub {
 warn "Ready!\n";
 
 if ($ENV{PMC_AUTOPLAY} && $Queue->has_media) {
-    $Television->set_active_source;
+    $Television->set_active_source
+        if $Television->can('set_active_source');
     $Controller->play_next_in_queue;
 }
 
