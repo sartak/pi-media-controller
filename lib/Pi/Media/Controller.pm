@@ -361,7 +361,7 @@ sub got_event {
     my $event = shift;
 
     if ($event->{type} eq 'television/input') {
-        if ($event->{input} ne 'Pi') {
+        if (($event->{input}||'') ne 'Pi') {
             $self->pause;
         }
     }
