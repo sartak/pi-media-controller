@@ -703,7 +703,8 @@ $server->register_service(sub {
                     $notify_cb->({ type => "television/input", hide => bool(1) }, $writer);
                 }
 
-                $notify_cb->($Controller->media_status, $writer);
+                $notify_cb->($Controller->playpause_status, $writer);
+                $notify_cb->($Controller->fastforward_status, $writer);
 
                 $notify_cb->({ type => 'subscriber' });
             };

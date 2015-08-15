@@ -86,10 +86,15 @@ has _game_home_button_pressed => (
 sub play_next_in_queue {
     my $self = shift;
 
-    my $media = $self->queue->shift
-        or return;
+    my $media = $self->queue->shift;
+    $self->notify({
+        type => 'fastforward',
+        show => bool($media),
+    };
 
-    $self->_play_media($media);
+    if ($media) {
+        $self->_play_media($media);
+    }
 }
 
 sub stop_playing {
@@ -159,6 +164,11 @@ sub _play_media {
         type => 'playpause',
         show => 'pause',
     });
+
+    $self->notify({
+        type => 'fastforward',
+        show => bool($media),
+    };
 
     my $handle = $self->_handle_for_media($media);
     $self->_handle($handle);
@@ -282,6 +292,10 @@ sub _finished_media {
 
     if ($self->_temporarily_stopped) {
         $self->_temporarily_stopped(0);
+        $self->notify({
+            type => 'fastforward',
+            show => bool(0),
+        };
     }
     else {
         $self->play_next_in_queue;
@@ -369,7 +383,7 @@ sub got_event {
     }
 }
 
-sub media_status {
+sub playpause_status {
     my $self = shift;
 
     if ($self->current_media && !$self->is_paused) {
@@ -384,6 +398,15 @@ sub media_status {
             show => 'play',
         };
     }
+}
+
+sub fastforward_status {
+    my $self = shift;
+
+    return {
+        type => 'fastforward',
+        show => bool($self->current_media),
+    };
 }
 
 1;
