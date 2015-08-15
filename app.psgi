@@ -91,7 +91,7 @@ push @extra_cb, sub { $Controller->got_event(@_) };
 
 my $TelevisionClass = $config->{television}{class} || 'Pi::Media::Television::HDMI';
 Mouse::load_class($TelevisionClass);
-my $tv_state = -e "tv.json" ? $json->decode(scalar slurp "tv.json") : {};
+my $tv_state = -e "tv.json" ? $json->decode(scalar slurp "tv.json") : { is_on => 1 };
 my $Television = $TelevisionClass->new(
     config    => $config,
     notify_cb => $notify_cb,
