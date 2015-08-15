@@ -367,5 +367,22 @@ sub got_event {
     }
 }
 
+sub media_status {
+    my $self = shift;
+
+    if ($self->current_media && !$self->is_paused) {
+        return {
+            type => 'playpause',
+            show => 'pause',
+        };
+    }
+    else {
+        return {
+            type => 'playpause',
+            show => 'play',
+        };
+    }
+}
+
 1;
 
