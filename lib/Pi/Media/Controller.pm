@@ -377,7 +377,7 @@ sub got_event {
 
     if ($event->{type} eq 'television/input') {
         if (($event->{input}||'') ne 'Pi') {
-            $self->pause;
+            $self->pause if $self->current_media && !$self->is_paused;
         }
     }
 }
