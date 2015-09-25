@@ -27,9 +27,14 @@ has parentId => (
     isa => 'Int',
 );
 
+has sort_order => (
+    is  => 'ro',
+    isa => 'Maybe[Int]',
+);
+
 sub TO_JSON {
     my $self = shift;
-    my $frozen = { map { $_ => $self->$_ } qw/id label color parentId/ };
+    my $frozen = { map { $_ => $self->$_ } qw/id label color parentId sort_order/ };
 
     $frozen->{requestPath} = $self->{requestPath} if $self->{requestPath};
     $frozen->{type} = 'tree';

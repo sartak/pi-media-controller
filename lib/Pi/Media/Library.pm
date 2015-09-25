@@ -194,17 +194,18 @@ sub _inflate_trees_from_sth {
 
     my @trees;
 
-    while (my ($id, $label_en, $label_ja, $parentId, $color, $query) = $sth->fetchrow_array) {
+    while (my ($id, $label_en, $label_ja, $parentId, $color, $query, $sort_order) = $sth->fetchrow_array) {
         my %label;
         $label{en} = $label_en if $label_en;
         $label{ja} = $label_ja if $label_ja;
 
         my $tree = Pi::Media::Tree->new(
-            id       => $id,
-            label    => \%label,
-            parentId => $parentId,
-            color    => $color,
-            query    => $query,
+            id         => $id,
+            label      => \%label,
+            parentId   => $parentId,
+            color      => $color,
+            query      => $query,
+            sort_order => $sort_order,
         );
 
         push @trees, $tree;
@@ -369,7 +370,7 @@ sub trees {
         push @bind, $args{parentId};
     }
 
-    my $query = 'SELECT id, label_en, label_ja, parentId, color, query FROM tree';
+    my $query = 'SELECT id, label_en, label_ja, parentId, color, query, sort_order FROM tree';
 
     $query .= ' WHERE ' . join(' AND ', @where) if @where;
     $query .= ' ORDER BY sort_order IS NULL, sort_order ASC, id ASC';
