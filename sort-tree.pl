@@ -49,7 +49,7 @@ my %saw_fixup;
 } @media;
 
 for my $i (1 .. $#media) {
-    my $media = $media[$i];
+    my $media = $media[$i-1];
 
     if (!defined($media->sort_order) || $media->sort_order != $i) {
         say(($media->sort_order // 'X') . ' -> ' . $i . ': ' . ($media->label->{en} || $media->label->{ja})) if $ARGV{verbose};
