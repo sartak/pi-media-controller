@@ -54,7 +54,7 @@ for my $i (1 .. $#media) {
     if (!defined($media->sort_order) || $media->sort_order != $i) {
         say(($media->sort_order // 'X') . ' -> ' . $i . ': ' . ($media->label->{en} || $media->label->{ja})) if $ARGV{verbose};
 
-        if ($media->type eq 'tree') {
+        if ($media->isa('Pi::Media::Tree')) {
             $library->update_tree($media, sort_order => $i);
         }
         else {
