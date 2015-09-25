@@ -16,7 +16,10 @@ my $config = $json->decode(scalar slurp "config.json");
 my $library = Pi::Media::Library->new(file => $ENV{PMC_DATABASE});
 $library->begin;
 
-my @media = $library->media(treeId => $treeId);
+my @media = (
+    $library->media(treeId => $treeId),
+    $library->trees(parentId => $treeId),
+);
 
 my %fixup = %{ $config->{sort_fixup}{$treeId} || {} };
 my %saw_fixup;
@@ -51,7 +54,12 @@ for my $i (1 .. $#media) {
     if (!defined($media->sort_order) || $media->sort_order != $i) {
         say(($media->sort_order // 'X') . ' -> ' . $i . ': ' . ($media->label->{en} || $media->label->{ja})) if $ARGV{verbose};
 
-        $library->update_media($media, sort_order => $i);
+        if ($media->type eq 'tree') {
+            $library->update_tree($media, sort_order => $i);
+        }
+        else {
+            $library->update_media($media, sort_order => $i);
+        }
     }
     else {
         say $i . ': ' . ($media->label->{en} || $media->label->{ja}) if $ARGV{verbose};

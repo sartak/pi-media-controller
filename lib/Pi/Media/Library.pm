@@ -520,6 +520,21 @@ sub update_media {
     $self->_dbh->do($query, {}, @bind, $media->id);
 }
 
+sub update_tree {
+    my ($self, $tree, %args) = @_;
+    my (@columns, @bind);
+
+    for my $column (keys %args) {
+        push @columns, $column;
+        push @bind, $args{$column};
+    }
+
+    my $query = 'UPDATE tree SET ';
+    $query .= join ', ', map { "$_=?" } @columns;
+    $query .= ' WHERE rowid=?;';
+    $self->_dbh->do($query, {}, @bind, $tree->id);
+}
+
 sub _absolutify_path {
     my ($self, $relative) = @_;
 
