@@ -10,6 +10,7 @@ my %seen = map { $_ => 1 } $library->paths;
 
 @ARGV or die "usage: $0 directories\n";
 
+my @bad;
 find(sub {
     return if -d $_;
 
@@ -23,5 +24,10 @@ find(sub {
 
     return if $seen{$file};
 
-    warn encode_utf8($file);
+    push @bad, $file;
 }, @ARGV);
+
+for my $file (sort @bad) {
+    warn encode_utf8($file);
+}
+
