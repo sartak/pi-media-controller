@@ -22,7 +22,7 @@ for my $media (@media) {
     $sha->addfile($handle);
     my $checksum = lc($sha->hexdigest);
 
-    my @dupes = $library->media(checksum => $checksum);
+    my @dupes = $library->media(all => 1, checksum => $checksum);
 
     $library->update_media($media, (
         checksum => $checksum,
