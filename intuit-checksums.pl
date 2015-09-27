@@ -22,10 +22,16 @@ for my $media (@media) {
     $sha->addfile($handle);
     my $checksum = lc($sha->hexdigest);
 
+    my @dupes = $library->media(checksum => $checksum);
+
     $library->update_media($media, (
         checksum => $checksum,
     ));
 
     print "[$checksum] " . $media->path . "\n";
+
+    for my $dupe (@dupes) {
+        print " ... same as " . $dupe->path . "\n";
+    }
 }
 
