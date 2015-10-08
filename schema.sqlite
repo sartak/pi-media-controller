@@ -45,6 +45,8 @@ CREATE TABLE IF NOT EXISTS tree_media_sort (
     mediaId INTEGER NOT NULL,
     treeId INTEGER NOT NULL,
     identifier TEXT,
+    label_en TEXT,
+    label_ja TEXT,
     sort_order INTEGER
 );
 

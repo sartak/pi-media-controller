@@ -425,15 +425,19 @@ sub media {
             push @where, "media.$column=?";
         }
     }
-
+    
     my $identifier_column = 'media.identifier';
+    my $label_en_column = 'media.label_en';
+    my $label_ja_column = 'media.label_ja';
     if ($args{source_tree}) {
         $identifier_column = "COALESCE(tree_media_sort.identifier, $identifier_column)";
+        $label_en_column = "COALESCE(tree_media_sort.label_en, $label_en_column)";
+        $label_ja_column = "COALESCE(tree_media_sort.label_ja, $label_ja_column)";
     }
 
     my $query = "
         SELECT
-            media.id, media.type, media.path, $identifier_column, media.label_en, media.label_ja, media.spoken_langs, media.subtitle_langs, media.immersible, media.streamable, media.durationSeconds, media.treeId, media.tags, media.checksum, media.sort_order
+            media.id, media.type, media.path, $identifier_column, $label_en_column, $label_ja_column, media.spoken_langs, media.subtitle_langs, media.immersible, media.streamable, media.durationSeconds, media.treeId, media.tags, media.checksum, media.sort_order
         FROM media
     ";
 
