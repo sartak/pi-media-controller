@@ -426,10 +426,16 @@ sub media {
         }
     }
 
+    if ($args{source_tree}) {
+        push @bind, $args{source_tree};
+        push @where, "tree_media_sort.treeId = ?";
+    }
+
     my $query = '
         SELECT
-            media.id, media.type, media.path, media.identifier, media.label_en, media.label_ja, media.spoken_langs, media.subtitle_langs, media.immersible, media.streamable, media.durationSeconds, media.treeId, media.tags, media.checksum, media.sort_order
+            media.id, media.type, media.path, coalesce(tree_media_sort.identifier, media.identifier), media.label_en, media.label_ja, media.spoken_langs, media.subtitle_langs, media.immersible, media.streamable, media.durationSeconds, media.treeId, media.tags, media.checksum, media.sort_order
         FROM media
+        LEFT JOIN tree_media_sort ON media.id = tree_media_sort.mediaId
     ';
 
     if (($args{where}||'') =~ /^JOIN /) {
@@ -441,7 +447,7 @@ sub media {
         }
         else {
             $query .= 'WHERE ' . join(' AND ', @where) if @where;
-            $query .= ' ORDER BY media.sort_order IS NULL, media.sort_order ASC, media.rowid ASC';
+            $query .= ' ORDER BY tree_media_sort.sort_order, media.sort_order IS NULL, media.sort_order ASC, media.rowid ASC';
         }
     }
 

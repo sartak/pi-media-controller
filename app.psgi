@@ -321,7 +321,7 @@ my %endpoints;
             }
 
             if ($where) {
-                push @response, $Library->media(where => $where);
+                push @response, $Library->media(where => $where, source_tree => $treeId);
             }
             else {
                 my @trees = $Library->trees(parentId => $treeId, query => $query);
