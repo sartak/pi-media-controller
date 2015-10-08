@@ -398,7 +398,7 @@ sub media {
         push @where, $args{where};
     }
     elsif (!$args{all}) {
-        push @where, 'treeId = ?';
+        push @where, 'media.treeId = ?';
         push @bind, $args{treeId};
     }
 
@@ -422,7 +422,7 @@ sub media {
     for my $column (qw/id type path identifier label_en label_ja spoken_langs subtitle_langs immersible streamable durationSeconds checksum sort_order/) {
         if ($args{$column}) {
             push @bind, $args{$column};
-            push @where, "$column=?";
+            push @where, "media.$column=?";
         }
     }
 
