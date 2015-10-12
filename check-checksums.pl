@@ -8,7 +8,25 @@ use Encode;
 
 my $library = Pi::Media::Library->new(file => $ENV{PMC_DATABASE});
 
-@ARGV or die "usage: $0 directories\n";
+@ARGV or die "usage: $0 directories|treeId\n";
+
+if (@ARGV == 1 && $ARGV[0] =~ /^\d+$/) {
+    my @trees = $library->trees(id => shift @ARGV);
+
+    while (my $tree = shift @trees) {
+        my @media;
+        if ($tree->query) {
+            @media = $library->media(where => $tree->query);
+        }
+        else {
+            @media = $library->media(treeId => $tree->id);
+        }
+
+        warn "Checking " . scalar(@media) . " media from tree " . $tree->id . "\n";
+        push @ARGV, map { $_->path } @media;
+        push @trees, $library->trees(parentId => $tree->id);
+    }
+}
 
 find(sub {
     return if -d $_;
