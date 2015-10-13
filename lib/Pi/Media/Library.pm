@@ -442,9 +442,8 @@ sub media {
     ";
 
     if ($args{source_tree}) {
-        $query .= 'LEFT JOIN tree_media_sort ON media.id = tree_media_sort.mediaId ';
+        $query .= 'LEFT JOIN tree_media_sort ON media.id = tree_media_sort.mediaId AND tree_media_sort.treeId = ? ';
         push @bind, $args{source_tree};
-        push @where, "(tree_media_sort.treeId IS NULL OR tree_media_sort.treeId = ?)";
     }
 
     if (($args{where}||'') =~ /^JOIN /) {
