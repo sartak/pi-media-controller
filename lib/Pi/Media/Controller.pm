@@ -194,7 +194,16 @@ sub _handle_for_media {
     my $self = shift;
     my $media = shift;
 
-    if ($media->isa('Pi::Media::File::Video')) {
+    if ($media->isa('Pi::Media::File::Stream')) {
+        open my $handle, '-|', 'youtube-dl', '-g', $media->url;
+        my $url = <$handle>;
+        close $handle;
+        my @args = ('-b', @{ $self->config->{omxplayer_args} || [] });
+        return AnyEvent::Run->new(
+            cmd => ['omxplayer', @args, $url],
+        );
+    }
+    elsif ($media->isa('Pi::Media::File::Video')) {
         my @args = ('-b', @{ $self->config->{omxplayer_args} || [] });
         return AnyEvent::Run->new(
             cmd => ['omxplayer', @args, $media->path],
