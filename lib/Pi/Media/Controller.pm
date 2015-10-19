@@ -138,7 +138,7 @@ sub _play_media {
     my $self = shift;
     my $media = shift;
 
-    if (!-r $media->path) {
+    if ($media->type ne 'stream' && !-r $media->path) {
         $self->notify({
             type  => 404,
             error => "Media file " . $media->path . " not found",
