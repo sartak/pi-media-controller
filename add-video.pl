@@ -84,7 +84,7 @@ sub duration_of {
         require MP4::Info;
         my $info = MP4::Info::get_mp4info($path);
         $secs = $info->{SECS};
-        if (!$secs) {
+        if (!$secs && ($info->{MM} || $info->{SS})) {
             $secs = $info->{MM} * 60 + $info->{SS};
         }
     }
