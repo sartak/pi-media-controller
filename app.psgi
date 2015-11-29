@@ -358,6 +358,28 @@ my %endpoints;
         },
     },
 
+    '/stream' => {
+        GET => sub {
+            my $req = shift;
+
+            my $id = $req->param('video') or do {
+                my $res = $req->new_response(400);
+                $res->body("video required");
+                return $res;
+            };
+
+            my $video = $Library->video_with_id($id) or do {
+                my $res = $req->new_response(404);
+                $res->body("video not found");
+                return $res;
+            };
+
+            my $path = $video->path;
+
+            return Plack::App::File->new->serve_path($req->env, $path);
+        },
+    },
+
     '/pi' => {
         SHUTDOWN => sub {
             my $req = shift;
