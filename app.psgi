@@ -362,19 +362,19 @@ my %endpoints;
         GET => sub {
             my $req = shift;
 
-            my $id = $req->param('video') or do {
+            my $id = $req->param('media') or do {
                 my $res = $req->new_response(400);
-                $res->body("video required");
+                $res->body("media required");
                 return $res;
             };
 
-            my $video = $Library->video_with_id($id) or do {
+            my $media = $Library->media_with_id($id) or do {
                 my $res = $req->new_response(404);
-                $res->body("video not found");
+                $res->body("media not found");
                 return $res;
             };
 
-            my $path = $video->path;
+            my $path = $media->path;
 
             return Plack::App::File->new->serve_path($req->env, $path);
         },
