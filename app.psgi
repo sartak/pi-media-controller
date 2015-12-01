@@ -21,6 +21,7 @@ use Pi::Media::AC;
 use Pi::Media::File::Stream;
 
 our $CURRENT_USER;
+our $CURRENT_PASS;
 
 select((select(STDERR), $|=1)[0]);
 
@@ -715,6 +716,7 @@ $server->register_service(sub {
     }
 
     local $main::CURRENT_USER = $user;
+    local $main::CURRENT_PASS = $pass;
 
     warn $req->method . ' ' . $req->path_info;
 
