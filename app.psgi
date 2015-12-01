@@ -706,7 +706,7 @@ $server->register_service(sub {
     }
 
     if (!$auth_ok) {
-        warn "Unauthorized request" . ($user ? " from user '$user'" : "") . "\n";
+        warn "Unauthorized request" . ($user ? " from user '$user'" : "") . " for " . $req->method . ' ' . $req->path_info . "\n";
         my $res = $req->new_response(401);
         $res->header('X-PMC-Time' => scalar gmtime);
         $res->header('Cache-control' => 'private, max-age=0, no-store');
