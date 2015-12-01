@@ -697,8 +697,10 @@ $server->register_service(sub {
 
     my $auth_ok;
     my $user;
-    if ($user = $req->header('X-PMC-Username')) {
-        if (my $pass = $req->header('X-PMC-Password')) {
+    my $pass;
+
+    if ($user = ($req->header('X-PMC-Username') || $req->param('user'))) {
+        if ($pass = ($req->header('X-PMC-Password') || $req->param('pass'))) {
             $auth_ok = $Library->confirm_auth($user, $pass);
         }
     }
