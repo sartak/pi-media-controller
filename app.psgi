@@ -381,9 +381,58 @@ my %endpoints;
                 return $res;
             };
 
-            my $path = $media->path;
+            my $user = $main::CURRENT_USER;
+            my $pass = $main::CURRENT_PASS;
+            return sub {
+                my $responder = shift;
 
-            return Plack::App::File->new->serve_path($req->env, $path);
+                my $dir = "/tmp/pmc/";
+                my $rand;
+                for (0..7) { $rand .= chr( int(rand(25) + 65) ); }
+                $dir .= $rand;
+                system("mkdir", $dir);
+
+                my $path = $media->path;
+                my @command = (
+                    "ffmpeg",
+                    "-i", $path,
+                    "-vcodec", "copy",
+                    "-acodec", "copy",
+                    "-f", "segment",
+                    "-segment_list", "$dir/list.m3u8",
+                    "-segment_time", 10,
+                    "-segment_format", "mpeg_ts",
+                    "-vbsf", "h264_mp4toannexb",
+                    "-flags", "-global_header",
+                    "$dir/segment%05d.ts",
+                );
+                warn join(' ', @command) . "\n";
+                system(@command);
+
+                my @files = glob("$dir/*");
+                my $count = @files - 1;
+                my $app = $req->header('X-App-Name');
+                $app = $app ? "/$app" : "";
+
+                my $list = join "\n",
+                    "#EXTM3U",
+                    "#EXT-X-PLAYLIST-TYPE:VOD",
+                    "#EXT-X-TARGETDURATION:10",
+                    "#EXT-X-VERSION:3",
+                    "#EXT-X-MEDIA-SEQUENCE:0",
+                    (
+                        map { ("#EXTINF:10.0,",
+                               sprintf "$app/static/$rand/segment%05d.ts?user=$user&pass=$pass", $_) }
+                        (0 .. $count-1)
+                    ),
+                    "#EXT-X-ENDLIST";
+
+                warn $list;
+
+                my $res = $req->new_response(200);
+                $res->body($list);
+                $responder->($res->finalize);
+            };
         },
     },
 
