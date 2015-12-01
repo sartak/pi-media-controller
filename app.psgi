@@ -354,6 +354,12 @@ my %endpoints;
                 }
             }
 
+            for my $thing (@response) {
+                if ($thing->isa('Pi::Media::File::Video')) {
+                    $thing->{streamPath} = "/stream?media=" . $thing->id;
+                }
+            }
+
             $res->body(encode_utf8($json->encode(\@response)));
             return $res;
         },

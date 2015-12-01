@@ -34,6 +34,8 @@ sub TO_JSON {
         $frozen->{$_} = $self->$_;
     };
 
+    $frozen->{streamPath} = $self->{streamPath} if $self->{streamPath};
+
     return $frozen;
 }
 
