@@ -48,7 +48,7 @@ my %saw_fixup;
     $a->path cmp $b->path
 } @media;
 
-for my $i (1 .. $#media) {
+for my $i (1 .. $#media+1) {
     my $media = $media[$i-1];
 
     if (!defined($media->sort_order) || $media->sort_order != $i) {
