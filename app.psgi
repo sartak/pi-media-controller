@@ -748,7 +748,7 @@ my %endpoints;
     },
 );
 
-$server->register_service(sub {
+my $app = sub {
     my $req = Plack::Request->new(shift);
 
     my $auth_ok;
@@ -840,7 +840,18 @@ $server->register_service(sub {
         return $res->finalize;
     }
     return $res;
-});
+};
+
+use Plack::Builder;
+$app = builder {
+    enable "Plack::Middleware::Static",
+        path => sub { s!^/+static/!! },
+        root => '/tmp/pmc';
+    $app;
+};
+
+
+$server->register_service($app);
 
 warn "Ready!\n";
 
