@@ -369,6 +369,14 @@ my %endpoints;
         GET => sub {
             my $req = shift;
 
+            our %session;
+            my $session_id = $req->header('X-Playback-Session-ID');
+            if ($session_id && $session{$session_id}) {
+                my $res = $req->new_response(200);
+                $res->body($session{$session_id});
+                return $res;
+            }
+
             my $id = $req->param('media') or do {
                 my $res = $req->new_response(400);
                 $res->body("media required");
@@ -427,6 +435,7 @@ my %endpoints;
                     ),
                     "#EXT-X-ENDLIST";
 
+                $session{$session_id} = $list if $session_id;
                 warn $list;
 
                 my $res = $req->new_response(200);
