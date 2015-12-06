@@ -31,7 +31,7 @@ for my $media (@media) {
         push @subtitle, '?';
 
         for my $stream (@streams) {
-            my ($hint, $type, $next) = $stream =~ /^Stream #\d+.\d+(?:\((\w+)\))?: (\w+): (\w+)/ or die "unparseable stream: " . $stream;
+            my ($hint, $type, $next) = $stream =~ /^Stream #\d+.\d+(?:\((\w+)\))?: (\w+): (\w+)?/ or die "unparseable stream: " . $stream;
             my $lang = '?';
             $lang .= '/' . $hint if $hint && $hint ne 'und';
 
@@ -49,6 +49,9 @@ for my $media (@media) {
             elsif ($type eq 'Subtitle') {
                 push @subtitle, $lang;
                 $seen{$lang}++;
+            }
+            elsif ($type eq 'Attachment' || $type eq 'Data') {
+                # skip
             }
             else {
                 die "invalid type $type: $stream";
