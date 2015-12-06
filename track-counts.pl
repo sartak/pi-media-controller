@@ -15,8 +15,6 @@ my @media = $library->media(
     emptyLangs     => 1,
 );
 
-my %seen;
-
 for my $media (@media) {
     next unless -e $media->path;
     eval {
@@ -44,11 +42,9 @@ for my $media (@media) {
             }
             elsif ($type eq 'Audio') {
                 push @spoken, $lang;
-                $seen{$lang}++;
             }
             elsif ($type eq 'Subtitle') {
                 push @subtitle, $lang;
-                $seen{$lang}++;
             }
             elsif ($type eq 'Attachment' || $type eq 'Data') {
                 # skip
@@ -81,5 +77,3 @@ for my $media (@media) {
     };
     warn $media->path . ': ' . $@ if $@;
 }
-
-use Data::Dumper; warn Dumper(\%seen) if @media > 10;
