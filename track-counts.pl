@@ -26,8 +26,8 @@ for my $media (@media) {
 
     my (@video, @spoken, @subtitle);
 
-    # assume softsubs
-    push @subtitle, '';
+    # possible softsubs
+    push @subtitle, '?';
 
     for my $stream (@streams) {
         my ($hint, $type, $next) = $stream =~ /^Stream #\d+.\d+(?:\((\w+)\))?: (\w+): (\w+)/ or die $media->path . " unparseable stream: " . $stream;
