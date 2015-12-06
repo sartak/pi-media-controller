@@ -18,62 +18,65 @@ my @media = $library->media(
 my %seen;
 
 for my $media (@media) {
-    next unless -e $media->path;
-    run3 [ "ffmpeg", "-i", $media->path ], \undef, \undef, \my $ffmpeg;
+    eval {
+        next unless -e $media->path;
+        run3 [ "ffmpeg", "-i", $media->path ], \undef, \undef, \my $ffmpeg;
 
-    my @streams = ($ffmpeg =~ /(Stream #\d+.\d+(?:\(\w+\))?: .*)/g);
-    die $media->path . " no streams: " . $ffmpeg if !@streams;
+        my @streams = ($ffmpeg =~ /(Stream #\d+.\d+(?:\(\w+\))?: .*)/g);
+        die "no streams: " . $ffmpeg if !@streams;
 
-    my (@video, @spoken, @subtitle);
+        my (@video, @spoken, @subtitle);
 
-    # possible softsubs
-    push @subtitle, '?';
+        # possible softsubs
+        push @subtitle, '?';
 
-    for my $stream (@streams) {
-        my ($hint, $type, $next) = $stream =~ /^Stream #\d+.\d+(?:\((\w+)\))?: (\w+): (\w+)/ or die $media->path . " unparseable stream: " . $stream;
-        my $lang = '?';
-        $lang .= '/' . $hint if $hint && $hint ne 'und';
+        for my $stream (@streams) {
+            my ($hint, $type, $next) = $stream =~ /^Stream #\d+.\d+(?:\((\w+)\))?: (\w+): (\w+)/ or die "unparseable stream: " . $stream;
+            my $lang = '?';
+            $lang .= '/' . $hint if $hint && $hint ne 'und';
 
-        if ($type eq 'Video' && $next eq 'mjpeg') {
-            $type = 'Subtitle';
+            if ($type eq 'Video' && $next eq 'mjpeg') {
+                $type = 'Subtitle';
+            }
+
+            if ($type eq 'Video') {
+                push @video, $stream;
+            }
+            elsif ($type eq 'Audio') {
+                push @spoken, $lang;
+                $seen{$lang}++;
+            }
+            elsif ($type eq 'Subtitle') {
+                push @subtitle, $lang;
+                $seen{$lang}++;
+            }
+            else {
+                die "invalid type $type: $stream";
+            }
         }
 
-        if ($type eq 'Video') {
-            push @video, $stream;
+        die "not just 1 video: " . $ffmpeg if @video != 1;
+
+        my $spoken = join ',', @spoken;
+        my $subtitle = join ',', @subtitle;
+
+        if ($media->path =~ m{/TV/日本語/} && ($spoken eq '?' || $spoken eq '?/jpn')) {
+            $spoken = 'ja';
         }
-        elsif ($type eq 'Audio') {
-            push @spoken, $lang;
-            $seen{$lang}++;
-        }
-        elsif ($type eq 'Subtitle') {
-            push @subtitle, $lang;
-            $seen{$lang}++;
-        }
-        else {
-            die $media->path . " invalid type $type: $stream";
-        }
-    }
 
-    die $media->path . " not just 1 video: " . $ffmpeg if @video != 1;
+        my %updates;
+        $updates{spoken_langs} = $spoken if join('', @{ $media->spoken_langs }) eq '??';
+        $updates{subtitle_langs} = $subtitle if join('', @{ $media->subtitle_langs }) eq '??';
 
-    my $spoken = join ',', @spoken;
-    my $subtitle = join ',', @subtitle;
+        $library->update_media($media, %updates);
 
-    if ($media->path =~ m{/TV/日本語/} && ($spoken eq '?' || $spoken eq '?/jpn')) {
-        $spoken = 'ja';
-    }
+        print "[$spoken] [$subtitle] " if defined($updates{spoken_langs}) && defined($updates{subtitle_langs});
+        print "[spoken:$spoken] " if defined($updates{spoken_langs}) && !defined($updates{subtitle_langs});
+        print "[subs:$subtitle] " if !defined($updates{spoken_langs}) && defined($updates{subtitle_langs});
 
-    my %updates;
-    $updates{spoken_langs} = $spoken if join('', @{ $media->spoken_langs }) eq '??';
-    $updates{subtitle_langs} = $subtitle if join('', @{ $media->subtitle_langs }) eq '??';
-
-    $library->update_media($media, %updates);
-
-    print "[$spoken] [$subtitle] " if defined($updates{spoken_langs}) && defined($updates{subtitle_langs});
-    print "[spoken:$spoken] " if defined($updates{spoken_langs}) && !defined($updates{subtitle_langs});
-    print "[subs:$subtitle] " if !defined($updates{spoken_langs}) && defined($updates{subtitle_langs});
-
-    print encode_utf8($media->path), "\n";
+        print encode_utf8($media->path), "\n";
+    };
+    warn $media->path . ': ' . $@ if $@;
 }
 
 use Data::Dumper; warn Dumper(\%seen) if @media > 10;
