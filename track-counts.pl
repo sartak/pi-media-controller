@@ -18,8 +18,8 @@ my @media = $library->media(
 my %seen;
 
 for my $media (@media) {
+    next unless -e $media->path;
     eval {
-        next unless -e $media->path;
         run3 [ "ffmpeg", "-i", $media->path ], \undef, \undef, \my $ffmpeg;
 
         my @streams = ($ffmpeg =~ /(Stream #\d+.\d+(?:\(\w+\))?: .*)/g);
