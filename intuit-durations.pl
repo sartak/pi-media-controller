@@ -78,7 +78,7 @@ my $library = Pi::Media::Library->new(file => $ENV{PMC_DATABASE});
             print "[$secs] " . $video->path . "\n";
         }
         else {
-            warn $video->path
+            warn $video->path;
         }
     }
 }

@@ -419,6 +419,10 @@ sub media {
         push @where, 'checksum IS NULL';
     }
 
+    if ($args{emptyLangs}) {
+        push @where, "(spoken_langs='??' OR subtitle_langs='??')";
+    }
+
     for my $column (qw/id type path identifier label_en label_ja spoken_langs subtitle_langs immersible streamable durationSeconds checksum sort_order/) {
         if ($args{$column}) {
             push @bind, $args{$column};

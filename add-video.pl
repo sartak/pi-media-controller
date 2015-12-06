@@ -19,12 +19,6 @@ my $identifier = $ARGV{identifier};
 warn "identifier probably shouldn't start with 0\n"
 	if $identifier && $identifier =~ /^0\d/;
 
-my $spoken_langs   = $ARGV{spoken_langs} or usage("spoken_langs required");
-defined(my $subtitle_langs = $ARGV{subtitle_langs}) or usage("subtitle_langs required");
-
-$spoken_langs =~ m{^[a-z,\?]+$} or usage("spoken_langs must be a comma-separated list");
-$subtitle_langs =~ m{^[a-z,\?]*$} or usage("subtitle_langs must be a comma-separated list");
-
 exists($ARGV{immersible}) || exists($ARGV{noimmersible}) or usage("immersible or noimmersible required");
 exists($ARGV{streamable}) || exists($ARGV{unstreamable}) or usage("streamable or unstreamable required");
 
@@ -53,8 +47,8 @@ my $id = $library->insert_video(
     identifier      => $identifier,
     label_en        => $label_en,
     label_ja        => $label_ja,
-    spoken_langs    => [split ',', $spoken_langs],
-    subtitle_langs  => [split ',', $subtitle_langs],
+    spoken_langs    => ['??'],
+    subtitle_langs  => ['??'],
     immersible      => $immersible,
     streamable      => $streamable,
     durationSeconds => duration_of($path),
@@ -70,7 +64,7 @@ else {
 
 sub usage {
     my $reason = shift;
-    die "$reason\nusage: $0 [--treeId=treeId OR --segments=foo --segments=bar] [--label_en=LABEL --label_ja=LABEL] [--identifier=IDENTIFIER] [--ignore-missing-file] --spoken_langs=en,ja --subtitle_langs=en,ja --immersible|--noimmersible --streamable|--unstreamable PATH";
+    die "$reason\nusage: $0 [--treeId=treeId OR --segments=foo --segments=bar] [--label_en=LABEL --label_ja=LABEL] [--identifier=IDENTIFIER] [--ignore-missing-file] --immersible|--noimmersible --streamable|--unstreamable PATH";
 }
 
 sub duration_of {
