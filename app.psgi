@@ -27,7 +27,7 @@ select((select(STDERR), $|=1)[0]);
 
 my $json = JSON->new->convert_blessed(1);
 
-die "Need config.json" unless -r "config.json";
+die "Need config.json" unless -e "config.json";
 my $config = $json->decode(scalar slurp "config.json");
 
 $config->{location} = $ENV{PMC_LOCATION} if $ENV{PMC_LOCATION};

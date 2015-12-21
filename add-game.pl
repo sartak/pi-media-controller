@@ -29,7 +29,7 @@ my $path = $ARGV[0] or usage("path required");
 @ARGV == 1 or usage("must have no stray args: " . join(', ', @ARGV));
 
 $path =~ s/~/$ENV{HOME}/;
-$ARGV{'ignore-missing-file'} || $path =~ /^real:/ || (-r $path && !-d _)
+$ARGV{'ignore-missing-file'} || $path =~ /^real:/ || (-e $path && !-d _)
     or die "path $path must be a readable file, or real:..., or pass --ignore-missing-file";
 
 my $streamable = $ARGV{streamable} ? 1 : 0;

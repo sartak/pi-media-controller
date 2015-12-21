@@ -30,7 +30,7 @@ my $path = $ARGV[0] or usage("path required");
 @ARGV == 1 or usage("must have no stray args: " . join(', ', @ARGV));
 
 $path =~ s/~/$ENV{HOME}/;
-$ARGV{'ignore-missing-file'} || (-r $path && !-d _)
+$ARGV{'ignore-missing-file'} || (-e $path && !-d _)
     or die "path $path must be a readable file, or pass --ignore-missing-file";
 
 my $immersible = $ARGV{immersible} ? 1 : 0;

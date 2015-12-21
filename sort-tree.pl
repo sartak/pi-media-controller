@@ -9,7 +9,7 @@ use Pi::Media::Library;
 
 my $treeId = shift or die "usage: $0 [--verbose] treeId\n";
 
-die "Need config.json" unless -r "config.json";
+die "Need config.json" unless -e "config.json";
 my $json = JSON->new->utf8->convert_blessed(1);
 my $config = $json->decode(scalar slurp "config.json");
 
