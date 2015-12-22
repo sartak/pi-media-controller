@@ -16,6 +16,19 @@ for my $media ($library->media(all => 1, excludeViewing => 1)) {
         warn $media->id . ": label has extraneous space\n";
     }
 
+    if ($media->can('spoken_langs')) {
+        for my $lang (@{ $media->spoken_langs }) {
+            next if $lang eq '_' || $media->label_for_language($lang);
+            warn $media->id . ": unknown spoken language '$lang'\n";
+        }
+    }
+    if ($media->can('subtitle_langs')) {
+        for my $lang (@{ $media->subtitle_langs }) {
+            next if $lang eq '_' || $media->label_for_language($lang);
+            warn $media->id . ": unknown subtitle language '$lang'\n";
+        }
+    }
+
     unless ($media->path =~ /^real:/ || (-e $media->path && !-d _)) {
         warn $media->id . ': cannot read ' . $media->path . "\n";
     }
