@@ -24,7 +24,7 @@ for my $media ($library->media(all => 1, excludeViewing => 1)) {
     }
     if ($media->can('subtitle_langs')) {
         for my $lang (@{ $media->subtitle_langs }) {
-            next if $lang eq '_' || $media->label_for_language($lang);
+            next if $lang eq '_' || $lang eq '' || $media->label_for_language($lang);
             warn $media->id . ": unknown subtitle language '$lang'\n";
         }
     }
