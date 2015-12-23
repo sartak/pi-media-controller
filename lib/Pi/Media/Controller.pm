@@ -400,18 +400,22 @@ sub set_audio_track {
 
     my $current = $self->_audio_track;
 
+warn "desired($desired) vs current($current)";
+
     if ($desired == $current) {
         return;
     }
 
-    while ($current > $desired) {
-        $self->previous_audio;
-        $current--;
-    }
-
-    while ($current < $desired) {
+    while ($desired > $current) {
         $self->next_audio;
         $current++;
+warn "+1";
+    }
+
+    while ($desired < $current) {
+        $self->previous_audio;
+        $current--;
+warn "-1";
     }
 
     $self->_set_audio_track($current);
