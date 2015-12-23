@@ -202,6 +202,13 @@ my %endpoints;
     },
     '/current/audio' => {
         GET => sub {
+            my $req = shift;
+
+            my $res = $req->new_response(200);
+            my $body = $Controller->audio_track;
+            $res->body($body);
+
+            return $res;
         },
         PUT => sub {
             my $req = shift;

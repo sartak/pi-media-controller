@@ -395,11 +395,14 @@ sub set_audio_track {
         return;
     }
 
-    if ($desired == $self->_audio_track) {
-        return;
-    }
+    $desired = 0 if $desired < 0;
+    $desired = $#{ $self->current_media->spoken_langs } if $desired > $#{ $self->current_media->spoken_langs };
 
     my $current = $self->_audio_track;
+
+    if ($desired == $current) {
+        return;
+    }
 
     while ($current > $desired) {
         $self->previous_audio;
