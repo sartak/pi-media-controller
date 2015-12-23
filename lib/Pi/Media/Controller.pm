@@ -398,7 +398,7 @@ sub set_audio_track {
     $desired = 0 if $desired < 0;
     $desired = $#{ $self->current_media->spoken_langs } if $desired > $#{ $self->current_media->spoken_langs };
 
-    my $current = $self->_audio_track;
+    my $current = $self->audio_track;
 
 warn "desired($desired) vs current($current)";
 
