@@ -138,7 +138,6 @@ sub _run_command {
     my $command = shift;
 
     return unless $self->_handle;
-    warn "Running command '$command'";
     $self->_handle->push_write($command);
 }
 
@@ -401,8 +400,6 @@ sub set_audio_track {
 
     my $current = $self->audio_track;
 
-warn "desired($desired) vs current($current)";
-
     if ($desired == $current) {
         return;
     }
@@ -410,13 +407,11 @@ warn "desired($desired) vs current($current)";
     while ($desired > $current) {
         $self->next_audio;
         $current++;
-warn "+1";
     }
 
     while ($desired < $current) {
         $self->previous_audio;
         $current--;
-warn "-1";
     }
 
     $self->_set_audio_track($current);
