@@ -74,8 +74,8 @@ has has_toggled_subtitles => (
     writer => '_set_has_toggled_subtitles',
 );
 
-has _audio_track => (
-    is      => 'rw',
+has audio_track => (
+    is      => 'ro',
     isa     => 'Int',
     default => 0,
     writer  => '_set_audio_track',
