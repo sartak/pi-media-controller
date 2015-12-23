@@ -74,6 +74,13 @@ has has_toggled_subtitles => (
     writer => '_set_has_toggled_subtitles',
 );
 
+has _audio_track => (
+    is      => 'rw',
+    isa     => 'Int',
+    default => 0,
+    writer  => '_set_audio_track',
+);
+
 # game specific
 
 has _game_home_button_pressed => (
@@ -150,6 +157,7 @@ sub _play_media {
     warn "Playing $media ...\n";
 
     $self->_set_is_paused(0);
+    $self->_set_audio_track(0);
     $self->_set_current_media($media);
     $self->_start_time(time);
     $self->_game_home_button_pressed(1);
@@ -378,6 +386,36 @@ sub toggle_or_next_subtitles {
         $self->_set_has_toggled_subtitles(1);
         return $self->toggle_subtitles;
     }
+}
+
+sub set_audio_track {
+    my $self    = shift;
+    my $desired = shift;
+    unless ($self->current_media && $self->current_media->isa('Pi::Media::File::Video')) {
+        return;
+    }
+
+    if ($desired == $self->_audio_track) {
+        return;
+    }
+
+    my $current = $self->_audio_track;
+
+    while ($current > $desired) {
+        $self->previous_audio;
+        $current--;
+    }
+
+    while ($current < $desired) {
+        $self->next_audio;
+        $current++;
+    }
+
+    $self->_set_audio_track($current);
+    $self->notify({
+        type  => 'audio_track',
+        track => $current,
+    });
 }
 
 sub got_event {

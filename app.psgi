@@ -189,11 +189,6 @@ my %endpoints;
                 return $req->new_response(204);
             }
         },
-        NEXTAUDIO => sub {
-            my $req = shift;
-            $Controller->next_audio;
-            return $req->new_response(200);
-        },
         NEXTSUBS => sub {
             my $req = shift;
             $Controller->toggle_or_next_subtitles;
@@ -204,6 +199,17 @@ my %endpoints;
         # previous_subtitles toggle_subtitles
         # decrease_subtitle_delay increase_subtitle_delay decrease_volume
         # increase_volume
+    },
+    '/current/audio' => {
+        GET => sub {
+        },
+        PUT => sub {
+            my $req = shift;
+
+            $Controller->set_audio_track($req->param('track'));
+
+            return $endpoints{'/current/audio'}{GET}->($req);
+        },
     },
 
     '/queue' => {
