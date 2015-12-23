@@ -138,6 +138,7 @@ sub _run_command {
     my $command = shift;
 
     return unless $self->_handle;
+    warn "Running command '$command'";
     $self->_handle->push_write($command);
 }
 
