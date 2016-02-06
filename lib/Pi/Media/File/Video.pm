@@ -74,6 +74,32 @@ sub label_for_language {
     return $language_map{$lang};
 }
 
+sub _fixup_langs {
+    my $self = shift;
+    my @langs = @_;
+
+    my @out;
+    for my $i (0..$#langs) {
+        next if $langs[$i] eq '_';
+        push @out, {
+            id    => $i,
+            type  => $langs[$i],
+            label => $language_map{$langs[$i]} || $langs[$i],
+        };
+    }
+    return \@out;
+}
+
+sub available_audio {
+    my $self = shift;
+    return $self->_fixup_langs(@{ $self->spoken_langs });
+}
+
+sub available_subtitles {
+    my $self = shift;
+    return $self->_fixup_langs(@{ $self->subtitle_langs });
+}
+
 sub TO_JSON {
     my $self = shift;
     my $frozen = $self->SUPER::TO_JSON(@_);
@@ -82,19 +108,8 @@ sub TO_JSON {
         $frozen->{$_} = $self->$_;
     }
 
-    for my $type (qw/spoken_langs subtitle_langs/) {
-        my @langs = @{ $self->$type };
-        my @out;
-        for my $i (0..$#langs) {
-            next if $langs[$i] eq '_';
-            push @out, {
-                id    => $i,
-                type  => $langs[$i],
-                label => $language_map{$langs[$i]} || $langs[$i],
-            };
-        }
-        $frozen->{$type} = \@out;
-    }
+    $frozen->{spoken_langs} = $self->available_audio;
+    $frozen->{subtitle_langs} = $self->available_subtitles;
 
     $frozen->{streamPath} = $self->{streamPath} if $self->{streamPath};
 

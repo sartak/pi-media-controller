@@ -138,10 +138,11 @@ sub audio_status {
     my $media = $self->current_media;
 
     if ($media && $media->isa('Pi::Media::File::Video')) {
+        my $available = $media->available_audio;
         return {
             type      => 'audio',
-            available => $media->spoken_langs,
-            selected  => $media->spoken_langs->[$self->audio_track],
+            available => $available,
+            selected  => $available->[$self->audio_track],
         };
     }
     else {
