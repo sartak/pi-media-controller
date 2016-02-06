@@ -824,6 +824,8 @@ my $app = sub {
                 $notify_cb->($Controller->playpause_status, $writer);
                 $notify_cb->($Controller->fastforward_status, $writer);
 
+                $notify_cb->($Controller->audio_status, $writer);
+
                 $notify_cb->({ type => 'subscriber' });
             };
         }

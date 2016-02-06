@@ -133,6 +133,30 @@ sub notify {
     $self->notify_cb->(@_);
 }
 
+sub audio_status {
+    my $self = shift;
+    my $media = $self->current_media;
+
+    if ($media && $media->isa('Pi::Media::File::Video')) {
+        return {
+            type      => 'audio',
+            available => $media->spoken_langs,
+            selected  => $media->spoken_langs->[$self->audio_track],
+        };
+    }
+    else {
+        return {
+            type      => 'audio',
+            available => [],
+        };
+    }
+}
+
+sub _notify_audio {
+    my $self = shift;
+    $self->notify($self->audio_status);
+}
+
 sub _run_command {
     my $self = shift;
     my $command = shift;
@@ -176,6 +200,8 @@ sub _play_media {
         type   => 'fastforward',
         status => $media ? 'show' : 'hide',
     });
+
+    $self->_notify_audio;
 
     my $handle = $self->_handle_for_media($media);
     $self->_handle($handle);
@@ -306,6 +332,8 @@ sub _finished_media {
         status => 'play',
     });
 
+    $self->_notify_audio;
+
     if ($self->_temporarily_stopped) {
         $self->_temporarily_stopped(0);
         $self->notify({
@@ -415,10 +443,7 @@ sub set_audio_track {
     }
 
     $self->_set_audio_track($current);
-    $self->notify({
-        type  => 'audio_track',
-        track => $current,
-    });
+    $self->_notify_audio;
 }
 
 sub got_event {
