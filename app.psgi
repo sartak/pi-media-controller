@@ -367,9 +367,11 @@ my %endpoints;
                 }
             }
 
-            for my $thing (@response) {
-                if ($thing->isa('Pi::Media::File::Video')) {
-                    $thing->{streamPath} = "/stream?media=" . $thing->id;
+            unless ($config->{disable_streaming}) {
+                for my $thing (@response) {
+                    if ($thing->isa('Pi::Media::File::Video')) {
+                        $thing->{streamPath} = "/stream?media=" . $thing->id;
+                    }
                 }
             }
 
@@ -381,6 +383,10 @@ my %endpoints;
     '/stream' => {
         GET => sub {
             my $req = shift;
+
+            if ($config->{disable_streaming}) {
+                return $req->new_response(400);
+            }
 
             our %session;
             my $session_id = $req->header('X-Playback-Session-ID');
