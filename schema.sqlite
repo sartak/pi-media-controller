@@ -47,7 +47,8 @@ CREATE TABLE IF NOT EXISTS tree_media_sort (
     identifier TEXT,
     label_en TEXT,
     label_ja TEXT,
-    sort_order INTEGER
+    sort_order INTEGER,
+    UNIQUE(mediaId, treeId)
 );
 
 CREATE INDEX media_treeId ON media(treeId);
