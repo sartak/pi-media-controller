@@ -24,8 +24,10 @@ my $i = 0;
 for my $media (@media) {
     # no way we can guess something useful, so at least make it easy to manage
     my $identifier = $media->label->{en} || $media->label->{ja};
-    $sth->execute($media->id, $treeId, $identifier, ++$i);
-    print $media->id . " ($i): $identifier\n";
+    my $result = $sth->execute($media->id, $treeId, $identifier, ++$i);
+    if ($result) {
+        print $media->id . " ($i): $identifier\n";
+    }
 }
 
 $library->commit;
