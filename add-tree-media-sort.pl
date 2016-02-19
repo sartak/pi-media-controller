@@ -18,7 +18,7 @@ if (!$tree->query) {
 
 my @media = $library->media(where => $tree->query);
 
-my $sth = $library->_dbh->prepare("INSERT INTO tree_media_sort (mediaId, treeId, identifier, sort_order) VALUES (?, ?, ?, ?);");
+my $sth = $library->_dbh->prepare("INSERT OR IGNORE INTO tree_media_sort (mediaId, treeId, identifier, sort_order) VALUES (?, ?, ?, ?);");
 
 my $i = 0;
 for my $media (@media) {
