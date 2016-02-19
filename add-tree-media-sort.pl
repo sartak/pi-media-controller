@@ -25,7 +25,7 @@ for my $media (@media) {
     # no way we can guess something useful, so at least make it easy to manage
     my $identifier = $media->label->{en} || $media->label->{ja};
     my $result = $sth->execute($media->id, $treeId, $identifier, ++$i);
-    if ($result) {
+    if ($result > 0) {
         print $media->id . " ($i): $identifier\n";
     }
 }
