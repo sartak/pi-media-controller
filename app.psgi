@@ -265,6 +265,17 @@ my %endpoints;
                     $res->body("media not found");
                     return $res;
                 };
+
+                # XXX this should prompt instead
+                if ($media->type eq 'video') {
+                    my $seconds = $Library->initial_seconds_for_video($media);
+                    if ($seconds && $seconds > $media->duration_seconds * .1) {
+                        # context is important!
+                        $seconds -= 120;
+
+                        $media->{initial_seconds} = $seconds;
+                    }
+                }
             }
 
             warn "Queued $media ...\n";
