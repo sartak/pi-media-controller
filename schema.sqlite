@@ -33,6 +33,7 @@ CREATE TABLE IF NOT EXISTS viewing (
     endTime INTEGER NOT NULL,
     initialSeconds INTEGER,
     elapsedSeconds INTEGER,
+    audioTrack INTEGER,
     location TEXT,
     who TEXT
 );
