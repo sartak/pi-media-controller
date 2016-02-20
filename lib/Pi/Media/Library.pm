@@ -518,7 +518,7 @@ sub add_viewing {
     $self->_dbh->do('
         INSERT INTO viewing
             (mediaId, startTime, endTime, initialSeconds, elapsedSeconds, location, who)
-        VALUES (?, ?, ?, ?, ?, ?)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
     ;', {}, (
         $args{media}->id,
         $args{start_time},

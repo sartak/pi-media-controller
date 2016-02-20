@@ -337,7 +337,7 @@ sub _finished_media {
         start_time      => $self->_start_time,
         end_time        => $end_time,
         initial_seconds => $initial_seconds,
-        elapsed_seconds => $end_seconds - $initial_seconds,
+        elapsed_seconds => ($end_seconds && ($end_seconds - $initial_seconds)),
         location        => $self->config->{location},
         who             => $self->current_media->{requestor},
     );
