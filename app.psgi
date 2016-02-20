@@ -269,7 +269,7 @@ my %endpoints;
                 # XXX this should prompt instead
                 if ($media->type eq 'video') {
                     my ($seconds, $audio_track) = $Library->resume_state_for_video($media);
-                    if ($seconds && $seconds > $media->duration_seconds * .1) {
+                    if ($seconds) {
                         # context is important!
                         $seconds -= 120;
 

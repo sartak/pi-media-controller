@@ -534,12 +534,15 @@ sub add_viewing {
 sub resume_state_for_video {
     my ($self, $media) = @_;
 
-    my $query = q{select initialSeconds + elapsedSeconds, audioTrack from viewing where mediaId=? and viewing.endTime > strftime('%s', 'now')-30*24*60*60 AND viewing.elapsedSeconds IS NOT NULL and viewing.endTime = (select max(endTime) from viewing as v where v.mediaId = ?) limit 1;};
+    my $query = q{select initialSeconds, elapsedSeconds, audioTrack from viewing where mediaId=? and viewing.endTime > strftime('%s', 'now')-30*24*60*60 AND viewing.elapsedSeconds IS NOT NULL and viewing.endTime = (select max(endTime) from viewing as v where v.mediaId = ?) limit 1;};
 
     my $sth = $self->_dbh->prepare($query);
     $sth->execute($media->id, $media->id);
 
-    return $sth->fetchrow_array;
+    my ($initial, $elapsed, $audio_track) = $sth->fetchrow_array;
+    return if !$elapsed;
+    return if $initial + $elapsed < $media->duration_seconds * .1;
+    return ($initial + $elapsed, $audio_track);
 }
 
 sub update_media {
