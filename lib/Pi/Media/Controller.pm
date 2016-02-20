@@ -233,6 +233,8 @@ sub _play_media {
         $self->_finished_media($media);
     });
 
+    $self->next_audio for 1 .. $self->audio_track;
+
     warn "Child pid is " . $handle->{child_pid};
 }
 
@@ -260,10 +262,6 @@ sub _handle_for_media {
             $m %= 60;
             my $timestamp = sprintf '%d:%02d:%02d', $h, $m, $s;
             push @args, '--pos', $timestamp;
-        }
-
-        if ($self->audio_track) {
-            push @args, '--aidx', $self->audio_track;
         }
 
         push @args, @{ $self->config->{omxplayer_args} || [] };
