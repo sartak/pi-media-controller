@@ -189,7 +189,7 @@ sub _play_media {
     warn "Playing $media ...\n";
 
     $self->_set_is_paused(0);
-    $self->_set_audio_track(0);
+    $self->_set_audio_track($media->{audio_track} || 0);
     $self->_set_current_media($media);
     $self->_start_time(time);
     $self->_game_home_button_pressed(1);
@@ -251,6 +251,7 @@ sub _handle_for_media {
     }
     elsif ($media->isa('Pi::Media::File::Video')) {
         my @args = ('-b');
+
         if ($self->initial_seconds) {
             my $s = $self->initial_seconds;
             my $m = int($s / 60);
@@ -259,6 +260,10 @@ sub _handle_for_media {
             $m %= 60;
             my $timestamp = sprintf '%d:%02d:%02d', $h, $m, $s;
             push @args, '--pos', $timestamp;
+        }
+
+        if ($self->audio_track) {
+            push @args, '--aidx', $self->audio_track;
         }
 
         push @args, @{ $self->config->{omxplayer_args} || [] };
