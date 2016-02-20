@@ -263,7 +263,7 @@ sub _handle_for_media {
         }
 
         if ($self->audio_track) {
-            push @args, '--aidx', $self->audio_track;
+            push @args, '--aidx', $self->audio_track + 1;
         }
 
         push @args, @{ $self->config->{omxplayer_args} || [] };
