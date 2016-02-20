@@ -261,7 +261,6 @@ sub _handle_for_media {
             push @args, '--pos', $timestamp;
         }
 
-        warn join ' ', @args;
         push @args, @{ $self->config->{omxplayer_args} || [] };
         return AnyEvent::Run->new(
             cmd => ['omxplayer', @args, $media->path],
