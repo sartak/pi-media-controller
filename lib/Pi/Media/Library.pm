@@ -517,16 +517,28 @@ sub add_viewing {
     my ($self, %args) = @_;
     $self->_dbh->do('
         INSERT INTO viewing
-            (mediaId, startTime, endTime, elapsedSeconds, location, who)
+            (mediaId, startTime, endTime, initialSeconds, elapsedSeconds, location, who)
         VALUES (?, ?, ?, ?, ?, ?)
     ;', {}, (
         $args{media}->id,
         $args{start_time},
         $args{end_time},
+        $args{initial_seconds},
         $args{elapsed_seconds},
         $args{location},
         $args{who},
     ));
+}
+
+sub initial_seconds_for_video {
+    my ($self, $media) = @_;
+
+    my $query = q{select initialSeconds + elapsedSeconds from viewing where mediaId=? and viewing.endTime > strftime('%s', 'now')-30*24*60*60 AND viewing.elapsedSeconds IS NOT NULL and viewing.endTime = (select max(endTime) from viewing as v where v.mediaId = ?) limit 1;};
+
+    my $sth = $self->_dbh->prepare($query);
+    $sth->execute($media->id, $media->id);
+
+    return ($sth->fetchrow_array)[0];
 }
 
 sub update_media {

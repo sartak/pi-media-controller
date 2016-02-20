@@ -81,6 +81,13 @@ has audio_track => (
     writer  => '_set_audio_track',
 );
 
+has initial_seconds => (
+    is      => 'ro',
+    isa     => 'Int',
+    writer  => '_set_initial_seconds',
+    clearer => '_clear_initial_seconds',
+);
+
 # game specific
 
 has _game_home_button_pressed => (
@@ -187,6 +194,10 @@ sub _play_media {
     $self->_start_time(time);
     $self->_game_home_button_pressed(1);
 
+    if ($media->type eq 'video') {
+        $self->_set_initial_seconds($media->{initial_seconds} || 0);
+    }
+
     $self->notify({
         type  => 'started',
         media => $media,
@@ -239,7 +250,19 @@ sub _handle_for_media {
         );
     }
     elsif ($media->isa('Pi::Media::File::Video')) {
-        my @args = ('-b', @{ $self->config->{omxplayer_args} || [] });
+        my @args = ('-b');
+        if ($self->initial_seconds) {
+            my $s = $self->initial_seconds;
+            my $m = int($s / 60);
+            $s %= 60;
+            my $h = int($m / 60);
+            $m %= 60;
+            my $timestamp = sprintf '%d:%02d:%02d', $h, $m, $s;
+            push @args, '--pos', $timestamp;
+        }
+
+        warn join ' ', @args;
+        push @args, @{ $self->config->{omxplayer_args} || [] };
         return AnyEvent::Run->new(
             cmd => ['omxplayer', @args, $media->path],
         );
@@ -285,22 +308,24 @@ sub _finished_media {
 
     my $end_time = time;
 
-    my $seconds;
+    my $end_seconds;
+    my $initial_seconds = $self->initial_seconds;
+
     if ($media->isa('Pi::Media::File::Video')) {
         if (my ($h, $m, $s) = $self->_buffer =~ /Stopped at: (\d+):(\d\d):(\d\d)/) {
-            $seconds = $s
-                        + 60 * $m
-                        + 3600 * $h;
+            $end_seconds = $s
+                         + 60 * $m
+                         + 3600 * $h;
 
             # close enough
-            if ($media->duration_seconds && $seconds > $media->duration_seconds * .9) {
-                $seconds = undef;
+            if ($media->duration_seconds && $end_seconds > $media->duration_seconds * .9) {
+                $end_seconds = undef;
             }
         }
 
     }
     else {
-        $seconds = $end_time - $self->_start_time;
+        $end_seconds = $end_time - $self->_start_time;
 
         if ($self->_game_home_button_pressed) {
             $self->_temporarily_stopped(1);
@@ -311,7 +336,8 @@ sub _finished_media {
         media           => $self->current_media,
         start_time      => $self->_start_time,
         end_time        => $end_time,
-        elapsed_seconds => $seconds,
+        initial_seconds => $initial_seconds,
+        elapsed_seconds => $end_seconds - $initial_seconds,
         location        => $self->config->{location},
         who             => $self->current_media->{requestor},
     );
@@ -321,6 +347,7 @@ sub _finished_media {
     $self->_clear_handle;
     $self->_buffer('');
     $self->_clear_start_time;
+    $self->_clear_initial_seconds;
     $self->_set_has_toggled_subtitles(0);
 
     $self->notify({

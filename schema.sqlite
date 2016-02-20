@@ -31,6 +31,7 @@ CREATE TABLE IF NOT EXISTS viewing (
     mediaId INTEGER,
     startTime INTEGER NOT NULL,
     endTime INTEGER NOT NULL,
+    initialSeconds INTEGER,
     elapsedSeconds INTEGER,
     location TEXT,
     who TEXT
