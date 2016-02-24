@@ -194,18 +194,21 @@ sub _inflate_trees_from_sth {
 
     my @trees;
 
-    while (my ($id, $label_en, $label_ja, $parentId, $color, $query, $sort_order) = $sth->fetchrow_array) {
+    while (my ($id, $label_en, $label_ja, $parentId, $color, $joins, $where, $order, $limit, $sort_order) = $sth->fetchrow_array) {
         my %label;
         $label{en} = $label_en if $label_en;
         $label{ja} = $label_ja if $label_ja;
 
         my $tree = Pi::Media::Tree->new(
-            id         => $id,
-            label      => \%label,
-            parentId   => $parentId,
-            color      => $color,
-            query      => $query,
-            sort_order => $sort_order,
+            id           => $id,
+            label        => \%label,
+            parentId     => $parentId,
+            color        => $color,
+            join_clause  => $joins,
+            where_clause => $where,
+            order_clause => $order,
+            limit_clause => $limit,
+            sort_order   => $sort_order,
         );
 
         push @trees, $tree;
@@ -370,7 +373,7 @@ sub trees {
         push @bind, $args{parentId};
     }
 
-    my $query = 'SELECT id, label_en, label_ja, parentId, color, query, sort_order FROM tree';
+    my $query = 'SELECT id, label_en, label_ja, parentId, color, join_clause, where_clause, order_clause, limit_clause, sort_order FROM tree';
 
     $query .= ' WHERE ' . join(' AND ', @where) if @where;
     $query .= ' ORDER BY sort_order IS NULL, sort_order ASC, id ASC';
@@ -387,7 +390,7 @@ sub media {
 
     my @bind;
     my @where;
-    my $limit;
+    my ($joins, $limit, $order);
 
     if ($args{query}) {
         push @where, '(label_en LIKE ? OR label_ja LIKE ?)';
@@ -401,8 +404,6 @@ sub media {
         push @where, 'media.treeId = ?';
         push @bind, $args{treeId};
     }
-
-    my ($joins, $limit, $order);
 
     if ($args{joins}) {
         $joins = $args{joins};
