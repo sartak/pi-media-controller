@@ -397,9 +397,6 @@ sub media {
         push @bind, "%" . $args{query} . "%";
         push @bind, "%" . $args{query} . "%";
     }
-    elsif ($args{where}) {
-        push @where, $args{where};
-    }
     elsif (!$args{all}) {
         push @where, 'media.treeId = ?';
         push @bind, $args{treeId};
@@ -415,6 +412,10 @@ sub media {
 
     if ($args{order}) {
         $order = $args{order};
+    }
+
+    if ($args{where}) {
+        push @where, $args{where};
     }
 
     if ($args{pathLike}) {

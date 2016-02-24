@@ -358,6 +358,7 @@ my %endpoints;
                 my ($tree) = $Library->trees(id => $treeId);
                 if ($tree->has_clause) {
                     %args = (
+                        all         => 1,
                         joins       => $tree->join_clause,
                         where       => $tree->where_clause,
                         order       => $tree->order_clause,
