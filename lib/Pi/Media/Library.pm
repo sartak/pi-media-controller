@@ -457,9 +457,10 @@ sub media {
     ";
 
     if ($joins) {
-        $query .= $joins;
+        $query .= " $joins ";
     }
-    elsif ($args{source_tree}) {
+
+    if ($args{source_tree}) {
         $query .= 'LEFT JOIN tree_media_sort ON media.id = tree_media_sort.mediaId AND tree_media_sort.treeId = ? ';
         push @bind, $args{source_tree};
     }
@@ -469,7 +470,7 @@ sub media {
     $query .= ' ORDER BY ';
 
     if ($order) {
-        $query .= $order;
+        $query .= " $order ";
     }
     else {
         if ($args{source_tree}) {
@@ -479,7 +480,7 @@ sub media {
         $query .= 'media.sort_order IS NULL, media.sort_order ASC, media.rowid ASC';
     }
 
-    $query .= ' LIMIT ' . $limit if $limit;
+    $query .= " LIMIT $limit" if $limit;
     $query .= ';';
 
     my $sth = eval { $self->_dbh->prepare($query) };
