@@ -33,10 +33,12 @@ my %language_map = (
 
     'en'    => 'English',
     'en/c'  => 'English (Commentary)',
+    'en/hi' => 'English (Hearing Impaired)',
     '?/eng' => 'English(?)',
 
     'ja'    => 'Japanese',
     'jp/c'  => 'Japanese (Commentary)',
+    'jp/hi' => 'Japanese (Hearing Impaired)',
     '?/jpn' => 'Japanese(?)',
 
     'can'   => 'Cantonese',
