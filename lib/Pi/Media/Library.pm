@@ -450,11 +450,11 @@ sub media {
         push @bind, $args{source_tree};
     }
 
-    if (($args{where}||'') =~ /^JOIN /) {
+    if (($args{where}||'') =~ /\bJOIN /) {
         $query .= $args{where};
     }
     else {
-        if (($args{where}||'') =~ /^ORDER BY /) {
+        if (($args{where}||'') =~ /\bORDER BY /) {
             $query .= ' ' . $args{where};
         }
         else {
