@@ -4,7 +4,10 @@ CREATE TABLE IF NOT EXISTS tree (
     label_en TEXT,
     label_ja TEXT,
     color TEXT,
-    query TEXT,
+    join_clause TEXT,
+    where_clause TEXT,
+    order_clause TEXT,
+    limit_clause TEXT,
     sort_order INTEGER
 );
 
