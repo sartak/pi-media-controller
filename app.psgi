@@ -351,18 +351,24 @@ my %endpoints;
 
             my $treeId = $req->param('tree') || 0;
             my $query  = $req->param('query');
-            my $where;
+            my %args;
             my @response;
 
             if ($treeId) {
                 my ($tree) = $Library->trees(id => $treeId);
-                if ($tree->query) {
-                    $where = $tree->query;
+                if ($tree->has_clause) {
+                    %args = (
+                        joins       => $tree->join_clause,
+                        where       => $tree->where_clause,
+                        order       => $tree->order_clause,
+                        limit       => $tree->limit_clause,
+                        source_tree => $tree->id,
+                    );
                 }
             }
 
-            if ($where) {
-                push @response, $Library->media(where => $where, source_tree => $treeId);
+            if (%args) {
+                push @response, $Library->media(%args);
             }
             else {
                 my @trees = $Library->trees(parentId => $treeId, query => $query);

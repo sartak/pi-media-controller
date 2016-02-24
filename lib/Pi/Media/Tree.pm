@@ -12,7 +12,22 @@ has label => (
     isa => 'HashRef[Str]',
 );
 
-has query => (
+has join_clause => (
+    is  => 'ro',
+    isa => 'Maybe[Str]',
+);
+
+has where_clause => (
+    is  => 'ro',
+    isa => 'Maybe[Str]',
+);
+
+has order_clause => (
+    is  => 'ro',
+    isa => 'Maybe[Str]',
+);
+
+has limit_clause => (
     is  => 'ro',
     isa => 'Maybe[Str]',
 );
@@ -40,6 +55,14 @@ sub TO_JSON {
     $frozen->{type} = 'tree';
 
     return $frozen;
+}
+
+sub has_clause {
+    my $self = shift;
+    return $self->join_clause
+        || $self->where_clause
+        || $self->order_clause
+        || $self->limit_clause;
 }
 
 1;

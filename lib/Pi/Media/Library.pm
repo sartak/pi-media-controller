@@ -402,8 +402,18 @@ sub media {
         push @bind, $args{treeId};
     }
 
+    my ($joins, $limit, $order);
+
+    if ($args{joins}) {
+        $joins = $args{joins};
+    }
+
     if ($args{limit}) {
         $limit = $args{limit};
+    }
+
+    if ($args{order}) {
+        $order = $args{order};
     }
 
     if ($args{pathLike}) {
@@ -445,28 +455,27 @@ sub media {
         FROM media
     ";
 
-    if ($args{source_tree}) {
+    if ($joins) {
+        $query .= $joins;
+    }
+    elsif ($args{source_tree}) {
         $query .= 'LEFT JOIN tree_media_sort ON media.id = tree_media_sort.mediaId AND tree_media_sort.treeId = ? ';
         push @bind, $args{source_tree};
     }
 
-    if (($args{where}||'') =~ /\bJOIN /) {
-        $query .= $args{where};
+    $query .= 'WHERE ' . join(' AND ', @where) if @where;
+
+    $query .= ' ORDER BY ';
+
+    if ($order) {
+        $query .= $order;
     }
     else {
-        if (($args{where}||'') =~ /\bORDER BY /) {
-            $query .= ' ' . $args{where};
+        if ($args{source_tree}) {
+            $query .= 'tree_media_sort.sort_order, ';
         }
-        else {
-            $query .= 'WHERE ' . join(' AND ', @where) if @where;
-            $query .= ' ORDER BY ';
 
-            if ($args{source_tree}) {
-                $query .= 'tree_media_sort.sort_order, ';
-            }
-
-            $query .= 'media.sort_order IS NULL, media.sort_order ASC, media.rowid ASC';
-        }
+        $query .= 'media.sort_order IS NULL, media.sort_order ASC, media.rowid ASC';
     }
 
     $query .= ' LIMIT ' . $limit if $limit;
