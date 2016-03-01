@@ -26,54 +26,64 @@ has duration_seconds => (
     isa => 'Maybe[Int]',
 );
 
-my %language_map = (
-    '?'   => 'Unknown',
-    '??'  => 'Unknown',
-    'ost' => 'Soundtrack',
+{
+    my %language_map = (
+        '?'   => 'Unknown',
+        '??'  => 'Unknown',
+        'ost' => 'Soundtrack',
 
-    'en'    => 'English',
-    'en/c'  => 'English (Commentary)',
-    'en/vi' => 'English (Visually Impaired)',
-    '?/eng' => 'English(?)',
+        '/c'    => '(Commentary)',
+        '/vi'   => '(Visually Impaired)',
 
-    'ja'    => 'Japanese',
-    'jp/c'  => 'Japanese (Commentary)',
-    'jp/vi' => 'Japanese (Visually Impaired)',
-    '?/jpn' => 'Japanese(?)',
+        'en'    => 'English',
+        '?/eng' => 'English(?)',
 
-    'can'   => 'Cantonese',
-    'man'   => 'Mandarin',
+        'ja'    => 'Japanese',
+        '?/jpn' => 'Japanese(?)',
 
-    'es'    => 'Spanish',
-    'fr'    => 'French',
-    'de'    => 'German',
-    'cs'    => 'Czech',
-    'it'    => 'Italian',
-    'ko'    => 'Korean',
-    'pl'    => 'Polish',
-    'pt'    => 'Portuguese',
-    'ru'    => 'Russian',
-    'th'    => 'Thai',
-    'zh'    => 'Chinese',
+        'can'   => 'Cantonese',
+        'man'   => 'Mandarin',
 
-    '?/ces' => 'Czech(?)',
-    '?/deu' => 'German(?)',
-    '?/fra' => 'French(?)',
-    '?/ita' => 'Italian(?)',
-    '?/kor' => 'Korean(?)',
-    '?/pol' => 'Polish(?)',
-    '?/por' => 'Portuguese(?)',
-    '?/rus' => 'Russian(?)',
-    '?/spa' => 'Spanish(?)',
-    '?/tha' => 'Thai(?)',
-    '?/zho' => 'Chinese(?)',
-);
+        'es'    => 'Spanish',
+        'fr'    => 'French',
+        'de'    => 'German',
+        'cs'    => 'Czech',
+        'it'    => 'Italian',
+        'ko'    => 'Korean',
+        'pl'    => 'Polish',
+        'pt'    => 'Portuguese',
+        'ru'    => 'Russian',
+        'th'    => 'Thai',
+        'zh'    => 'Chinese',
 
-sub label_for_language {
-    my $class = shift;
-    my $lang = shift;
+        '?/ces' => 'Czech(?)',
+        '?/deu' => 'German(?)',
+        '?/fra' => 'French(?)',
+        '?/ita' => 'Italian(?)',
+        '?/kor' => 'Korean(?)',
+        '?/pol' => 'Polish(?)',
+        '?/por' => 'Portuguese(?)',
+        '?/rus' => 'Russian(?)',
+        '?/spa' => 'Spanish(?)',
+        '?/tha' => 'Thai(?)',
+        '?/zho' => 'Chinese(?)',
+    );
 
-    return $language_map{$lang};
+    sub label_for_language {
+        my $class = shift;
+        my $lang = shift;
+
+        return $language_map{$lang} if $language_map{$lang};
+
+        if (my ($l, $n) = $lang =~ m{^(.+)(/.+)$}) {
+            $l = $language_map{$l};
+            $n = $language_map{$n};
+            return join ' ', $l, $n
+                if $l && $n;
+        }
+
+        return;
+    }
 }
 
 sub _fixup_langs {
@@ -86,7 +96,7 @@ sub _fixup_langs {
         push @out, {
             id    => $i,
             type  => $langs[$i],
-            label => $language_map{$langs[$i]} || $langs[$i],
+            label => $self->label_for_language($langs[$i]) || $langs[$i],
         };
     }
     return \@out;
