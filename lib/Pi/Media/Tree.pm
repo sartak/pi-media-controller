@@ -44,7 +44,7 @@ has parentId => (
 
 has sort_order => (
     is  => 'ro',
-    isa => 'Maybe[Int]',
+    isa => 'Maybe[Num]',
 );
 
 sub TO_JSON {
