@@ -6,11 +6,18 @@ use JSON;
 use Getopt::Whatever;
 use Pi::Media::Library;
 
-my $treeId = shift or die "usage: $0 treeId\n";
-
+die "usage: $0 treeId or segments required\n" if !@ARGV;
 my $library = Pi::Media::Library->new(file => $ENV{PMC_DATABASE});
-$library->begin;
 
+my $treeId;
+if (@ARGV == 1 && $ARGV[0] =~ /^\d+$/) {
+    $treeId = shift;
+}
+else {
+    $treeId = $library->tree_from_segments(@ARGV);
+}
+
+$library->begin;
 my ($tree) = $library->trees(id => $treeId);
 if (!$tree->query) {
     die "tree $treeId has no where clause";
