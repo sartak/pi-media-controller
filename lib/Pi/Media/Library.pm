@@ -360,23 +360,32 @@ sub trees {
     my @where;
 
     if ($args{query}) {
-        push @where, '(label_en LIKE ? OR label_ja LIKE ?)';
+        push @where, '(tree.label_en LIKE ? OR tree.label_ja LIKE ?)';
         push @bind, "%" . $args{query} . "%";
         push @bind, "%" . $args{query} . "%";
     }
     elsif ($args{id}) {
-        push @where, 'id = ?';
+        push @where, 'tree.id = ?';
         push @bind, $args{id};
     }
     elsif (!$args{all}) {
-        push @where, 'parentId = ?';
+        push @where, 'tree.parentId = ?';
         push @bind, $args{parentId};
     }
 
-    my $query = 'SELECT id, label_en, label_ja, parentId, color, join_clause, where_clause, order_clause, limit_clause, sort_order FROM tree';
+    my $query = 'SELECT tree.id, tree.label_en, tree.label_ja, tree.parentId, tree.color, tree.join_clause, tree.where_clause, tree.order_clause, tree.limit_clause, tree.sort_order FROM tree';
+
+    if ($args{media_sort}) {
+        $query .= ' LEFT JOIN tree_media_sort ON tree.id = tree_media_sort.treeId';
+    }
 
     $query .= ' WHERE ' . join(' AND ', @where) if @where;
-    $query .= ' ORDER BY sort_order IS NULL, sort_order ASC, id ASC';
+
+    if ($args{media_sort}) {
+        $query .= ' GROUP BY tree_media_sort.treeId HAVING COUNT(tree_media_sort.treeId) > 0';
+    }
+
+    $query .= ' ORDER BY tree.sort_order IS NULL, tree.sort_order ASC, tree.id ASC';
     $query .= ';';
 
     my $sth = $self->_dbh->prepare($query);
