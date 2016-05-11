@@ -12,6 +12,7 @@ for my $key (keys %ARGV) {
 
 my $treeId = $ARGV{treeId};
 my $segments = ref $ARGV{segments} ? $ARGV{segments} : [$ARGV{segments}];
+my $tags = ref $ARGV{tag} ? $ARGV{tag} : $ARGV{tag} ? [$ARGV{tag}] : [];
 
 $treeId || $ARGV{segments} or usage("treeId or segments required");
 
@@ -53,6 +54,7 @@ my $id = $library->insert_video(
     streamable      => $streamable,
     durationSeconds => duration_of($path),
     treeId          => $treeId,
+    tags            => $tags,
 );
 
 if ($ARGV{'ignore-missing-file'}) {
@@ -64,7 +66,7 @@ else {
 
 sub usage {
     my $reason = shift;
-    die "$reason\nusage: $0 [--treeId=treeId OR --segments=foo --segments=bar] [--label_en=LABEL --label_ja=LABEL] [--identifier=IDENTIFIER] [--ignore-missing-file] --immersible|--noimmersible --streamable|--unstreamable PATH";
+    die "$reason\nusage: $0 [--treeId=treeId OR --segments=foo --segments=bar] [--label_en=LABEL --label_ja=LABEL] [--identifier=IDENTIFIER] [--ignore-missing-file] --immersible|--noimmersible --streamable|--unstreamable [--tag=TAG] PATH";
 }
 
 sub duration_of {

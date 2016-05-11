@@ -222,8 +222,8 @@ sub insert_video {
 
     $self->_dbh->do('
         INSERT INTO media
-            (path, type, identifier, label_en, label_ja, spoken_langs, subtitle_langs, immersible, streamable, durationSeconds, treeId)
-        VALUES (?, "video", ?, ?, ?, ?, ?, ?, ?, ?, ? )
+            (path, type, identifier, label_en, label_ja, spoken_langs, subtitle_langs, immersible, streamable, durationSeconds, treeId, tags)
+        VALUES (?, "video", ?, ?, ?, ?, ?, ?, ?, ?, ?, ? )
     ;', {}, (
         $self->_relativify_path($args{path}),
         $args{identifier},
@@ -235,6 +235,7 @@ sub insert_video {
         $args{streamable} ? 1 : 0,
         $args{durationSeconds},
         $args{treeId},
+        ($args{tags} ? ('`' . (join '`', @{$args{tags}}) . '`') : undef),
     ));
 
     return $self->_dbh->sqlite_last_insert_rowid;
