@@ -12,7 +12,7 @@ for my $key (keys %ARGV) {
 
 my $treeId = $ARGV{treeId};
 my $segments = ref $ARGV{segments} ? $ARGV{segments} : [$ARGV{segments}];
-my $tags = ref $ARGV{tag} ? $ARGV{tag} : $ARGV{tag} ? [$ARGV{tag}] : [];
+my $tags = ref $ARGV{tag} ? $ARGV{tag} : $ARGV{tag} ? [$ARGV{tag}] : undef;
 
 $treeId || $ARGV{segments} or usage("treeId or segments required");
 
