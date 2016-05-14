@@ -426,8 +426,8 @@ sub increase_speed          { shift->_run_command('2') }
 sub rewind                  { shift->_run_command('<') }
 sub fast_forward            { shift->_run_command('>') }
 sub show_info               { shift->_run_command('z') }
-sub previous_audio          { shift->_run_command('j') }
-sub next_audio              { shift->_run_command('k') }
+sub previous_audio          { shift->_run_command('j'); sleep 1 }
+sub next_audio              { shift->_run_command('k'); sleep 1 }
 sub previous_chapter        { shift->_run_command('i') }
 sub next_chapter            { shift->_run_command('o') }
 sub previous_subtitles      { shift->_run_command('n') }
