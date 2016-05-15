@@ -235,7 +235,7 @@ sub insert_video {
         $args{streamable} ? 1 : 0,
         $args{durationSeconds},
         $args{treeId},
-        ($args{tags} ? ('`' . (join '`', @{$args{tags}}) . '`') : undef),
+        ($args{tags} ? ('`' . (join '`', @{$args{tags}}) . '`') : ''),
     ));
 
     return $self->_dbh->sqlite_last_insert_rowid;
