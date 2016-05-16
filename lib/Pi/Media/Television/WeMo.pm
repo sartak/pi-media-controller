@@ -49,4 +49,10 @@ sub power_off {
     }
 }
 
+sub set_active_source {
+    my $self = shift;
+
+    $self->power_on;
+}
+
 1;
