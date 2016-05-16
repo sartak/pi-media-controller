@@ -52,7 +52,10 @@ sub power_off {
 sub set_active_source {
     my $self = shift;
 
-    $self->power_on;
+    if ($self->power_on) {
+        warn "waiting to set active source because we just powered on";
+        sleep 15;
+    }
 }
 
 1;
