@@ -15,12 +15,13 @@ for my $tree (@trees) {
 
     $library->begin;
     my @media = $library->media(
-        all         => 1,
-        joins       => $tree->join_clause,
-        where       => $tree->where_clause,
-        order       => $tree->order_clause,
-        limit       => $tree->limit_clause,
-        source_tree => $tree->id,
+        all            => 1,
+        joins          => $tree->join_clause,
+        where          => $tree->where_clause,
+        order          => $tree->order_clause,
+        limit          => $tree->limit_clause,
+        source_tree    => $tree->id,
+        excludeViewing => 1,
     );
 
     my $sth = $library->_dbh->prepare("INSERT OR IGNORE INTO tree_media_sort (mediaId, treeId, identifier, sort_order) VALUES (?, ?, ?, ?);");

@@ -142,6 +142,8 @@ sub _inflate_media_from_sth {
     }
 
     if (!$args{excludeViewing}) {
+        die "Need a CURRENT_USER to produce viewing data" if !$main::CURRENT_USER;
+
         if (keys %videos_by_id) {
             my $query = 'SELECT mediaId, MAX(endTime) FROM viewing WHERE';
             $query .= ' who=? AND (';

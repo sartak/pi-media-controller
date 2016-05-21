@@ -17,7 +17,7 @@ my $library = Pi::Media::Library->new(file => $ENV{PMC_DATABASE});
 $library->begin;
 
 my @media = (
-    $library->media(treeId => $treeId),
+    $library->media(treeId => $treeId, excludeViewing => 1),
     $library->trees(parentId => $treeId),
 );
 
