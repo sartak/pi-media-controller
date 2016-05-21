@@ -6,7 +6,7 @@ use Getopt::Whatever;
 use Pi::Media::Library;
 
 for my $key (keys %ARGV) {
-    next if $key eq 'segments';
+    next if $key eq 'segments' || $key eq 'tag';
     die "Argument $key repeated. Accident?" if ref $ARGV{$key} eq 'ARRAY';
 }
 
