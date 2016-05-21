@@ -3,6 +3,7 @@ use 5.14.0;
 use Mouse;
 use Pi::Media::File;
 use Pi::Media::Library;
+use Pi::Media::User;
 
 has notify_cb => (
     is      => 'ro',

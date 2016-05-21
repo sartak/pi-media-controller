@@ -344,7 +344,7 @@ sub _finished_media {
         audio_track     => $self->audio_track,
         elapsed_seconds => ($end_seconds && ($end_seconds - $initial_seconds)),
         location        => $self->config->{location},
-        who             => $self->current_media->{requestor},
+        who             => $self->current_media->{requestor}->name,
     );
 
     warn "Done playing $media\n";

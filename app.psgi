@@ -21,7 +21,6 @@ use Pi::Media::AC;
 use Pi::Media::File::Stream;
 
 our $CURRENT_USER;
-our $CURRENT_PASS;
 
 select((select(STDERR), $|=1)[0]);
 
@@ -428,7 +427,8 @@ my %endpoints;
             };
 
             my $user = $main::CURRENT_USER;
-            my $pass = $main::CURRENT_PASS;
+            my $username = $user->name;
+            my $password = $user->password;
             return sub {
                 my $responder = shift;
 
@@ -468,7 +468,7 @@ my %endpoints;
                     "#EXT-X-MEDIA-SEQUENCE:0",
                     (
                         map { ("#EXTINF:10.0,",
-                               sprintf "$app/static/$rand/segment%05d.ts?user=$user&pass=$pass", $_) }
+                               sprintf "$app/static/$rand/segment%05d.ts?user=$username&pass=$password", $_) }
                         (0 .. $count-1)
                     ),
                     "#EXT-X-ENDLIST";
@@ -798,18 +798,17 @@ my %endpoints;
 my $app = sub {
     my $req = Plack::Request->new(shift);
 
-    my $auth_ok;
     my $user;
-    my $pass;
+    my $username;
 
-    if ($user = ($req->header('X-PMC-Username') || $req->param('user'))) {
-        if ($pass = ($req->header('X-PMC-Password') || $req->param('pass'))) {
-            $auth_ok = $Library->confirm_auth($user, $pass);
+    if ($username = ($req->header('X-PMC-Username') || $req->param('user'))) {
+        if (my $pass = ($req->header('X-PMC-Password') || $req->param('pass'))) {
+            $user = $Library->login($username, $pass);
         }
     }
 
-    if (!$auth_ok) {
-        warn "Unauthorized request" . ($user ? " from user '$user'" : "") . " for " . $req->method . ' ' . $req->path_info . "\n";
+    if (!$user) {
+        warn "Unauthorized request" . ($username ? " from user '$username'" : "") . " for " . $req->method . ' ' . $req->path_info . "\n";
         my $res = $req->new_response(401);
         $res->header('X-PMC-Time' => scalar gmtime);
         $res->header('Cache-control' => 'private, max-age=0, no-store');
@@ -818,7 +817,6 @@ my $app = sub {
     }
 
     local $main::CURRENT_USER = $user;
-    local $main::CURRENT_PASS = $pass;
 
     warn $req->method . ' ' . $req->path_info;
 

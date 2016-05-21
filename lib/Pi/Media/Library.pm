@@ -5,6 +5,7 @@ use Pi::Media::File::Video;
 use Pi::Media::File::Game;
 use Pi::Media::File::Book;
 use Pi::Media::Tree;
+use Pi::Media::User;
 use DBI;
 use Path::Class;
 use Unicode::Normalize 'NFC';
@@ -50,16 +51,23 @@ sub rollback {
     $self->_dbh->rollback;
 }
 
-sub confirm_auth {
+sub login {
     my ($self, $username, $password) = @_;
 
-    my $query = 'SELECT 1 FROM user WHERE name=? AND password=?;';
+    my $query = 'SELECT name, password, preferred_lang FROM user WHERE name=? AND password=?;';
 
     my $sth = $self->_dbh->prepare($query);
     $sth->execute($username, $password);
 
-    return 1 if $sth->fetchrow_array;
-    return 0;
+    if (my ($name, $password, $preferred_lang) = $sth->fetchrow_array) {
+        return Pi::Media::User->new(
+            name           => $name,
+            password       => $password,
+            preferred_lang => $preferred_lang,
+        );
+    }
+
+    return;
 }
 
 sub _inflate_media_from_sth {
@@ -141,7 +149,7 @@ sub _inflate_media_from_sth {
             $query .= ') AND elapsedSeconds IS NULL GROUP BY mediaId;';
 
             my $sth = $self->_dbh->prepare($query);
-            $sth->execute($main::CURRENT_USER, keys %videos_by_id);
+            $sth->execute($main::CURRENT_USER->name, keys %videos_by_id);
 
             while (my ($id, $date) = $sth->fetchrow_array) {
                 for my $video (@{ $videos_by_id{$id} }) {
@@ -159,7 +167,7 @@ sub _inflate_media_from_sth {
                 $query .= ') GROUP BY mediaId;';
 
                 my $sth = $self->_dbh->prepare($query);
-                $sth->execute($main::CURRENT_USER, keys %games_by_id);
+                $sth->execute($main::CURRENT_USER->name, keys %games_by_id);
 
                 while (my ($id, $playtime) = $sth->fetchrow_array) {
                     for my $game (@{ $games_by_id{$id} }) {
@@ -175,7 +183,7 @@ sub _inflate_media_from_sth {
                 $query .= ') AND elapsedSeconds IS NULL GROUP BY mediaId;';
 
                 my $sth = $self->_dbh->prepare($query);
-                $sth->execute($main::CURRENT_USER, keys %games_by_id);
+                $sth->execute($main::CURRENT_USER->name, keys %games_by_id);
 
                 while (my ($id) = $sth->fetchrow_array) {
                     for my $game (@{ $games_by_id{$id} }) {

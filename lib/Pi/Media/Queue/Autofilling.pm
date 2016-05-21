@@ -1,6 +1,7 @@
 package Pi::Media::Queue::Autofilling;
 use 5.14.0;
 use Mouse;
+use Pi::Media::User;
 extends 'Pi::Media::Queue';
 
 has source => (
@@ -11,7 +12,7 @@ has source => (
 
 has requestor => (
     is      => 'rw',
-    isa     => 'Str',
+    isa     => 'Pi::Media::User',
     clearer => 'clear_requestor',
 );
 
