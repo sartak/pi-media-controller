@@ -43,7 +43,8 @@ CREATE TABLE IF NOT EXISTS viewing (
 
 CREATE TABLE IF NOT EXISTS user (
     name TEXT NOT NULL,
-    password TEXT NOT NULL
+    password TEXT NOT NULL,
+    preferred_lang TEXT
 );
 
 CREATE TABLE IF NOT EXISTS tree_media_sort (
