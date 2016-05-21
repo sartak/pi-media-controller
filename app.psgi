@@ -432,7 +432,7 @@ my %endpoints;
             return sub {
                 my $responder = shift;
 
-                my $dir = "/tmp/pmc/";
+                my $dir = $Library->stream_tmp . "pmc/";
                 my $rand;
                 for (0..7) { $rand .= chr( int(rand(25) + 65) ); }
                 $dir .= $rand;
@@ -893,7 +893,7 @@ use Plack::Builder;
 $app = builder {
     enable "Plack::Middleware::Static",
         path => sub { s!^/+static/!! },
-        root => '/tmp/pmc';
+        root => $Library->stream_tmp . "pmc/",
     $app;
 };
 
