@@ -626,7 +626,7 @@ sub _relativify_path {
 sub stream_tmp {
     my $self = shift;
 
-    return Path::Class::file($self->file)->dir->subdir('tmp')->stringify;
+    return Path::Class::file($self->file)->dir->subdir('tmp')->stringify . '/';
 }
 
 1;
