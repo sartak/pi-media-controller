@@ -397,6 +397,38 @@ my %endpoints;
             return $res;
         },
     },
+    '/library/viewed' => {
+        PUT => sub {
+            my $req = shift;
+            my $mediaId = $req->param('mediaId');
+            my $startTime = $req->param('startTime');
+            my $endTime = $req->param('endTime');
+            my $initialSeconds = $req->param('initialSeconds');
+            my $elapsedSeconds = $req->param('elapsedSeconds');
+            my $audioTrack = $req->param('audioTrack');
+            my $location = $req->param('location');
+            my $who = $main::CURRENT_USER->name;
+
+            my $media = $Library->media_with_id($mediaId) or do {
+                my $res = $req->new_response(404);
+                $res->body("media not found");
+                return $res;
+            };
+
+            $Library->add_viewing(
+                media           => $media,
+                start_time      => $startTime,
+                end_time        => $endTime,
+                initial_seconds => $initialSeconds,
+                elapsed_seconds => $elapsedSeconds,
+                audio_track     => $audioTrack,
+                location        => $location,
+                who             => $who,
+            );
+
+            return $req->new_response(204);
+        },
+    },
 
     '/stream' => {
         GET => sub {
