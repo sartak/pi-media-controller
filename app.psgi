@@ -925,7 +925,7 @@ use Plack::Builder;
 $app = builder {
     enable "Plack::Middleware::Static",
         path => sub { s!^/+static/!! },
-        root => $Library->stream_tmp . "pmc/",
+        root => $Library->stream_tmp . "/pmc/";
     $app;
 };
 
