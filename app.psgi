@@ -438,7 +438,7 @@ my %endpoints;
                 media           => $media,
                 start_time      => $startTime,
                 end_time        => $endTime,
-                initial_seconds => $initialSeconds,
+                initial_seconds => int($initialSeconds),
                 elapsed_seconds => $elapsedSeconds,
                 audio_track     => $audioTrack,
                 location        => $location,
