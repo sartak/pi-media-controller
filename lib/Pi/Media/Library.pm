@@ -504,6 +504,7 @@ sub media {
     $query .= " LIMIT $limit" if $limit;
     $query .= ';';
 
+    $query =~ s/\$CURRENT_USER/$self->_dbh->quote($main::CURRENT_USER->name)/ge;
     my $sth = eval { $self->_dbh->prepare($query) };
     if ($@) {
         die "$query\n\n$@";
