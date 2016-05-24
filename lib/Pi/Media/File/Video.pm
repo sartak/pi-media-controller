@@ -124,6 +124,7 @@ sub TO_JSON {
     $frozen->{subtitle_langs} = $self->available_subtitles;
 
     $frozen->{streamPath} = $self->{streamPath} if $self->{streamPath};
+    $frozen->{resume} = $self->{resume} if $self->{resume};
 
     return $frozen;
 }
