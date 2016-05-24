@@ -393,6 +393,19 @@ my %endpoints;
                 }
             }
 
+           for my $thing (@response) {
+               if ($thing->isa('Pi::Media::File::Video')) {
+                   my ($seconds, $audio_track) = $Library->resume_state_for_video($thing);
+                   if ($seconds) {
+                       # context is important!
+                       $seconds -= 120;
+
+                       $thing->{resume}{initial_seconds} = $seconds;
+                       $thing->{resume}{audio_track} = $audio_track;
+                   }
+               }
+           }
+
             $res->body(encode_utf8($json->encode(\@response)));
             return $res;
         },
