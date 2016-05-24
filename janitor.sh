@@ -1,5 +1,5 @@
 #!/bin/bash
-pushd ~/pi-media-controller/
+cd ~/pi-media-controller/
 
 perl -Ilib -Iextlib untracked-media.pl /media/paul/Commercials /media/paul/LP /media/paul/Movies /media/paul/ROM/*/ /media/paul/Shorts /media/paul/Talks /media/paul/TV
 
@@ -20,5 +20,3 @@ perl -Ilib -Iextlib ./add-tree-media-sort.pl
 perl -Ilib -Iextlib intuit-checksums.pl;
 
 (echo 'select path, spoken_langs from media where spoken_langs like "?%" and spoken_langs != "??" order by id asc; select path, spoken_langs from media where spoken_langs like "%?%" and spoken_langs != "??" order by id asc;' | sqlite3 $PMC_DATABASE | grep Movies) | tee >(wc -l) >(head) >/dev/null
-
-popd
