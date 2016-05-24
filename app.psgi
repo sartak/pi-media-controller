@@ -417,7 +417,7 @@ my %endpoints;
             my $startTime = $req->param('startTime');
             my $endTime = $req->param('endTime');
             my $initialSeconds = $req->param('initialSeconds');
-            my $elapsedSeconds = $req->param('elapsedSeconds');
+            my $endSeconds = $req->param('endSeconds');
             my $audioTrack = $req->param('audioTrack');
             my $location = $req->param('location');
             my $who = $main::CURRENT_USER->name;
@@ -427,6 +427,12 @@ my %endpoints;
                 $res->body("media not found");
                 return $res;
             };
+
+            # close enough
+            if ($media->duration_seconds && $endSeconds > $media->duration_seconds * .9) {
+                $endSeconds = undef;
+            }
+            my $elapsedSeconds = $endSeconds ? int($endSeconds - $initialSeconds) : undef;
 
             $Library->add_viewing(
                 media           => $media,
