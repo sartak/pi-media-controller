@@ -436,8 +436,8 @@ my %endpoints;
 
             $Library->add_viewing(
                 media           => $media,
-                start_time      => $startTime,
-                end_time        => $endTime,
+                start_time      => int($startTime),
+                end_time        => int($endTime),
                 initial_seconds => int($initialSeconds),
                 elapsed_seconds => $elapsedSeconds,
                 audio_track     => $audioTrack,
