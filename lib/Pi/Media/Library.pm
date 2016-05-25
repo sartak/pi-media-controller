@@ -573,8 +573,10 @@ sub resume_state_for_video {
     $sth->execute($media->id, $media->id, $main::CURRENT_USER->name);
 
     my ($initial, $elapsed, $audio_track) = $sth->fetchrow_array;
-    return if $initial + $elapsed < $media->duration_seconds * .1;
-    return ($initial + $elapsed, $audio_track);
+    $initial += $elapsed || 0;
+    return if $initial < $media->duration_seconds * .1;
+    return if $initial < 10 * 60;
+    return ($initial, $audio_track);
 }
 
 sub update_media {
