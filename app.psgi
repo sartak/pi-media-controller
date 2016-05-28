@@ -97,6 +97,7 @@ my $tv_state = -e "tv.json" ? $json->decode(scalar slurp "tv.json") : { is_on =>
 my $Television = $TelevisionClass->new(
     config    => $config,
     notify_cb => $notify_cb,
+    %{ $config->{television} },
     %$tv_state,
     is_on => ($tv_state->{is_on} ? 1 : 0), # JSON::XS::Boolean fails type
 );

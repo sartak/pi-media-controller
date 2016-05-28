@@ -4,15 +4,29 @@ use Mouse;
 use JSON::Types;
 extends 'Pi::Media::Television';
 
-sub minimum_volume { 0 }
-sub maximum_volume { 100 }
+has infrared_name => (
+    is      => 'ro',
+    isa     => 'Str',
+    default => 'TV',
+);
 
-# only allow the ones I actually use, since the TV gets grumpy if I select
-# an unconnected input
-my @inputs = ("RCA", "Pi", "AppleTV");
-# my @inputs = ("TV", "RCA", "Pi", "AppleTV", "USB", "Component");
+has minimum_volume => (
+    is      => 'ro',
+    isa     => 'Int',
+    default => 0,
+);
 
-my %input_index = map { $inputs[$_] => $_ } 0..$#inputs;
+has maximum_volume => (
+    is      => 'ro',
+    isa     => 'Int',
+    default => 100,
+);
+
+has inputs => (
+    is      => 'ro',
+    isa     => 'ArrayRef[Str]',
+    default => sub { ['Pi'] },
+);
 
 has muted => (
     is      => 'ro',
@@ -26,7 +40,6 @@ has volume => (
     is      => 'ro',
     writer  => '_set_volume',
     isa     => 'Int',
-    default => __PACKAGE__->minimum_volume,
     trigger => sub { shift->_write_state },
 );
 
@@ -53,15 +66,17 @@ around state => sub {
 sub _transmit {
     my ($self, $cmd) = @_;
 
+    my $name = $self->infrared_name;
+
     # try twice before reporting failure
 
-    warn(join ' ', qw(irsend SEND_ONCE TV), $cmd);
-    system(qw(irsend SEND_ONCE TV), $cmd);
+    warn(join ' ', 'irsend', 'SEND_ONCE', $name, $cmd);
+    system('irsend', 'SEND_ONCE', $name, $cmd);
 
     if ($?) {
         warn "trying again!";
-        warn(join ' ', qw(irsend SEND_ONCE TV), $cmd);
-        system(qw(irsend SEND_ONCE TV), $cmd);
+        warn(join ' ', 'irsend', 'SEND_ONCE', $name, $cmd);
+        system('irsend', 'SEND_ONCE', $name, $cmd);
 
         if ($?) {
             die "irsend failed";
@@ -167,6 +182,9 @@ sub input_status {
 sub set_input {
     my $self = shift;
     my $input = shift;
+
+    my @inputs = @{ $self->inputs };
+    my %input_index = map { $inputs[$_] => $_ } 0..$#inputs;
 
     die "invalid input $input. valid are: @inputs" unless exists $input_index{$input};
 
