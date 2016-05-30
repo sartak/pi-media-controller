@@ -25,6 +25,8 @@ sub scan {
 
     my $file = $self->config->{gamepad}{wiimote}{$self->led};
 
+    die "File $file doesn't exist" if !-e $file;
+
     warn "Attaching wiimote " . $self->led . " (" . $self->id . ")";
 
     my $handle = AnyEvent::Run->new(
