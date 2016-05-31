@@ -12,7 +12,6 @@ use Scalar::Util 'blessed';
 use File::Slurp 'slurp';
 use URI::Escape;
 use AnyEvent::HTTP;
-use AnyEvent::Run;
 
 use Pi::Media::Queue::Autofilling;
 use Pi::Media::Controller;
@@ -511,9 +510,11 @@ my %endpoints;
                 );
                 warn join(' ', @command) . "\n";
 
-                my $ffmpeg = AnyEvent::Run->new(
-                    cmd => \@command,
-                );
+                $SIG{CHLD} = 'IGNORE';
+                if (fork() == 0) {
+                    exec @command;
+                }
+
                 sleep 3; # give ffmpeg a chance to write the list file
 
                 my $before = "$app/static/$rand/";
@@ -521,8 +522,6 @@ my %endpoints;
 
                 $session{$session_id} = sub {
                     my $req = shift;
-
-                    my $_keepalive = $ffmpeg;
 
                     my $res = $req->new_response(200);
                     $res->header('Content-Type' => 'application/x-mpegURL');
