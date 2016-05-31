@@ -12,6 +12,7 @@ use Scalar::Util 'blessed';
 use File::Slurp 'slurp';
 use URI::Escape;
 use AnyEvent::HTTP;
+use AnyEvent::Run;
 
 use Pi::Media::Queue::Autofilling;
 use Pi::Media::Controller;
@@ -462,9 +463,7 @@ my %endpoints;
             our %session;
             my $session_id = $req->header('X-Playback-Session-ID');
             if ($session_id && $session{$session_id}) {
-                my $res = $req->new_response(200);
-                $res->body($session{$session_id});
-                return $res;
+                return $session{$session_id}->($req);
             }
 
             my $id = $req->param('media') or do {
@@ -482,6 +481,9 @@ my %endpoints;
             my $user = $main::CURRENT_USER;
             my $username = $user->name;
             my $password = $user->password;
+            my $app = $req->header('X-App-Name');
+            $app = $app ? "/$app" : "";
+
             return sub {
                 my $responder = shift;
 
@@ -492,46 +494,54 @@ my %endpoints;
                 system("mkdir", $dir);
 
                 my $path = $media->path;
+                my $list_path = "$dir/list.m3u8";
                 my @command = (
                     "ffmpeg",
                     "-i", $path,
-                    "-vcodec", "copy",
-                    "-acodec", "copy",
+                    "-codec", "copy",
+                    "-map", "0",
                     "-f", "segment",
-                    "-segment_list", "$dir/list.m3u8",
+                    "-segment_list", $list_path,
                     "-segment_time", 10,
                     "-segment_format", "mpeg_ts",
+                    "-segment_list_flags", "live",
                     "-vbsf", "h264_mp4toannexb",
                     "-flags", "-global_header",
                     "$dir/segment%05d.ts",
                 );
                 warn join(' ', @command) . "\n";
-                system(@command);
 
-                my @files = glob("$dir/*");
-                my $count = @files - 1;
-                my $app = $req->header('X-App-Name');
-                $app = $app ? "/$app" : "";
+                my $ffmpeg = AnyEvent::Run->new(
+                    cmd => \@command,
+                );
+                sleep 3; # give ffmpeg a chance to write the list file
 
-                my $list = join "\n",
-                    "#EXTM3U",
-                    "#EXT-X-PLAYLIST-TYPE:VOD",
-                    "#EXT-X-TARGETDURATION:10",
-                    "#EXT-X-VERSION:3",
-                    "#EXT-X-MEDIA-SEQUENCE:0",
-                    (
-                        map { ("#EXTINF:10.0,",
-                               sprintf "$app/static/$rand/segment%05d.ts?user=$username&pass=$password", $_) }
-                        (0 .. $count-1)
-                    ),
-                    "#EXT-X-ENDLIST";
+                my $before = "$app/static/$rand/";
+                my $after = "?user=$username&pass=$password";
 
-                $session{$session_id} = $list if $session_id;
-                warn $list;
+                $session{$session_id} = sub {
+                    my $req = shift;
 
-                my $res = $req->new_response(200);
-                $res->body($list);
-                $responder->($res->finalize);
+                    my $_keepalive = $ffmpeg;
+
+                    my $res = $req->new_response(200);
+                    $res->header('Content-Type' => 'application/x-mpegURL');
+                    $res->header('Cache-Control' => 'private, no-cache');
+
+                    my $body = -e $list_path ? slurp $list_path : '';
+
+                    # absolute URLs including auth
+                    $body =~ s{^(segment.*)$}{$before$1$after}mg;
+
+                    # https://developer.apple.com/library/ios/technotes/tn2288/_index.html#//apple_ref/doc/uid/DTS40012238-CH1-EVENT_PLAYLIST
+                    $body =~ s{^(#EXTM3U)$}{$1\n#EXT-X-PLAYLIST-TYPE:EVENT}m;
+
+                    $res->body($body);
+
+                    return $res;
+                };
+
+                return $session{$session_id}->($req);
             };
         },
     },
