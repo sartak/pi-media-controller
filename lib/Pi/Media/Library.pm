@@ -572,7 +572,9 @@ sub resume_state_for_video {
     my $sth = $self->_dbh->prepare($query);
     $sth->execute($media->id, $media->id, $main::CURRENT_USER->name);
 
-    my ($initial, $elapsed, $audio_track) = $sth->fetchrow_array;
+    my ($initial, $elapsed, $audio_track) = $sth->fetchrow_array
+        or return;
+
     $initial += $elapsed || 0;
     return if $initial < $media->duration_seconds * .1;
     return if $initial < 10 * 60;
