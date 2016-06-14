@@ -483,65 +483,71 @@ my %endpoints;
             my $app = $req->header('X-App-Name');
             $app = $app ? "/$app" : "";
 
-            return sub {
-                my $responder = shift;
+            my $dir = $Library->stream_tmp . "pmc/";
+            my $rand;
+            for (0..7) { $rand .= chr( int(rand(25) + 65) ); }
+            $dir .= $rand;
+            system("mkdir", $dir);
 
-                my $dir = $Library->stream_tmp . "pmc/";
-                my $rand;
-                for (0..7) { $rand .= chr( int(rand(25) + 65) ); }
-                $dir .= $rand;
-                system("mkdir", $dir);
+            my $path = $media->path;
+            my $list_path = "$dir/list.m3u8";
+            my @command = (
+                "ffmpeg",
+                "-i", $path,
+                "-codec", "copy",
+                "-map", "0",
+                "-f", "segment",
+                "-segment_list", $list_path,
+                "-segment_time", 10,
+                "-segment_format", "mpeg_ts",
+                "-segment_list_flags", "live",
+                "-vbsf", "h264_mp4toannexb",
+                "-flags", "-global_header",
+                "$dir/segment%05d.ts",
+            );
+            warn join(' ', @command) . "\n";
 
-                my $path = $media->path;
-                my $list_path = "$dir/list.m3u8";
-                my @command = (
-                    "ffmpeg",
-                    "-i", $path,
-                    "-codec", "copy",
-                    "-map", "0",
-                    "-f", "segment",
-                    "-segment_list", $list_path,
-                    "-segment_time", 10,
-                    "-segment_format", "mpeg_ts",
-                    "-segment_list_flags", "live",
-                    "-vbsf", "h264_mp4toannexb",
-                    "-flags", "-global_header",
-                    "$dir/segment%05d.ts",
-                );
-                warn join(' ', @command) . "\n";
+            $SIG{CHLD} = 'IGNORE';
+            if (fork() == 0) {
+                exec @command;
+            }
 
-                $SIG{CHLD} = 'IGNORE';
-                if (fork() == 0) {
-                    exec @command;
+            my $before = "$app/static/$rand/";
+            my $after = "?user=$username&pass=$password";
+            my $body = '';
+
+            $session{$session_id} = sub {
+                my $req = shift;
+
+                my $res = $req->new_response(200);
+                $res->header('Content-Type' => 'application/x-mpegURL');
+                $res->header('Cache-Control' => 'private, no-cache');
+
+                use Time::HiRes 'sleep';
+                until (-e $list_path) {
+                    sleep 0.3;
                 }
 
-                sleep 3; # give ffmpeg a chance to write the list file
+                $body = slurp $list_path;
 
-                my $before = "$app/static/$rand/";
-                my $after = "?user=$username&pass=$password";
+                # absolute URLs including auth
+                $body =~ s{^(segment.*)$}{$before$1$after}mg;
 
-                $session{$session_id} = sub {
-                    my $req = shift;
+                # https://developer.apple.com/library/ios/technotes/tn2288/_index.html#//apple_ref/doc/uid/DTS40012238-CH1-EVENT_PLAYLIST
+                $body =~ s{^(#EXTM3U)$}{$1\n#EXT-X-PLAYLIST-TYPE:EVENT}m;
 
-                    my $res = $req->new_response(200);
-                    $res->header('Content-Type' => 'application/x-mpegURL');
-                    $res->header('Cache-Control' => 'private, no-cache');
+                # target duration must not change and videos must not exceed
+                # it; best to highball it (we asked ffmpeg for 10s chunks)
+                $body =~ s{^(#EXT-X-TARGETDURATION):\d+}{$1:20}m;
 
-                    my $body = -e $list_path ? slurp $list_path : '';
 
-                    # absolute URLs including auth
-                    $body =~ s{^(segment.*)$}{$before$1$after}mg;
 
-                    # https://developer.apple.com/library/ios/technotes/tn2288/_index.html#//apple_ref/doc/uid/DTS40012238-CH1-EVENT_PLAYLIST
-                    $body =~ s{^(#EXTM3U)$}{$1\n#EXT-X-PLAYLIST-TYPE:EVENT}m;
+                $res->body($body);
 
-                    $res->body($body);
-
-                    return $res;
-                };
-
-                return $session{$session_id}->($req);
+                return $res;
             };
+
+            return $session{$session_id}->($req);
         },
     },
 
