@@ -515,17 +515,29 @@ my %endpoints;
             my $before = "$app/static/$rand/";
             my $after = "?user=$username&pass=$password";
             my $body = '';
+            my $target_duration = 20;
 
             $session{$session_id} = sub {
                 my $req = shift;
-
                 my $res = $req->new_response(200);
                 $res->header('Content-Type' => 'application/x-mpegURL');
                 $res->header('Cache-Control' => 'private, no-cache');
 
                 use Time::HiRes 'sleep';
-                until (-e $list_path) {
-                    sleep 0.3;
+
+                # make sure the sum duration of videos encoded thus far is
+                # greater than the target duration
+                # http://stackoverflow.com/a/36509633
+                while (1) {
+                    next if !-e $list_path;
+                    $body = slurp $list_path;
+
+                    my $duration = 0;
+                    $duration += $1 while $body =~ m{^#EXTINF:([0-9.]+),}mg;
+                    last if $duration > $target_duration;
+                }
+                continue {
+                    sleep 0.1;
                 }
 
                 $body = slurp $list_path;
@@ -541,9 +553,7 @@ my %endpoints;
 
                 # target duration must not change and videos must not exceed
                 # it; best to highball it (we asked ffmpeg for 10s chunks)
-                $body =~ s{^(#EXT-X-TARGETDURATION):\d+}{$1:20}m;
-
-
+                $body =~ s{^(#EXT-X-TARGETDURATION):\d+}{$1:$target_duration}m;
 
                 $res->body($body);
 
