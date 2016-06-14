@@ -536,6 +536,9 @@ my %endpoints;
                 # https://developer.apple.com/library/ios/technotes/tn2288/_index.html#//apple_ref/doc/uid/DTS40012238-CH1-EVENT_PLAYLIST
                 $body =~ s{^(#EXTM3U)$}{$1\n#EXT-X-PLAYLIST-TYPE:EVENT}m;
 
+                # this tag is unnecessary
+                $body =~ s{^#EXT-X-MEDIA-SEQUENCE:\d+\n}{}m;
+
                 # target duration must not change and videos must not exceed
                 # it; best to highball it (we asked ffmpeg for 10s chunks)
                 $body =~ s{^(#EXT-X-TARGETDURATION):\d+}{$1:20}m;
