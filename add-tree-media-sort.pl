@@ -6,9 +6,9 @@ use JSON;
 use Getopt::Whatever;
 use Pi::Media::Library;
 
-die "usage: $0\n" if @ARGV;
 my $library = Pi::Media::Library->new(file => $ENV{PMC_DATABASE});
 my @trees = $library->trees(all => 1, media_sort => 1);
+push @trees, $library->trees(id => $_) for @ARGV;
 
 for my $tree (@trees) {
     next unless $tree->has_clause;
