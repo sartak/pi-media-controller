@@ -932,7 +932,7 @@ my %endpoints;
     },
 );
 
-my $app = sub {
+my $authenticate = sub {
     my $req = Plack::Request->new(shift);
 
     my $user;
@@ -944,6 +944,14 @@ my $app = sub {
         }
     }
 
+    return $user if !wantarray;
+    return ($username, $user);
+};
+
+my $app = sub {
+    my $req = Plack::Request->new(shift);
+
+    my ($username, $user) = $authenticate->($req);
     if (!$user) {
         warn "Unauthorized request" . ($username ? " from user '$username'" : "") . " for " . $req->method . ' ' . $req->path_info . "\n";
         my $res = $req->new_response(401);
