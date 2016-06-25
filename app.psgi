@@ -378,11 +378,11 @@ my %endpoints;
             }
 
             for my $thing (@response) {
-                my @actions = (
+                my @actions = {
                     url    => "/queue?media=" . $thing->id,
                     type   => 'enqueue',
                     label  => 'Play from Beginning',
-                );
+                };
 
                 if ($thing->isa('Pi::Media::File::Video')) {
                     my ($seconds, $audio_track) = $Library->resume_state_for_video($thing);
