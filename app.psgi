@@ -544,7 +544,7 @@ my %endpoints;
                 exec @command;
             }
 
-            my $before = "$app/static/$rand/";
+            my $before = "$app/static/stream/$rand/";
             my $after = "?user=$username&pass=$password";
             my $body = '';
             my $target_duration = 20;
@@ -1037,7 +1037,7 @@ my $app = sub {
 use Plack::Builder;
 $app = builder {
     enable "Plack::Middleware::Static",
-        path => sub { s!^/+static/!! },
+        path => sub { s!^/+static/stream/!! },
         root => $Library->stream_tmp . "pmc/";
     $app;
 };
