@@ -949,9 +949,10 @@ my $authenticate = sub {
 };
 
 my $app = sub {
-    my $req = Plack::Request->new(shift);
+    my $env = shift;
+    my $req = Plack::Request->new($env);
 
-    my ($username, $user) = $authenticate->($req);
+    my ($username, $user) = $authenticate->($env);
     if (!$user) {
         warn "Unauthorized request" . ($username ? " from user '$username'" : "") . " for " . $req->method . ' ' . $req->path_info . "\n";
         my $res = $req->new_response(401);
