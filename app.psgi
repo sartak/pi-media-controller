@@ -506,6 +506,8 @@ my %endpoints;
                 return $res;
             };
 
+            my $initialSeconds = $req->param('initialSeconds');
+
             my $user = $main::CURRENT_USER;
             my $username = $user->name;
             my $password = $user->password;
@@ -525,6 +527,7 @@ my %endpoints;
                 "-i", $path,
                 "-codec", "copy",
                 "-map", "0",
+                ($initialSeconds ? ("-ss", $initialSeconds) : ()),
                 "-f", "segment",
                 "-segment_list", $list_path,
                 "-segment_time", 10,
