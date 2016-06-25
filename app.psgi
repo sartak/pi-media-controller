@@ -378,14 +378,16 @@ my %endpoints;
             }
 
             for my $thing (@response) {
-                my @actions = {
-                    url    => "/queue?media=" . $thing->id,
-                    type   => 'enqueue',
-                    label  => 'Play from Beginning',
-                };
+                my @actions;
 
                 if ($thing->isa('Pi::Media::File::Video')) {
                     my ($seconds, $audio_track) = $Library->resume_state_for_video($thing);
+
+                    push @actions, {
+                        url    => "/queue?media=" . $thing->id,
+                        type   => 'enqueue',
+                        label  => $seconds ? 'Play from Beginning' : 'Play',
+                    };
 
                     if ($seconds) {
                         # context is important!
@@ -394,9 +396,11 @@ my %endpoints;
                         $thing->{resume}{seconds} = $seconds;
 
                         push @actions, {
-                            url    => "/queue?media=" . $thing->id . '&initialSeconds=' . $seconds . '&audioTrack=' & $audio_track,
-                            type   => 'enqueue',
-                            label  => "Resume Play from $seconds",
+                            url            => "/queue?media=" . $thing->id . '&initialSeconds=' . $seconds . '&audioTrack=' . $audio_track,
+                            type           => 'enqueue',
+                            label          => "Resume Play",
+                            initialSeconds => $seconds,
+                            audioTrack     => $audio_track,
                         };
                     }
 
@@ -404,14 +408,16 @@ my %endpoints;
                         push @actions, {
                             url    => "/stream?media=" . $thing->id,
                             type   => 'stream',
-                            label  => 'Stream from Beginning',
+                            label  => $seconds ? 'Stream from Beginning' : 'Stream',
                         };
 
                         if ($seconds) {
                             push @actions, {
-                                url    => "/stream?media=" . $thing->id . '&initialSeconds=' . $seconds . '&audioTrack=' & $audio_track,
-                                type   => 'stream',
-                                label  => "Resume Stream from $seconds",
+                                url            => "/stream?media=" . $thing->id . '&initialSeconds=' . $seconds . '&audioTrack=' . $audio_track,
+                                type           => 'stream',
+                                label          => "Resume Stream",
+                                initialSeconds => $seconds,
+                                audioTrack     => $audio_track,
                             };
                         }
                     }
