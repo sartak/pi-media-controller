@@ -1039,6 +1039,13 @@ $app = builder {
     enable "Plack::Middleware::Static",
         path => sub { s!^/+static/stream/!! },
         root => $Library->stream_tmp . "pmc/";
+    enable "Plack::Middleware::Static",
+        path => sub {
+            my ($path, $env) = @_;
+            return unless $authenticate->($env);
+            s!^/+static/download/!!;
+        },
+        root => $Library->library_root;
     $app;
 };
 

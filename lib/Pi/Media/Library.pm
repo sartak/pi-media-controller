@@ -627,6 +627,12 @@ sub _relativify_path {
     return Path::Class::file($absolute)->relative(Path::Class::file($self->file)->dir)->stringify;
 }
 
+sub library_root {
+    my $self = shift;
+
+    return Path::Class::file($self->file)->dir->stringify . '/';
+}
+
 sub stream_tmp {
     my $self = shift;
 
