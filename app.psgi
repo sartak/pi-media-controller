@@ -596,6 +596,30 @@ my %endpoints;
         },
     },
 
+    '/download' => {
+        GET => sub {
+            my $req = shift;
+
+            if ($config->{disable_download}) {
+                return $req->new_response(400);
+            }
+
+            my $id = $req->param('media') or do {
+                my $res = $req->new_response(400);
+                $res->body("media required");
+                return $res;
+            };
+
+            my $media = $Library->media_with_id($id) or do {
+                my $res = $req->new_response(404);
+                $res->body("media not found");
+                return $res;
+            };
+
+            my $path = $media->path;
+        },
+    },
+
     '/pi' => {
         SHUTDOWN => sub {
             my $req = shift;
