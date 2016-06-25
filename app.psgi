@@ -363,11 +363,7 @@ my %endpoints;
                 push @response, $Library->media(%args);
             }
             else {
-                my @trees = $Library->trees(parentId => $treeId, query => $query);
-                for my $tree (@trees) {
-                    $tree->{requestPath} = "/library?tree=" . $tree->{id};
-                    push @response, $tree;
-                }
+                push @response, $Library->trees(parentId => $treeId, query => $query);
 
                 if ($query) {
                     push @response, $Library->media(query => $query);
@@ -429,6 +425,13 @@ my %endpoints;
                             label  => 'Download',
                         };
                     }
+                }
+                elsif ($thing->isa('Pi::Media::Tree')) {
+                    push @actions, {
+                        url => "/library?tree=" . $thing->{id},
+                        type => 'navigate',
+                        label => 'Display', # shouldn't be shown
+                    };
                 }
 
                 $thing->{actions} = \@actions;

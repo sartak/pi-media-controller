@@ -51,7 +51,7 @@ sub TO_JSON {
     my $self = shift;
     my $frozen = { map { $_ => $self->$_ } qw/id label color parentId sort_order/ };
 
-    $frozen->{requestPath} = $self->{requestPath} if $self->{requestPath};
+    $frozen->{actions} = $self->{actions} if $self->{actions};
     $frozen->{type} = 'tree';
 
     return $frozen;
