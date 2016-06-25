@@ -266,17 +266,8 @@ my %endpoints;
                     return $res;
                 };
 
-                # XXX this should prompt instead
-                if ($media->type eq 'video') {
-                    my ($seconds, $audio_track) = $Library->resume_state_for_video($media);
-                    if ($seconds) {
-                        # context is important!
-                        $seconds -= 120;
-
-                        $media->{initial_seconds} = $seconds;
-                        $media->{audio_track} = $audio_track;
-                    }
-                }
+                $media->{initial_seconds} = $req->param('initialSeconds') || 0;
+                $media->{audio_track} = $req->param('audioTrack') || 0;
             }
 
             warn "Queued $media ...\n";
@@ -386,15 +377,13 @@ my %endpoints;
                 }
             }
 
-            unless ($config->{disable_streaming}) {
-                for my $thing (@response) {
-                    if ($thing->isa('Pi::Media::File::Video')) {
-                        $thing->{streamPath} = "/stream?media=" . $thing->id;
-                    }
-                }
-            }
-
             for my $thing (@response) {
+                my @actions = (
+                    url    => "/queue?media=" . $thing->id,
+                    type   => 'enqueue',
+                    label  => 'Play from Beginning',
+                );
+
                 if ($thing->isa('Pi::Media::File::Video')) {
                     my ($seconds, $audio_track) = $Library->resume_state_for_video($thing);
 
@@ -403,9 +392,40 @@ my %endpoints;
                         $seconds -= 120;
 
                         $thing->{resume}{seconds} = $seconds;
-                        $thing->{resume}{audio_track} = $audio_track;
+
+                        push @actions, {
+                            url    => "/queue?media=" . $thing->id . '&initialSeconds=' . $seconds . '&audioTrack=' & $audio_track,
+                            type   => 'enqueue',
+                            label  => "Resume Play from $seconds",
+                        };
+                    }
+
+                    unless ($config->{disable_streaming}) {
+                        push @actions, {
+                            url    => "/stream?media=" . $thing->id,
+                            type   => 'stream',
+                            label  => 'Stream from Beginning',
+                        };
+
+                        if ($seconds) {
+                            push @actions, {
+                                url    => "/stream?media=" . $thing->id . '&initialSeconds=' . $seconds . '&audioTrack=' & $audio_track,
+                                type   => 'stream',
+                                label  => "Resume Stream from $seconds",
+                            };
+                        }
+                    }
+
+                    unless ($config->{disable_downloads}) {
+                        push @actions, {
+                            url    => "/download?media=" . $thing->id,
+                            type   => 'download',
+                            label  => 'Download',
+                        };
                     }
                 }
+
+                $thing->{actions} = \@actions;
             }
 
             $res->body(encode_utf8($json->encode(\@response)));
