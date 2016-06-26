@@ -1055,15 +1055,21 @@ my $app = sub {
 use Plack::Builder;
 $app = builder {
     enable "Plack::Middleware::Static",
-        path => sub { s!^/+static/stream/!! },
+        path => sub {
+            my ($path, $env) = @_;
+            return 0 unless $authenticate->($env);
+            s!^/+static/stream/!!;
+        },
         root => $Library->stream_tmp . "pmc/";
+
     enable "Plack::Middleware::Static",
         path => sub {
             my ($path, $env) = @_;
-            return unless $authenticate->($env);
+            return 0 unless $authenticate->($env);
             s!^/+static/download/!!;
         },
         root => $Library->library_root;
+
     $app;
 };
 
