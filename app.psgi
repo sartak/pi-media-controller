@@ -620,7 +620,18 @@ my %endpoints;
                 return $res;
             };
 
-            my $path = $media->path;
+            my $user = $main::CURRENT_USER;
+            my $username = $user->name;
+            my $password = $user->password;
+            my $path = uri_escape(encode_utf8($Library->_relativify_path($media->path)));
+            my $app = $req->header('X-App-Name');
+            $app = $app ? "/$app" : "";
+
+            my $url = "$app/static/download/$path?user=$username&pass=$password";
+
+            my $res = $req->new_response;
+            $res->redirect($url);
+            return $res;
         },
     },
 
