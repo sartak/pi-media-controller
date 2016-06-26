@@ -485,7 +485,9 @@ my %endpoints;
             my $req = shift;
 
             if ($config->{disable_streaming}) {
-                return $req->new_response(400);
+                my $res = $req->new_response(400);
+                $res->body("streaming disabled");
+                return $res;
             }
 
             our %session;
@@ -601,7 +603,9 @@ my %endpoints;
             my $req = shift;
 
             if ($config->{disable_download}) {
-                return $req->new_response(400);
+                my $res = $req->new_response(400);
+                $res->body("download disabled");
+                return $res;
             }
 
             my $id = $req->param('media') or do {
@@ -927,7 +931,9 @@ my %endpoints;
                 return $req->new_response(204);
             }
 
-            return $req->new_response(400);
+            my $res = $req->new_response(400);
+            $res->body("scene required");
+            return $res;
         },
     },
 );
