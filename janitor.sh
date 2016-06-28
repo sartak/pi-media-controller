@@ -1,7 +1,7 @@
 #!/bin/bash
 cd ~/pi-media-controller/
 
-perl -Ilib -Iextlib untracked-media.pl /media/paul/Commercials /media/paul/LP /media/paul/Movies /media/paul/ROM/*/ /media/paul/Shorts /media/paul/Talks /media/paul/TV
+perl -Ilib -Iextlib untracked-media.pl /media/paul/Commercials /media/paul/LP /media/paul/Movies /media/paul/ROM/*/ /media/paul/Shorts /media/paul/Talks /media/paul/Go /media/paul/TV
 
 perl -Ilib -Iextlib fsck.pl
 
