@@ -39,6 +39,16 @@ $ARGV{'ignore-missing-file'} || (-e $path && !-d _)
 my $immersible = $ARGV{immersible} ? 1 : 0;
 my $streamable = $ARGV{streamable} ? 1 : 0;
 
+my $spoken_langs = ['??'];
+if (exists $ARGV{spoken_langs}) {
+    $spoken_langs = [map { defined($_) ? $_ : '' } split / *, */, $ARGV{spoken_langs}];
+}
+
+my $subtitle_langs = ['??'];
+if (exists $ARGV{subtitle_langs}) {
+    $subtitle_langs = [map { defined($_) ? $_ : '' } split / *, */, $ARGV{subtitle_langs}];
+}
+
 my $library = Pi::Media::Library->new(file => $ENV{PMC_DATABASE});
 
 if (!$treeId) {
@@ -50,8 +60,8 @@ my $id = $library->insert_video(
     identifier      => $identifier,
     label_en        => $label_en,
     label_ja        => $label_ja,
-    spoken_langs    => ['??'],
-    subtitle_langs  => ['??'],
+    spoken_langs    => $spoken_langs,
+    subtitle_langs  => $subtitle_langs,
     immersible      => $immersible,
     streamable      => $streamable,
     durationSeconds => duration_of($path),
