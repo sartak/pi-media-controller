@@ -31,9 +31,9 @@ CREATE TABLE IF NOT EXISTS media (
 );
 
 CREATE TABLE IF NOT EXISTS viewing (
-    mediaId INTEGER,
-    startTime INTEGER NOT NULL,
-    endTime INTEGER NOT NULL,
+    mediaId INTEGER NOT NULL,
+    startTime INTEGER,
+    endTime INTEGER,
     initialSeconds INTEGER,
     elapsedSeconds INTEGER,
     audioTrack INTEGER,
