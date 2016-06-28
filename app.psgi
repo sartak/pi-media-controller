@@ -476,7 +476,9 @@ my %endpoints;
                 who             => $who,
             );
 
-            return $req->new_response(204);
+            my $res = $req->new_response(204);
+            $res->header('X-PMC-Completed' => defined($elapsedSeconds) ? 0 : 1);
+            return $res;
         },
     },
 
