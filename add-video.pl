@@ -20,6 +20,8 @@ my $identifier = $ARGV{identifier};
 warn "identifier probably shouldn't start with 0\n"
 	if $identifier && $identifier =~ /^0\d/;
 
+my $sort_order = $ARGV{sort_order};
+
 exists($ARGV{immersible}) || exists($ARGV{noimmersible}) or usage("immersible or noimmersible required");
 exists($ARGV{streamable}) || exists($ARGV{unstreamable}) or usage("streamable or unstreamable required");
 
@@ -55,6 +57,7 @@ my $id = $library->insert_video(
     durationSeconds => duration_of($path),
     treeId          => $treeId,
     tags            => $tags,
+    sort_order      => $sort_order,
 );
 
 if ($ARGV{'ignore-missing-file'}) {
