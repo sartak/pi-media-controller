@@ -340,8 +340,9 @@ my %endpoints;
             my $res = $req->new_response(200);
             $res->content_type("application/json");
 
-            my $treeId = $req->param('tree') || 0;
-            my $query  = $req->param('query');
+            my $treeId  = $req->param('tree') || 0;
+            my $query   = $req->param('query');
+
             my %args;
             my @response;
 
@@ -357,6 +358,11 @@ my %endpoints;
                         source_tree => $tree->id,
                     );
                 }
+            }
+
+            if (($req->param('id')||'') =~ /,/) {
+                $args{id} = [grep { length } split ',', $req->param('id')];
+                $args{all} = 1;
             }
 
             if (%args) {

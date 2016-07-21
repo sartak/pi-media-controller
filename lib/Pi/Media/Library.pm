@@ -423,6 +423,12 @@ sub media {
         push @bind, $args{treeId};
     }
 
+    if (ref($args{id})) {
+        push @where, 'media.id IN (' . (join ',', map { '?' } @{ $args{id} }) . ')';
+        push @bind, @{ $args{id} };
+        delete $args{id};
+    }
+
     if ($args{joins}) {
         $joins = $args{joins};
     }
