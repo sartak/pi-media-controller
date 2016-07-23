@@ -47,7 +47,7 @@ has completed => (
 
 has last_played => (
     is  => 'rw',
-    isa => 'Int',
+    isa => 'Maybe[Int]',
 );
 
 has tags => (
