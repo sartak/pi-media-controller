@@ -63,7 +63,7 @@ has checksum => (
 
 has sort_order => (
     is  => 'ro',
-    isa => 'Maybe[Num]',
+    isa => 'Maybe[Str]',
 );
 
 sub extension {
