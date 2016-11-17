@@ -67,6 +67,7 @@ has duration_seconds => (
         '?/spa' => 'Spanish(?)',
         '?/tha' => 'Thai(?)',
         '?/zho' => 'Chinese(?)',
+        '?/hun' => 'Hungarian(?)',
     );
 
     sub label_for_language {
