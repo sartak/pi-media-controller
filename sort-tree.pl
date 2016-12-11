@@ -6,8 +6,9 @@ use JSON;
 use File::Slurp 'slurp';
 use Getopt::Whatever;
 use Pi::Media::Library;
+use Sort::Naturally;
 
-my $treeId = shift or die "usage: $0 [--verbose] treeId\n";
+my $treeId = shift or die "usage: $0 [--verbose] [--path] treeId\n";
 
 die "Need config.json" unless -e "config.json";
 my $json = JSON->new->utf8->convert_blessed(1);
@@ -24,29 +25,34 @@ my @media = (
 my %fixup = %{ $config->{sort_fixup}{$treeId} || {} };
 my %saw_fixup;
 
-@media = sort {
-    my $a_label = $a->label->{en} || $a->label->{ja};
-    my $b_label = $b->label->{en} || $b->label->{ja};
+if ($ARGV{path}) {
+    @media = sort { ncmp($a->path, $b->path) } @media;
+}
+else {
+    @media = sort {
+        my $a_label = $a->label->{en} || $a->label->{ja};
+        my $b_label = $b->label->{en} || $b->label->{ja};
 
-    if ($fixup{$a_label}) {
-        $saw_fixup{$a_label}++;
-        $a_label = $fixup{$a_label};
-    }
-    if ($fixup{$b_label}) {
-        $saw_fixup{$b_label}++;
-        $b_label = $fixup{$b_label};
-    }
+        if ($fixup{$a_label}) {
+            $saw_fixup{$a_label}++;
+            $a_label = $fixup{$a_label};
+        }
+        if ($fixup{$b_label}) {
+            $saw_fixup{$b_label}++;
+            $b_label = $fixup{$b_label};
+        }
 
-    $a_label =~ s/^The //;
-    $b_label =~ s/^The //;
+        $a_label =~ s/^The //;
+        $b_label =~ s/^The //;
 
-    $a_label =~ s/^An? //;
-    $b_label =~ s/^An? //;
+        $a_label =~ s/^An? //;
+        $b_label =~ s/^An? //;
 
-    $a_label cmp $b_label ||
-    ($b->path =~ m{/English/} <=> $a->path =~ m{/English/}) ||
-    $a->path cmp $b->path
-} @media;
+        $a_label cmp $b_label ||
+        ($b->path =~ m{/English/} <=> $a->path =~ m{/English/}) ||
+        $a->path cmp $b->path
+    } @media;
+}
 
 for my $i (1 .. $#media+1) {
     my $media = $media[$i-1];
