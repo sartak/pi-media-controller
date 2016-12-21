@@ -19,5 +19,4 @@ perl -Ilib -Iextlib ./add-tree-media-sort.pl
 
 perl -Ilib -Iextlib intuit-checksums.pl;
 
-(echo 'select path, spoken_langs from media where spoken_langs like "?%" and spoken_langs != "??" order by id asc; select path, spoken_langs from media where spoken_langs like "%?%" and spoken_langs != "??" order by id asc;' | sqlite3 $PMC_DATABASE | grep Movies) | head
-(echo 'select path, spoken_langs from media where spoken_langs like "?%" and spoken_langs != "??" order by id asc; select path, spoken_langs from media where spoken_langs like "%?%" and spoken_langs != "??" order by id asc;' | sqlite3 $PMC_DATABASE | grep Movies) | wc -l
+(echo 'select spoken_langs from media where spoken_langs like "%?%" and treeId=1;' | sqlite3 $PMC_DATABASE) | wc -l
