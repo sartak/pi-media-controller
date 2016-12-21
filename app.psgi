@@ -1002,47 +1002,6 @@ my $app = sub {
 
     warn $req->method . ' ' . $req->path_info;
 
-    if ($req->path_info eq '/status') {
-        if ($req->method eq 'GET') {
-            return sub {
-                my $responder = shift;
-                my $writer = $responder->([200, ['Content-Type', 'application/json', 'X-PMC-Time' => scalar(gmtime), 'Cache-control' => 'private, max-age=0, no-store']]);
-                push @Watchers, $writer;
-
-                $notify_cb->({ type => 'connected' }, $writer);
-                $notify_cb->($Television->power_status, $writer);
-
-                if ($Television->can('volume_status')) {
-                    $notify_cb->($Television->volume_status, $writer);
-                }
-                else {
-                    $notify_cb->({ type => "television/volume", hide => bool(1) }, $writer);
-                }
-
-                if ($Television->can('input_status')) {
-                    $notify_cb->($Television->input_status, $writer);
-                }
-                else {
-                    $notify_cb->({ type => "television/input", hide => bool(1) }, $writer);
-                }
-
-                $notify_cb->($Controller->playpause_status, $writer);
-                $notify_cb->($Controller->fastforward_status, $writer);
-
-                $notify_cb->($Controller->audio_status, $writer);
-
-                $notify_cb->({ type => 'subscriber' });
-            };
-        }
-        else {
-            my $res = $req->new_response(405);
-            $res->body("allowed methods: GET");
-            $res->header('X-PMC-Time' => scalar gmtime);
-            $res->header('Cache-control' => 'private, max-age=0, no-store');
-            return $res->finalize;
-        }
-    }
-
     my $spec = $endpoints{$req->path_info};
     if (!$spec) {
         my $res = $req->new_response(404);
@@ -1091,10 +1050,57 @@ $app = builder {
         },
         root => $Library->library_root;
 
+    mount '/status' => sub {
+        my $env = shift;
+        return 0 unless $authenticate->($env);
+
+        my $req = Plack::Request->new($env);
+        if ($req->method eq 'GET') {
+            $env->{'plack.skip-deflater'} = 1;
+
+            return sub {
+                my $responder = shift;
+                my $writer = $responder->([200, ['Content-Type' => 'application/json', 'X-PMC-Time' => scalar(gmtime), 'Cache-control' => 'private, max-age=0, no-store']]);
+                push @Watchers, $writer;
+
+                $notify_cb->({ type => 'connected' }, $writer);
+                $notify_cb->($Television->power_status, $writer);
+
+                if ($Television->can('volume_status')) {
+                    $notify_cb->($Television->volume_status, $writer);
+                }
+                else {
+                    $notify_cb->({ type => "television/volume", hide => bool(1) }, $writer);
+                }
+
+                if ($Television->can('input_status')) {
+                    $notify_cb->($Television->input_status, $writer);
+                }
+                else {
+                    $notify_cb->({ type => "television/input", hide => bool(1) }, $writer);
+                }
+
+                $notify_cb->($Controller->playpause_status, $writer);
+                $notify_cb->($Controller->fastforward_status, $writer);
+
+                $notify_cb->($Controller->audio_status, $writer);
+
+                $notify_cb->({ type => 'subscriber' });
+            };
+        }
+        else {
+            my $res = $req->new_response(405);
+            $res->body("allowed methods: GET");
+            $res->header('X-PMC-Time' => scalar gmtime);
+            $res->header('Cache-control' => 'private, max-age=0, no-store');
+            return $res->finalize;
+        }
+    };
+
     enable "Deflater",
         content_type => ['text/css','text/html','text/javascript','application/javascript','application/json'];
 
-    $app;
+    mount "/" => $app;
 };
 
 
