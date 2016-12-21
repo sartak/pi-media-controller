@@ -1052,9 +1052,18 @@ $app = builder {
 
     mount '/status' => sub {
         my $env = shift;
-        return 0 unless $authenticate->($env);
-
         my $req = Plack::Request->new($env);
+
+        my ($username, $user) = $authenticate->($env);
+        if (!$user) {
+            warn "Unauthorized request" . ($username ? " from user '$username'" : "") . " for " . $req->method . ' ' . $req->path_info . "\n";
+            my $res = $req->new_response(401);
+            $res->header('X-PMC-Time' => scalar gmtime);
+            $res->header('Cache-control' => 'private, max-age=0, no-store');
+            $res->body("unauthorized");
+            return $res->finalize;
+        }
+
         if ($req->method eq 'GET') {
             $env->{'plack.skip-deflater'} = 1;
 
