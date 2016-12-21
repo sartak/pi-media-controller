@@ -146,8 +146,8 @@ sub _inflate_media_from_sth {
 
         if (keys %videos_by_id) {
             my $query = 'SELECT mediaId, MAX(endTime) FROM viewing WHERE';
-            $query .= ' who=? AND (';
-            $query .= join ' OR ', map { 'mediaId=?' } keys %videos_by_id;
+            $query .= ' who=? AND mediaId IN (';
+            $query .= join ', ', map { '?' } keys %videos_by_id;
             $query .= ') AND elapsedSeconds IS NULL GROUP BY mediaId;';
 
             my $sth = $self->_dbh->prepare($query);
