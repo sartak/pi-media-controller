@@ -1091,6 +1091,9 @@ $app = builder {
         },
         root => $Library->library_root;
 
+    enable "Deflater",
+        content_type => ['text/css','text/html','text/javascript','application/javascript','application/json'];
+
     $app;
 };
 
