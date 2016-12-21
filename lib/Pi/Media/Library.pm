@@ -32,6 +32,12 @@ has file => (
     default => 'library.sqlite',
 );
 
+has _resume_state_cache => (
+    is      => 'ro',
+    isa     => 'HashRef',
+    default => sub { {} },
+);
+
 sub disconnect {
     my ($self) = @_;
     $self->_dbh->disconnect;
@@ -574,6 +580,9 @@ sub media_with_id {
 
 sub add_viewing {
     my ($self, %args) = @_;
+
+    delete $self->_resume_state_cache->{$args{media}->id};
+
     $self->_dbh->do('
         INSERT INTO viewing
             (mediaId, startTime, endTime, initialSeconds, elapsedSeconds, audioTrack, location, who)
@@ -590,7 +599,7 @@ sub add_viewing {
     ));
 }
 
-sub resume_state_for_video {
+sub _resume_state_for_video {
     my ($self, $media) = @_;
 
     my $query = q{select initialSeconds, elapsedSeconds, audioTrack from viewing where mediaId=? and viewing.endTime > strftime('%s', 'now')-30*24*60*60 AND viewing.elapsedSeconds IS NOT NULL and viewing.endTime = (select max(endTime) from viewing as v where v.mediaId = ? and v.who = ?) limit 1;};
@@ -605,6 +614,17 @@ sub resume_state_for_video {
     return if $initial < $media->duration_seconds * .1;
     return if $initial < 10 * 60;
     return ($initial, $audio_track);
+}
+
+sub resume_state_for_video {
+    my ($self, $media) = @_;
+
+    my $key = $media->id;
+    if (!$self->_resume_state_cache->{$key}) {
+        $self->_resume_state_cache->{$key} =
+            [ $self->_resume_state_for_video($media) ];
+    }
+    return @{ $self->_resume_state_cache->{$key} };
 }
 
 sub update_media {
