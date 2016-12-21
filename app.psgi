@@ -12,6 +12,7 @@ use Scalar::Util 'blessed';
 use File::Slurp 'slurp';
 use URI::Escape;
 use AnyEvent::HTTP;
+use Time::HiRes 'time';
 
 use Pi::Media::Queue::Autofilling;
 use Pi::Media::Controller;
@@ -346,6 +347,8 @@ my %endpoints;
             my %args;
             my @response;
 
+            warn "Starting library queries at " . (time - $req->{_pmc_begin}) . "s" if $ENV{PMC_PROFILE};
+
             if ($treeId) {
                 my ($tree) = $Library->trees(id => $treeId);
                 if ($tree->has_clause) {
@@ -358,6 +361,7 @@ my %endpoints;
                         source_tree => $tree->id,
                     );
                 }
+                warn "Found tree at " . (time - $req->{_pmc_begin}) . "s" if $ENV{PMC_PROFILE};
             }
 
             if (($req->param('id')||'') =~ /,/) {
@@ -367,15 +371,19 @@ my %endpoints;
 
             if (%args) {
                 push @response, $Library->media(%args);
+                warn "Got media (with \%args) at " . (time - $req->{_pmc_begin}) . "s" if $ENV{PMC_PROFILE};
             }
             else {
                 push @response, $Library->trees(parentId => $treeId, query => $query);
+                warn "Got tree (without \%args) at " . (time - $req->{_pmc_begin}) . "s" if $ENV{PMC_PROFILE};
 
                 if ($query) {
                     push @response, $Library->media(query => $query);
+                    warn "Got media (with query) at " . (time - $req->{_pmc_begin}) . "s" if $ENV{PMC_PROFILE};
                 }
                 else {
                     push @response, $Library->media(treeId => $treeId);
+                    warn "Got media (without query) at " . (time - $req->{_pmc_begin}) . "s" if $ENV{PMC_PROFILE};
                 }
             }
 
@@ -443,7 +451,9 @@ my %endpoints;
                 $thing->{actions} = \@actions;
             }
 
+            warn "Finished inflating response at " . (time - $req->{_pmc_begin}) . "s" if $ENV{PMC_PROFILE};
             $res->body(encode_utf8($json->encode(\@response)));
+            warn "Finished serializing response at " . (time - $req->{_pmc_begin}) . "s" if $ENV{PMC_PROFILE};
             return $res;
         },
     },
@@ -976,6 +986,7 @@ my $authenticate = sub {
 my $app = sub {
     my $env = shift;
     my $req = Plack::Request->new($env);
+    $req->{_pmc_begin} = time;
 
     my ($username, $user) = $authenticate->($env);
     if (!$user) {
@@ -1051,6 +1062,8 @@ my $app = sub {
     }
 
     my $res = $action->($req);
+
+    warn "Request took " . (time - $req->{_pmc_begin}) . "s" if $ENV{PMC_PROFILE};
 
     if (blessed($res)) {
         $res->header('X-PMC-Time' => scalar gmtime);

@@ -8,6 +8,7 @@ use Pi::Media::Tree;
 use Pi::Media::User;
 use DBI;
 use Path::Class;
+use Time::HiRes 'time';
 use Unicode::Normalize 'NFC';
 
 has _dbh => (
@@ -78,6 +79,8 @@ sub _inflate_media_from_sth {
     my %games_by_id;
     my %books_by_id;
 
+    my $begin = time;
+
     while (my ($id, $type, $path, $identifier, $label_en, $label_ja, $spoken_langs, $subtitle_langs, $immersible, $streamable, $durationSeconds, $treeId, $tags, $checksum, $sort_order) = $sth->fetchrow_array) {
         my %label;
         $label{en} = $label_en if $label_en;
@@ -141,6 +144,8 @@ sub _inflate_media_from_sth {
         push @media, $media;
     }
 
+    warn "fetching all rows took " . (time - $begin) . "s" if $ENV{PMC_PROFILE};
+
     if (!$args{excludeViewing}) {
         Carp::confess "Need a CURRENT_USER to produce viewing data" if !$main::CURRENT_USER;
 
@@ -151,7 +156,10 @@ sub _inflate_media_from_sth {
             $query .= ') AND elapsedSeconds IS NULL GROUP BY mediaId;';
 
             my $sth = $self->_dbh->prepare($query);
+            warn "prepare viewing query at " . (time - $begin) . "s" if $ENV{PMC_PROFILE};
+
             $sth->execute($main::CURRENT_USER->name, keys %videos_by_id);
+            warn "execute viewing query $query at " . (time - $begin) . "s" if $ENV{PMC_PROFILE};
 
             while (my ($id, $date) = $sth->fetchrow_array) {
                 for my $video (@{ $videos_by_id{$id} }) {
@@ -159,6 +167,7 @@ sub _inflate_media_from_sth {
                     $video->last_played($date);
                 }
             }
+            warn "applying viewing query at " . (time - $begin) . "s" if $ENV{PMC_PROFILE};
         }
 
         if (keys %games_by_id) {
@@ -195,6 +204,8 @@ sub _inflate_media_from_sth {
             }
         }
     }
+
+    warn "viewing rows took " . (time - $begin) . "s" if $ENV{PMC_PROFILE};
 
     return @media;
 }
@@ -512,14 +523,22 @@ sub media {
     $query .= ';';
 
     $query =~ s/\$CURRENT_USER/$self->_dbh->quote($main::CURRENT_USER->name)/ge;
+
+    my $begin = time;
+
     my $sth = eval { $self->_dbh->prepare($query) };
     if ($@) {
         die "$query\n\n$@";
     }
+    warn "prepare took " . (time - $begin) . "s" if $ENV{PMC_PROFILE};
 
     $sth->execute(@bind);
+    warn "execute took " . (time - $begin) . "s" if $ENV{PMC_PROFILE};
 
-    return $self->_inflate_media_from_sth($sth, %args);
+    my @media = $self->_inflate_media_from_sth($sth, %args);
+    warn "inflate took " . (time - $begin) . "s" if $ENV{PMC_PROFILE};
+
+    return @media;
 }
 
 sub paths {
