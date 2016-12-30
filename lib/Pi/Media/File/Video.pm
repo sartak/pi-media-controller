@@ -77,6 +77,12 @@ has duration_seconds => (
 
         return $language_map{$lang} if $language_map{$lang};
 
+        if ($lang =~ /&/) {
+            return join ' & ',
+                   map { $class->label_for_language($_) }
+                   split /&/, $lang;
+        }
+
         if (my ($l, $n) = $lang =~ m{^(.+)(/.+)$}) {
             $l = $language_map{$l};
             $n = $language_map{$n};
