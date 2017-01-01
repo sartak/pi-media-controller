@@ -229,6 +229,12 @@ my %endpoints;
 
             return $req->new_response(200);
         },
+        DELETE => sub {
+            my $req = shift;
+            $Controller->stop_playing;
+            $Television->power_off if $Television->can('power_off');
+            return $req->new_response(200);
+        },
     },
     '/current/audio' => {
         GET => sub {
