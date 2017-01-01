@@ -22,7 +22,22 @@ sub shift {
     if (!$self->SUPER::has_media(@_) && $self->source) {
         $self->notify({ type => 'queue', autofill => 1 });
 
-        my @media = $self->library->media(where => $self->source->query);
+        my $tree = $self->source;
+        my @media;
+        if ($tree->has_clause) {
+            @media = $self->library->media(
+                all         => 1,
+                joins       => $tree->join_clause,
+                where       => $tree->where_clause,
+                order       => $tree->order_clause,
+                limit       => $tree->limit_clause,
+                source_tree => $tree->id,
+            );
+        }
+        else {
+            @media = $self->library->media(treeId => $tree->id);
+        }
+
         local $main::CURRENT_USER = $self->requestor;
         $self->push(@media);
 
