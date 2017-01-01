@@ -201,6 +201,35 @@ my %endpoints;
         # decrease_subtitle_delay increase_subtitle_delay decrease_volume
         # increase_volume
     },
+    '/current/paused' => {
+        PUT => sub {
+            my $req = shift;
+            if ($req->param('paused')) {
+                if ($Controller->pause) {
+                    return $req->new_response(200);
+                }
+                else {
+                    return $req->new_response(204);
+                }
+            }
+            else {
+                $Television->set_active_source
+                    if $Television->can('set_active_source');
+                if ($Controller->unpause) {
+                    if (!$Controller->current_media) {
+                        $Controller->play_next_in_queue;
+                    }
+
+                    return $req->new_response(200);
+                }
+                else {
+                    return $req->new_response(204);
+                }
+            }
+
+            return $req->new_response(200);
+        },
+    },
     '/current/audio' => {
         GET => sub {
             my $req = shift;
