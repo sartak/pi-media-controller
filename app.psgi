@@ -431,7 +431,7 @@ my %endpoints;
                     push @actions, {
                         url    => "/queue?media=" . $thing->id,
                         type   => 'enqueue',
-                        label  => $seconds ? 'Play from Beginning' : 'Play',
+                        label  => $seconds ? 'TV Play from Beginning' : 'Play on TV',
                     };
 
                     if ($seconds) {
@@ -443,7 +443,7 @@ my %endpoints;
                         push @actions, {
                             url            => "/queue?media=" . $thing->id . '&initialSeconds=' . $seconds . '&audioTrack=' . $audio_track,
                             type           => 'enqueue',
-                            label          => "Resume Play",
+                            label          => "Resume Play on TV",
                             initialSeconds => $seconds,
                             audioTrack     => $audio_track,
                         };
