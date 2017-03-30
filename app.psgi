@@ -422,6 +422,7 @@ my %endpoints;
                 }
             }
 
+            my %tags_for_tree;
             for my $thing (@response) {
                 my @actions;
 
@@ -474,6 +475,26 @@ my %endpoints;
                             type   => 'download',
                             label  => 'Download',
                         };
+                    }
+
+                    my $treeId = $thing->treeId;
+                    $tags_for_tree{$treeId} ||= [$Library->media_tags_for_tree($treeId)];
+                    my @tags = @{ $thing->tags };
+                    for my $tag (@{ $tags_for_tree{$thing->treeId} }) {
+                        if (grep { $_ eq $tag } @tags) {
+                            push @actions, {
+                                url    => "/library/tags?mediaId=" . $id . "&removeTag=" . $tag,
+                                type   => 'tag',
+                                label  => "Remove Tag \"$tag\"",
+                            };
+                        }
+                        else {
+                            push @actions, {
+                                url    => "/library/tags?mediaId=" . $id . "&addTag=" . $tag,
+                                type   => 'tag',
+                                label  => "Add Tag \"$tag\"",
+                            };
+                        }
                     }
                 }
                 elsif ($thing->isa('Pi::Media::Tree')) {
@@ -530,6 +551,39 @@ my %endpoints;
 
             my $res = $req->new_response(204);
             $res->header('X-PMC-Completed' => defined($elapsedSeconds) ? 0 : 1);
+            return $res;
+        },
+    },
+
+    '/library/tags' => {
+        POST => sub {
+            my $req = shift;
+            my $mediaId = $req->param('mediaId');
+            my $addTag = $req->param('addTag');
+            my $removeTag = $req->param('removeTag');
+
+            my $media = $Library->media_with_id($mediaId) or do {
+                my $res = $req->new_response(404);
+                $res->body("media not found");
+                return $res;
+            };
+
+            my @oldTags = @{ $media->tags };
+            my @newTags = @oldTags;
+
+            if ($addTag) {
+                push @newTags, $addTag unless grep { $_ eq $addTag } @newTags;
+            }
+            if ($removeTag) {
+                @newTags = grep { $_ ne $removeTag } @newTags;
+            }
+
+            if ("@oldTags" ne "@newTags") {
+                my $tags = @newTags ? ('`' . (join '`', @newTags) . '`') : '';
+                $Library->update_media($media, tags => $tags);
+            }
+
+            my $res = $req->new_response(204);
             return $res;
         },
     },

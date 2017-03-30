@@ -47,9 +47,15 @@ has sort_order => (
     isa => 'Maybe[Num]',
 );
 
+has media_tags => (
+    is       => 'ro',
+    isa      => 'ArrayRef[Str]',
+    required => 1,
+);
+
 sub TO_JSON {
     my $self = shift;
-    my $frozen = { map { $_ => $self->$_ } qw/id label color parentId sort_order/ };
+    my $frozen = { map { $_ => $self->$_ } qw/id label color parentId sort_order media_tags/ };
 
     $frozen->{actions} = $self->{actions} if $self->{actions};
     $frozen->{type} = 'tree';

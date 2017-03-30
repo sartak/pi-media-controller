@@ -221,10 +221,11 @@ sub _inflate_trees_from_sth {
 
     my @trees;
 
-    while (my ($id, $label_en, $label_ja, $parentId, $color, $joins, $where, $order, $limit, $sort_order) = $sth->fetchrow_array) {
+    while (my ($id, $label_en, $label_ja, $parentId, $color, $joins, $where, $order, $limit, $sort_order, $media_tags) = $sth->fetchrow_array) {
         my %label;
         $label{en} = $label_en if $label_en;
         $label{ja} = $label_ja if $label_ja;
+        $media_tags = [grep { length } split '`', $media_tags];
 
         my $tree = Pi::Media::Tree->new(
             id           => $id,
@@ -236,6 +237,7 @@ sub _inflate_trees_from_sth {
             order_clause => $order,
             limit_clause => $limit,
             sort_order   => $sort_order,
+            media_tags   => $media_tags,
         );
 
         push @trees, $tree;
@@ -402,7 +404,7 @@ sub trees {
         push @bind, $args{parentId};
     }
 
-    my $query = 'SELECT tree.id, tree.label_en, tree.label_ja, tree.parentId, tree.color, tree.join_clause, tree.where_clause, tree.order_clause, tree.limit_clause, tree.sort_order FROM tree';
+    my $query = 'SELECT tree.id, tree.label_en, tree.label_ja, tree.parentId, tree.color, tree.join_clause, tree.where_clause, tree.order_clause, tree.limit_clause, tree.sort_order, tree.media_tags FROM tree';
 
     if ($args{media_sort}) {
         $query .= ' LEFT JOIN tree_media_sort ON tree.id = tree_media_sort.treeId';
@@ -576,6 +578,24 @@ sub media_with_id {
 
     my @media = $self->_inflate_media_from_sth($sth, %args);
     return $media[0];
+}
+
+sub media_tags_for_tree {
+    my ($self, $id) = @_;
+
+    my $sth = $self->_dbh->prepare('
+        SELECT media_tags
+        FROM tree
+        WHERE id = ?
+        LIMIT 1
+    ;');
+    $sth->execute($id);
+
+    if (my ($tags) = $sth->fetchrow_array) {
+        return grep { length } split '`', $tags;
+    }
+
+    return;
 }
 
 sub add_viewing {

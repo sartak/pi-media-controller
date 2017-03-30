@@ -8,7 +8,8 @@ CREATE TABLE IF NOT EXISTS tree (
     where_clause TEXT,
     order_clause TEXT,
     limit_clause TEXT,
-    sort_order INTEGER
+    sort_order INTEGER,
+    media_tags TEXT DEFAULT ""
 );
 
 CREATE TABLE IF NOT EXISTS media (
