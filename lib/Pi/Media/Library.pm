@@ -221,7 +221,7 @@ sub _inflate_trees_from_sth {
 
     my @trees;
 
-    while (my ($id, $label_en, $label_ja, $parentId, $color, $joins, $where, $order, $limit, $sort_order, $media_tags) = $sth->fetchrow_array) {
+    while (my ($id, $label_en, $label_ja, $parentId, $color, $joins, $where, $group, $order, $limit, $sort_order, $media_tags) = $sth->fetchrow_array) {
         my %label;
         $label{en} = $label_en if $label_en;
         $label{ja} = $label_ja if $label_ja;
@@ -234,6 +234,7 @@ sub _inflate_trees_from_sth {
             color        => $color,
             join_clause  => $joins,
             where_clause => $where,
+            group_clause => $group,
             order_clause => $order,
             limit_clause => $limit,
             sort_order   => $sort_order,
@@ -404,7 +405,7 @@ sub trees {
         push @bind, $args{parentId};
     }
 
-    my $query = 'SELECT tree.id, tree.label_en, tree.label_ja, tree.parentId, tree.color, tree.join_clause, tree.where_clause, tree.order_clause, tree.limit_clause, tree.sort_order, tree.media_tags FROM tree';
+    my $query = 'SELECT tree.id, tree.label_en, tree.label_ja, tree.parentId, tree.color, tree.join_clause, tree.where_clause, tree.group_clause, tree.order_clause, tree.limit_clause, tree.sort_order, tree.media_tags FROM tree';
 
     if ($args{media_sort}) {
         $query .= ' LEFT JOIN tree_media_sort ON tree.id = tree_media_sort.treeId';
@@ -430,7 +431,7 @@ sub media {
 
     my @bind;
     my @where;
-    my ($joins, $limit, $order);
+    my ($joins, $limit, $order, $group);
 
     if ($args{query}) {
         push @where, '(label_en LIKE ? OR label_ja LIKE ?)';
@@ -454,6 +455,10 @@ sub media {
 
     if ($args{limit}) {
         $limit = $args{limit};
+    }
+
+    if ($args{group}) {
+        $group = $args{group};
     }
 
     if ($args{order}) {
@@ -513,6 +518,8 @@ sub media {
     }
 
     $query .= 'WHERE ' . join(' AND ', @where) if @where;
+
+    $query .= " GROUP BY $group" if $group;
 
     $query .= ' ORDER BY ';
 

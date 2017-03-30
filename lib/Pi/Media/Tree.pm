@@ -22,6 +22,11 @@ has where_clause => (
     isa => 'Maybe[Str]',
 );
 
+has group_clause => (
+    is  => 'ro',
+    isa => 'Maybe[Str]',
+);
+
 has order_clause => (
     is  => 'ro',
     isa => 'Maybe[Str]',
@@ -67,6 +72,7 @@ sub has_clause {
     my $self = shift;
     return $self->join_clause
         || $self->where_clause
+        || $self->group_clause
         || $self->order_clause
         || $self->limit_clause;
 }

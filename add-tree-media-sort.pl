@@ -19,6 +19,7 @@ for my $tree (@trees) {
         joins          => $tree->join_clause,
         where          => $tree->where_clause,
         order          => $tree->order_clause,
+        group          => $tree->group_clause,
         limit          => $tree->limit_clause,
         source_tree    => $tree->id,
         excludeViewing => 1,

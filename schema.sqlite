@@ -6,6 +6,7 @@ CREATE TABLE IF NOT EXISTS tree (
     color TEXT,
     join_clause TEXT,
     where_clause TEXT,
+    group_clause TEXT,
     order_clause TEXT,
     limit_clause TEXT,
     sort_order INTEGER,
