@@ -426,10 +426,11 @@ my %endpoints;
                 my @actions;
 
                 if ($thing->isa('Pi::Media::File::Video')) {
+                    my $id = $thing->id;
                     my ($seconds, $audio_track) = $Library->resume_state_for_video($thing);
 
                     push @actions, {
-                        url    => "/queue?media=" . $thing->id,
+                        url    => "/queue?media=" . $id,
                         type   => 'enqueue',
                         label  => $seconds ? 'TV Play from Beginning' : 'Play on TV',
                     };
@@ -441,7 +442,7 @@ my %endpoints;
                         $thing->{resume}{seconds} = $seconds;
 
                         push @actions, {
-                            url            => "/queue?media=" . $thing->id . '&initialSeconds=' . $seconds . '&audioTrack=' . $audio_track,
+                            url            => "/queue?media=" . $id . '&initialSeconds=' . $seconds . '&audioTrack=' . $audio_track,
                             type           => 'enqueue',
                             label          => "Resume Play on TV",
                             initialSeconds => $seconds,
@@ -451,14 +452,14 @@ my %endpoints;
 
                     unless ($config->{disable_streaming}) {
                         push @actions, {
-                            url    => "/stream?media=" . $thing->id,
+                            url    => "/stream?media=" . $id,
                             type   => 'stream',
                             label  => $seconds ? 'Stream from Beginning' : 'Stream',
                         };
 
                         if ($seconds) {
                             push @actions, {
-                                url            => "/stream?media=" . $thing->id . '&initialSeconds=' . $seconds . '&audioTrack=' . $audio_track,
+                                url            => "/stream?media=" . $id . '&initialSeconds=' . $seconds . '&audioTrack=' . $audio_track,
                                 type           => 'stream',
                                 label          => "Resume Stream",
                                 initialSeconds => $seconds,
@@ -469,7 +470,7 @@ my %endpoints;
 
                     unless ($config->{disable_downloads}) {
                         push @actions, {
-                            url    => "/download?media=" . $thing->id,
+                            url    => "/download?media=" . $id,
                             type   => 'download',
                             label  => 'Download',
                         };
