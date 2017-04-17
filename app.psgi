@@ -391,6 +391,7 @@ my %endpoints;
                         all         => 1,
                         joins       => $tree->join_clause,
                         where       => $tree->where_clause,
+                        group       => $tree->group_clause,
                         order       => $tree->order_clause,
                         limit       => $tree->limit_clause,
                         source_tree => $tree->id,

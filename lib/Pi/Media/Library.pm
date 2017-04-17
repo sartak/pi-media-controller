@@ -457,12 +457,11 @@ sub media {
         $limit = $args{limit};
     }
 
+    my $distinct = $args{distinct};
     if ($args{group}) {
         $group = $args{group};
         $distinct = 1 if $group =~ s/^\*//;
     }
-
-    $distinct ||= $args{distinct};
 
     if ($args{order}) {
         $order = $args{order};
