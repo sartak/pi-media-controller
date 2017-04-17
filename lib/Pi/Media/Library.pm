@@ -459,7 +459,10 @@ sub media {
 
     if ($args{group}) {
         $group = $args{group};
+        $distinct = 1 if $group =~ s/^\*//;
     }
+
+    $distinct ||= $args{distinct};
 
     if ($args{order}) {
         $order = $args{order};
@@ -504,7 +507,8 @@ sub media {
 
     my $query = "
         SELECT
-            media.id, media.type, media.path, $identifier_column, $label_en_column, $label_ja_column, media.spoken_langs, media.subtitle_langs, media.immersible, media.streamable, media.durationSeconds, media.treeId, media.tags, media.checksum, media.sort_order
+            " . ($distinct ? "DISTINCT(media.id)" : "media.id") . ",
+            media.type, media.path, $identifier_column, $label_en_column, $label_ja_column, media.spoken_langs, media.subtitle_langs, media.immersible, media.streamable, media.durationSeconds, media.treeId, media.tags, media.checksum, media.sort_order
         FROM media
     ";
 
