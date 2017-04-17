@@ -484,14 +484,14 @@ my %endpoints;
                     for my $tag (@{ $tags_for_tree{$thing->treeId} }) {
                         if (grep { $_ eq $tag } @tags) {
                             push @actions, {
-                                url    => "/library/tags?mediaId=" . $id . "&removeTag=" . $tag,
+                                url    => "/library/tags?mediaId=" . $id . "&removeTag=" . uri_escape($tag),
                                 type   => 'tag',
                                 label  => "Remove Tag \"$tag\"",
                             };
                         }
                         else {
                             push @actions, {
-                                url    => "/library/tags?mediaId=" . $id . "&addTag=" . $tag,
+                                url    => "/library/tags?mediaId=" . $id . "&addTag=" . uri_escape($tag),
                                 type   => 'tag',
                                 label  => "Add Tag \"$tag\"",
                             };
