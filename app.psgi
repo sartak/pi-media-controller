@@ -486,14 +486,14 @@ my %endpoints;
                             push @actions, {
                                 url    => "/library/tags?mediaId=" . $id . "&removeTag=" . uri_escape($tag),
                                 type   => 'tag',
-                                label  => "Remove Tag \"$tag\"",
+                                label  => $tag eq 'bookmark' ? "Unbookmark" : "Remove Tag \"$tag\"",
                             };
                         }
                         else {
                             push @actions, {
                                 url    => "/library/tags?mediaId=" . $id . "&addTag=" . uri_escape($tag),
                                 type   => 'tag',
-                                label  => "Add Tag \"$tag\"",
+                                label  => $tag eq 'bookmark' ? 'Bookmark' : "Add Tag \"$tag\"",
                             };
                         }
                     }
