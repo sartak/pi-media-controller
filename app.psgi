@@ -481,7 +481,7 @@ my %endpoints;
                     my $treeId = $thing->treeId;
                     $tags_for_tree{$treeId} ||= [$Library->media_tags_for_tree($treeId)];
                     my @tags = @{ $thing->tags };
-                    for my $tag (@{ $tags_for_tree{$thing->treeId} }) {
+                    for my $tag ('bookmark', @{ $tags_for_tree{$thing->treeId} }) {
                         if (grep { $_ eq $tag } @tags) {
                             push @actions, {
                                 url    => "/library/tags?mediaId=" . $id . "&removeTag=" . uri_escape($tag),
