@@ -87,7 +87,7 @@ sub _inflate_media_from_sth {
 
     my $begin = time;
 
-    while (my ($id, $type, $path, $identifier, $label_en, $label_ja, $spoken_langs, $subtitle_langs, $immersible, $streamable, $durationSeconds, $treeId, $tags, $checksum, $sort_order) = $sth->fetchrow_array) {
+    while (my ($id, $type, $path, $identifier, $label_en, $label_ja, $spoken_langs, $subtitle_langs, $immersible, $streamable, $durationSeconds, $treeId, $tags, $checksum, $sort_order, $materialized_path) = $sth->fetchrow_array) {
         my %label;
         $label{en} = $label_en if $label_en;
         $label{ja} = $label_ja if $label_ja;
@@ -96,50 +96,53 @@ sub _inflate_media_from_sth {
         my $media;
         if ($type eq 'video') {
             $media = Pi::Media::File::Video->new(
-                id               => $id,
-                type             => $type,
-                path             => $self->_absolutify_path($path),
-                identifier       => $identifier,
-                label            => \%label,
-                spoken_langs     => [split ',', $spoken_langs],
-                subtitle_langs   => [split ',', $subtitle_langs],
-                immersible       => $immersible,
-                streamable       => $streamable,
-                duration_seconds => $durationSeconds,
-                treeId           => $treeId,
-                tags             => $tags,
-                checksum         => $checksum,
-                sort_order       => $sort_order,
+                id                => $id,
+                type              => $type,
+                path              => $self->_absolutify_path($path),
+                identifier        => $identifier,
+                label             => \%label,
+                spoken_langs      => [split ',', $spoken_langs],
+                subtitle_langs    => [split ',', $subtitle_langs],
+                immersible        => $immersible,
+                streamable        => $streamable,
+                duration_seconds  => $durationSeconds,
+                treeId            => $treeId,
+                tags              => $tags,
+                checksum          => $checksum,
+                sort_order        => $sort_order,
+                materialized_path => $materialized_path,
             );
             push @{ $videos_by_id{$id} ||= [] }, $media;
         }
         elsif ($type eq 'game') {
             $media = Pi::Media::File::Game->new(
-                id               => $id,
-                type             => $type,
-                path             => $self->_absolutify_path($path),
-                identifier       => $identifier,
-                label            => \%label,
-                streamable       => $streamable,
-                treeId           => $treeId,
-                tags             => $tags,
-                checksum         => $checksum,
-                sort_order       => $sort_order,
+                id                => $id,
+                type              => $type,
+                path              => $self->_absolutify_path($path),
+                identifier        => $identifier,
+                label             => \%label,
+                streamable        => $streamable,
+                treeId            => $treeId,
+                tags              => $tags,
+                checksum          => $checksum,
+                sort_order        => $sort_order,
+                materialized_path => $materialized_path,
             );
             push @{ $games_by_id{$id} ||= [] }, $media;
         }
         elsif ($type eq 'book') {
             $media = Pi::Media::File::Book->new(
-                id               => $id,
-                type             => $type,
-                path             => $self->_absolutify_path($path),
-                identifier       => $identifier,
-                label            => \%label,
-                streamable       => $streamable,
-                treeId           => $treeId,
-                tags             => $tags,
-                checksum         => $checksum,
-                sort_order       => $sort_order,
+                id                => $id,
+                type              => $type,
+                path              => $self->_absolutify_path($path),
+                identifier        => $identifier,
+                label             => \%label,
+                streamable        => $streamable,
+                treeId            => $treeId,
+                tags              => $tags,
+                checksum          => $checksum,
+                sort_order        => $sort_order,
+                materialized_path => $materialized_path,
             );
             push @{ $books_by_id{$id} ||= [] }, $media;
         }
@@ -221,24 +224,25 @@ sub _inflate_trees_from_sth {
 
     my @trees;
 
-    while (my ($id, $label_en, $label_ja, $parentId, $color, $joins, $where, $group, $order, $limit, $sort_order, $media_tags) = $sth->fetchrow_array) {
+    while (my ($id, $label_en, $label_ja, $parentId, $color, $joins, $where, $group, $order, $limit, $sort_order, $media_tags, $materialized_path) = $sth->fetchrow_array) {
         my %label;
         $label{en} = $label_en if $label_en;
         $label{ja} = $label_ja if $label_ja;
         $media_tags = [grep { length } split '`', $media_tags];
 
         my $tree = Pi::Media::Tree->new(
-            id           => $id,
-            label        => \%label,
-            parentId     => $parentId,
-            color        => $color,
-            join_clause  => $joins,
-            where_clause => $where,
-            group_clause => $group,
-            order_clause => $order,
-            limit_clause => $limit,
-            sort_order   => $sort_order,
-            media_tags   => $media_tags,
+            id                => $id,
+            label             => \%label,
+            parentId          => $parentId,
+            color             => $color,
+            join_clause       => $joins,
+            where_clause      => $where,
+            group_clause      => $group,
+            order_clause      => $order,
+            limit_clause      => $limit,
+            sort_order        => $sort_order,
+            media_tags        => $media_tags,
+            materialized_path => $materialized_path,
         );
 
         push @trees, $tree;
@@ -405,7 +409,7 @@ sub trees {
         push @bind, $args{parentId};
     }
 
-    my $query = 'SELECT tree.id, tree.label_en, tree.label_ja, tree.parentId, tree.color, tree.join_clause, tree.where_clause, tree.group_clause, tree.order_clause, tree.limit_clause, tree.sort_order, tree.media_tags FROM tree';
+    my $query = 'SELECT tree.id, tree.label_en, tree.label_ja, tree.parentId, tree.color, tree.join_clause, tree.where_clause, tree.group_clause, tree.order_clause, tree.limit_clause, tree.sort_order, tree.media_tags, tree.materialized_path FROM tree';
 
     if ($args{media_sort}) {
         $query .= ' LEFT JOIN tree_media_sort ON tree.id = tree_media_sort.treeId';
@@ -507,7 +511,7 @@ sub media {
     my $query = "
         SELECT
             " . ($distinct ? "DISTINCT(media.id)" : "media.id") . ",
-            media.type, media.path, $identifier_column, $label_en_column, $label_ja_column, media.spoken_langs, media.subtitle_langs, media.immersible, media.streamable, media.durationSeconds, media.treeId, media.tags, media.checksum, media.sort_order
+            media.type, media.path, $identifier_column, $label_en_column, $label_ja_column, media.spoken_langs, media.subtitle_langs, media.immersible, media.streamable, media.durationSeconds, media.treeId, media.tags, media.checksum, media.sort_order, media.materialized_path
         FROM media
     ";
 
@@ -528,6 +532,9 @@ sub media {
 
     if ($order) {
         $query .= " $order ";
+    }
+    elsif ($args{source_tree}) {
+        $query .= 'media.materialized_path ASC';
     }
     else {
         if ($args{source_tree}) {
@@ -578,7 +585,7 @@ sub media_with_id {
 
     my $sth = $self->_dbh->prepare('
         SELECT
-            id, type, path, identifier, label_en, label_ja, spoken_langs, subtitle_langs, immersible, streamable, durationSeconds, treeId, tags, checksum, sort_order
+            id, type, path, identifier, label_en, label_ja, spoken_langs, subtitle_langs, immersible, streamable, durationSeconds, treeId, tags, checksum, sort_order, materialized_path
         FROM media
         WHERE id = ?
         LIMIT 1

@@ -58,9 +58,14 @@ has media_tags => (
     required => 1,
 );
 
+has materialized_path => (
+    is  => 'ro',
+    isa => 'Maybe[Str]',
+);
+
 sub TO_JSON {
     my $self = shift;
-    my $frozen = { map { $_ => $self->$_ } qw/id label color parentId sort_order media_tags/ };
+    my $frozen = { map { $_ => $self->$_ } qw/id label color parentId sort_order media_tags materialized_path/ };
 
     $frozen->{actions} = $self->{actions} if $self->{actions};
     $frozen->{type} = 'tree';

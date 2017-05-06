@@ -9,6 +9,8 @@ perl -Ilib -Iextlib sort-tree.pl 1
 
 perl -Ilib -Iextlib sort-tree.pl 2
 
+perl -Ilib -Iextlib materialize-paths.pl
+
 perl -Ilib -Iextlib canonicalize-paths.pl NFC
 
 perl -Ilib -Iextlib intuit-durations.pl
