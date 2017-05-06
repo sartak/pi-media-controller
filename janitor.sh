@@ -17,8 +17,8 @@ perl -Ilib -Iextlib intuit-durations.pl
 
 perl -Ilib -Iextlib track-counts.pl
 
-perl -Ilib -Iextlib ./add-tree-media-sort.pl
+perl -Ilib -Iextlib add-tree-media-sort.pl
 
-perl -Ilib -Iextlib intuit-checksums.pl;
+perl -Ilib -Iextlib intuit-checksums.pl
 
 echo 'select path, spoken_langs from media where spoken_langs like "%?%" and treeId=1;' | sqlite3 $PMC_DATABASE
