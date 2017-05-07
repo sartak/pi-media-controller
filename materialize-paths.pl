@@ -26,7 +26,7 @@ while ($_ = shift @trees) {
     }
 
     my $i = 0;
-    my @media = $library->media(treeId => $tree->id, excludeViewing => 1);
+    my @media = $library->media(treeId => $tree->id, excludeViewing => 1, no_materialized_path_sort => 1);
     $digits = length(scalar(@media)-1);
     for my $media (@media) {
         my $media_path = sprintf "%s/%0${digits}d", $path, $i++;

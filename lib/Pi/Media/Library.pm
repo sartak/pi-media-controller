@@ -533,12 +533,13 @@ sub media {
     if ($order) {
         $query .= " $order ";
     }
-    elsif ($args{source_tree}) {
-        $query .= 'media.materialized_path ASC';
-    }
     else {
         if ($args{source_tree}) {
             $query .= 'tree_media_sort.sort_order, ';
+        }
+
+        unless ($args{no_materialized_path_sort}) {
+            $query .= 'media.materialized_path ASC, ';
         }
 
         $query .= 'media.sort_order IS NULL, media.sort_order ASC, media.rowid ASC';
