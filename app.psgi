@@ -1125,6 +1125,12 @@ my $app = sub {
 
 use Plack::Builder;
 $app = builder {
+    enable "Plack::Middleware::CrossOrigin",
+        origins        => '*',
+        methods        => '*',
+        headers        => '*',
+        expose_headers => '*';
+
     enable sub {
         my $app = shift;
         sub {
