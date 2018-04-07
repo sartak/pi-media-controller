@@ -736,7 +736,7 @@ my %endpoints;
             my $app = $req->header('X-App-Name');
             $app = $app ? "/$app" : "";
 
-            my $url = "$app/static/download/$path?user=$username&pass=$password";
+            my $url = "$app/static/download/$path?user=$username&pass=$password&id=" . $media->id;
 
             my $res = $req->new_response;
             $res->redirect($url);
@@ -1125,6 +1125,22 @@ my $app = sub {
 
 use Plack::Builder;
 $app = builder {
+    enable sub {
+        my $app = shift;
+        sub {
+            my $env = shift;
+            my $req = Plack::Request->new($env);
+            my $res = $app->($env);
+            if ($env->{PATH_INFO} =~ m{^/static/download/.*?([^/]+\.(\w+))$}) {
+                my ($path, $extension) = ($1, $2);
+                my $id = $req->param('id');
+                my $file = $id ? "$id.$extension" : $path;
+                push @{ $res->[1] }, 'Content-Disposition' => "attachment; filename=$file";
+            }
+            return $res;
+        };
+    };
+
     enable "Plack::Middleware::Static",
         path => sub {
             my ($path, $env) = @_;
