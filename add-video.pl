@@ -32,6 +32,10 @@ my $label_en = $ARGV{label_en};
 my $label_ja = $ARGV{label_ja};
 $label_en || $label_ja or die usage("Must have at least one of label_en or label_ja");
 
+if (exists($ARGV{viewing}) && !length($ARGV{viewing})) {
+    die usage("viewing needs a device name");
+}
+
 my $path = $ARGV[0] or usage("path required");
 @ARGV == 1 or usage("must have no stray args: " . join(', ', @ARGV));
 
@@ -78,6 +82,20 @@ if ($ARGV{'ignore-missing-file'}) {
 }
 else {
     print "Added " . ($label_ja || $label_en) . " as video $id\n";
+}
+
+if ($ARGV{'viewing'}) {
+    my $viewing = $library->add_viewing(
+        media_id => $id,
+        start_time => undef,
+        end_time => undef,
+        initial_seconds => 0,
+        elapsed_seconds => undef,
+        audio_track => 0,
+        location => $ARGV{'viewing'},
+        who => 'shawn',
+    );
+    print "Added viewing on device '$ARGV{viewing}' $viewing\n";
 }
 
 sub usage {

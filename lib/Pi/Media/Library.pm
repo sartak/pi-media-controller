@@ -619,14 +619,16 @@ sub media_tags_for_tree {
 sub add_viewing {
     my ($self, %args) = @_;
 
-    delete $self->_resume_state_cache->{$args{media}->id};
+    my $id = $args{media_id} || $args{media}->id;
+
+    delete $self->_resume_state_cache->{$id};
 
     $self->_dbh->do('
         INSERT INTO viewing
             (mediaId, startTime, endTime, initialSeconds, elapsedSeconds, audioTrack, location, who)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?)
     ;', {}, (
-        $args{media}->id,
+        $id,
         $args{start_time},
         $args{end_time},
         $args{initial_seconds},
@@ -635,6 +637,7 @@ sub add_viewing {
         $args{location},
         $args{who},
     ));
+    return $self->_dbh->sqlite_last_insert_rowid;
 }
 
 sub _resume_state_for_video {
