@@ -69,6 +69,9 @@ has duration_seconds => (
         '?/zho' => 'Chinese(?)',
         '?/hun' => 'Hungarian(?)',
         '?/ukr' => 'Ukranian(?)',
+        '?/ind' => 'Indonesian(?)',
+        '?/msa' => 'Malay(?)',
+        '?/vie' => 'Vietnamese(?)',
     );
 
     sub label_for_language {
