@@ -1147,7 +1147,7 @@ $app = builder {
         };
     };
 
-    enable "Plack::Middleware::Static",
+    enable "Plack::Middleware::Static::Range",
         path => sub {
             my ($path, $env) = @_;
             return 0 unless $authenticate->($env);
@@ -1155,7 +1155,7 @@ $app = builder {
         },
         root => $Library->stream_tmp . "pmc/";
 
-    enable "Plack::Middleware::Static",
+    enable "Plack::Middleware::Static::Range",
         path => sub {
             my ($path, $env) = @_;
             return 0 unless $authenticate->($env);
