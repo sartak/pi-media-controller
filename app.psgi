@@ -505,6 +505,13 @@ my %endpoints;
                         label => 'Display', # shouldn't be shown
                     };
                 }
+                elsif ($thing->isa('Pi::Media::File::Game')) {
+                    push @actions, {
+                        url    => "/queue?media=" . $thing->{id},
+                        type   => 'enqueue',
+                        label  => 'Play on TV',
+                    };
+                }
 
                 $thing->{actions} = \@actions;
             }
