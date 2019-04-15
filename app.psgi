@@ -507,10 +507,20 @@ my %endpoints;
                 }
                 elsif ($thing->isa('Pi::Media::File::Game')) {
                     push @actions, {
-                        url    => "/queue?media=" . $thing->{id},
+                        url    => "/queue?media=" . $thing->{id} . '&save=new',
                         type   => 'enqueue',
-                        label  => 'Play on TV',
+                        label  => 'New Game',
                     };
+
+                    my $base = $thing->path;
+                    $base =~ s/\.\w+$//;
+                    if (-e "$base.state.auto") {
+                      push @actions, {
+                          url    => "/queue?media=" . $thing->{id},
+                          type   => 'enqueue',
+                          label  => 'Resume Game',
+                      };
+                    }
                 }
 
                 $thing->{actions} = \@actions;
