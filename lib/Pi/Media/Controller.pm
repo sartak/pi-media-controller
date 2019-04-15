@@ -96,6 +96,13 @@ has _game_home_button_pressed => (
     default => 1,
 );
 
+has save_state => (
+    is      => 'ro',
+    isa     => 'Str',
+    writer  => '_set_save_state',
+    clearer => '_clear_save_state',
+);
+
 sub play_next_in_queue {
     my $self = shift;
 
@@ -197,6 +204,9 @@ sub _play_media {
     if ($media->type eq 'video') {
         $self->_set_initial_seconds($media->{initial_seconds} || 0);
     }
+    elsif ($media->type eq 'game') {
+        $self->_set_save_state($media->{save_state});
+    }
 
     $self->notify({
         type  => 'started',
@@ -277,21 +287,33 @@ sub _handle_for_media {
             die "No emulator for type " . $media->extension;
         }
 
-        my $cfg_path = $media->path;
-        $cfg_path =~ s/.\w+$/.cfg/;
+        my $base_path = $media->path;
+        $base_path =~ s/.\w+$//;
+
+        my $cfg_path = "$base_path.cfg";
         if (-e $cfg_path) {
             push @emulator_cmd, "--appendconfig", $cfg_path;
 
             my $config = slurp($cfg_path);
             if ($config =~ / ^ \s* \# \s* pmc: \s* save_state \s* = \s* never \b /mx) {
-                my $state_path = $media->path;
-                $state_path =~ s/.\w+$/.state.auto/;
+                my $state_path = "$base_path.state.auto";
                 unlink $state_path;
             }
 
             if ($config =~ / ^ \s* libretro_path \s* = /mx) {
                 @emulator_cmd = grep { $_ ne '-L' && !/\.so$/ } @emulator_cmd;
             }
+        }
+
+        my $state_path = "$base_path.state.auto";
+        my $time = time;
+        if ($self->save_state eq 'new') {
+          system("mv", $state_path => "$base_path.state.$time");
+        }
+        elsif ($self->save_state) {
+          my $state = $self->save_state;
+          system("mv", $state_path => "$base_path.state.$time");
+          system("mv", "$base_path.state.$state" => $state_path);
         }
 
         warn join ' ', @emulator_cmd, $media->path;
@@ -353,6 +375,7 @@ sub _finished_media {
     $self->_buffer('');
     $self->_clear_start_time;
     $self->_clear_initial_seconds;
+    $self->_clear_save_state;
     $self->_set_has_toggled_subtitles(0);
 
     $self->notify({

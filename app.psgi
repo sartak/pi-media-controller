@@ -304,6 +304,7 @@ my %endpoints;
 
                 $media->{initial_seconds} = $req->param('initialSeconds') || 0;
                 $media->{audio_track} = $req->param('audioTrack') || 0;
+                $media->{save_state} = $req->param('saveState') || 0;
             }
 
             warn "Queued $media ...\n";
@@ -507,19 +508,30 @@ my %endpoints;
                 }
                 elsif ($thing->isa('Pi::Media::File::Game')) {
                     push @actions, {
-                        url    => "/queue?media=" . $thing->{id} . '&save=new',
+                        url    => "/queue?media=" . $thing->{id} . '&saveState=new',
                         type   => 'enqueue',
                         label  => 'New Game',
                     };
 
                     my $base = $thing->path;
                     $base =~ s/\.\w+$//;
-                    if (-e "$base.state.auto") {
-                      push @actions, {
-                          url    => "/queue?media=" . $thing->{id},
-                          type   => 'enqueue',
-                          label  => 'Resume Game',
-                      };
+                    my @save_states = sort glob(qq{"$base.state.*"});
+                    if (@save_states) {
+                        pop @save_states;
+                        push @actions, {
+                            url    => "/queue?media=" . $thing->{id},
+                            type   => 'enqueue',
+                            label  => 'Resume Latest State',
+                        };
+
+                        for my $path (@save_states) {
+                          my ($state) = $path =~ /\.(\d+)$/;
+                          push @actions, {
+                              url    => "/queue?media=" . $thing->{id} . "&saveState=$state",
+                              type   => 'enqueue',
+                              label  => 'Resume ' . scalar(localtime($state)),
+                          };
+                        }
                     }
                 }
 
