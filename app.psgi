@@ -1098,7 +1098,7 @@ my $app = sub {
 
     local $main::CURRENT_USER = $user;
 
-    warn $req->method . ' ' . $req->path_info;
+    warn $req->method . ' ' . $req->request_uri;
 
     my $spec = $endpoints{$req->path_info};
     if (!$spec) {
