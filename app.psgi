@@ -517,7 +517,6 @@ my %endpoints;
                     $base =~ s/\.\w+$//;
                     my @save_states = sort glob(qq{"$base.state.*"});
                     if (@save_states) {
-                        pop @save_states;
                         push @actions, {
                             url    => "/queue?media=" . $thing->{id},
                             type   => 'enqueue',
@@ -525,7 +524,9 @@ my %endpoints;
                         };
 
                         for my $path (@save_states) {
-                          my ($state) = $path =~ /\.(\d+)$/;
+                          my ($state) = $path =~ /\.(\d+)$/
+                              or next;
+
                           push @actions, {
                               url    => "/queue?media=" . $thing->{id} . "&saveState=$state",
                               type   => 'enqueue',
