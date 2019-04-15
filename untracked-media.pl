@@ -17,7 +17,7 @@ find(sub {
     my $file = decode_utf8($File::Find::name);
 
     return if $file =~ /\.DS_Store/
-           || $file =~ /\.state\.auto$/
+           || $file =~ /\.state\.(auto|\d+)$/
            || $file =~ /\.srm$/
            || $file =~ /\.cfg$/
            || $file =~ /\.sav$/;
