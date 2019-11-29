@@ -91,5 +91,16 @@ sub TO_JSON {
     return $frozen;
 }
 
+sub has_tag {
+    my $self = shift;
+    my $tag = shift;
+
+    for my $t (@{ $self->tags }) {
+        return 1 if $t eq $tag;
+    }
+
+    return;
+}
+
 1;
 
