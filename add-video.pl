@@ -25,7 +25,6 @@ warn "identifier probably shouldn't start with 0\n"
 
 my $sort_order = $ARGV{sort_order};
 
-exists($ARGV{immersible}) || exists($ARGV{noimmersible}) or usage("immersible or noimmersible required");
 exists($ARGV{streamable}) || exists($ARGV{unstreamable}) or usage("streamable or unstreamable required");
 
 my $label_en = $ARGV{label_en};
@@ -43,7 +42,6 @@ $path =~ s/~/$ENV{HOME}/;
 $ARGV{'ignore-missing-file'} || (-e $path && !-d _)
     or die "path $path must be a readable file, or pass --ignore-missing-file";
 
-my $immersible = $ARGV{immersible} ? 1 : 0;
 my $streamable = $ARGV{streamable} ? 1 : 0;
 
 my $spoken_langs = ['??'];
@@ -69,7 +67,6 @@ my $id = $library->insert_video(
     label_ja        => $label_ja,
     spoken_langs    => $spoken_langs,
     subtitle_langs  => $subtitle_langs,
-    immersible      => $immersible,
     streamable      => $streamable,
     durationSeconds => duration_of($path),
     treeId          => $treeId,
@@ -100,7 +97,7 @@ if ($ARGV{'viewing'}) {
 
 sub usage {
     my $reason = shift;
-    die "$reason\nusage: $0 [--treeId=treeId OR --segments=foo --segments=bar] [--label_en=LABEL --label_ja=LABEL] [--identifier=IDENTIFIER] [--ignore-missing-file] --immersible|--noimmersible --streamable|--unstreamable [--tag=TAG] PATH";
+    die "$reason\nusage: $0 [--treeId=treeId OR --segments=foo --segments=bar] [--label_en=LABEL --label_ja=LABEL] [--identifier=IDENTIFIER] [--ignore-missing-file] --streamable|--unstreamable [--tag=TAG] PATH";
 }
 
 sub duration_of {

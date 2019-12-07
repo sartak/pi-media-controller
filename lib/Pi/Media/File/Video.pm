@@ -15,12 +15,6 @@ has subtitle_langs => (
     required => 1,
 );
 
-has immersible => (
-    is       => 'ro',
-    isa      => 'Bool',
-    required => 1,
-);
-
 has duration_seconds => (
     is  => 'ro',
     isa => 'Maybe[Int]',
@@ -127,7 +121,7 @@ sub TO_JSON {
     my $self = shift;
     my $frozen = $self->SUPER::TO_JSON(@_);
 
-    for (qw/immersible duration_seconds/) {
+    for (qw/duration_seconds/) {
         $frozen->{$_} = $self->$_;
     }
 

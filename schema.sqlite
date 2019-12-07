@@ -30,7 +30,6 @@ CREATE TABLE IF NOT EXISTS media (
 
     spoken_langs TEXT,
     subtitle_langs TEXT,
-    immersible BOOLEAN,
     durationSeconds INTEGER
 );
 

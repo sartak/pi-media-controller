@@ -31,7 +31,7 @@ system(
     "-Iextlib",
     "add-video.pl",
     "--streamable",
-    "--immersible",
+    "--tag=immersible",
     "--segments=Commercials",
     "--segments=Collection",
     "--segments=$ARGV{year}",

@@ -87,7 +87,7 @@ sub _inflate_media_from_sth {
 
     my $begin = time;
 
-    while (my ($id, $type, $path, $identifier, $label_en, $label_ja, $spoken_langs, $subtitle_langs, $immersible, $streamable, $durationSeconds, $treeId, $tags, $checksum, $sort_order, $materialized_path) = $sth->fetchrow_array) {
+    while (my ($id, $type, $path, $identifier, $label_en, $label_ja, $spoken_langs, $subtitle_langs, $streamable, $durationSeconds, $treeId, $tags, $checksum, $sort_order, $materialized_path) = $sth->fetchrow_array) {
         my %label;
         $label{en} = $label_en if $label_en;
         $label{ja} = $label_ja if $label_ja;
@@ -103,7 +103,6 @@ sub _inflate_media_from_sth {
                 label             => \%label,
                 spoken_langs      => [split ',', $spoken_langs],
                 subtitle_langs    => [split ',', $subtitle_langs],
-                immersible        => $immersible,
                 streamable        => $streamable,
                 duration_seconds  => $durationSeconds,
                 treeId            => $treeId,
@@ -256,8 +255,8 @@ sub insert_video {
 
     $self->_dbh->do('
         INSERT INTO media
-            (path, type, identifier, label_en, label_ja, spoken_langs, subtitle_langs, immersible, streamable, durationSeconds, treeId, tags, sort_order)
-        VALUES (?, "video", ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? )
+            (path, type, identifier, label_en, label_ja, spoken_langs, subtitle_langs, streamable, durationSeconds, treeId, tags, sort_order)
+        VALUES (?, "video", ?, ?, ?, ?, ?, ?, ?, ?, ?, ? )
     ;', {}, (
         $self->_relativify_path($args{path}),
         $args{identifier},
@@ -265,7 +264,6 @@ sub insert_video {
         $args{label_ja},
         (join ',', @{$args{spoken_langs}}),
         (join ',', @{$args{subtitle_langs}}),
-        $args{immersible} ? 1 : 0,
         $args{streamable} ? 1 : 0,
         $args{durationSeconds},
         $args{treeId},
@@ -492,7 +490,7 @@ sub media {
         push @where, "(spoken_langs='??' OR subtitle_langs='??')";
     }
 
-    for my $column (qw/id type path identifier label_en label_ja spoken_langs subtitle_langs immersible streamable durationSeconds checksum sort_order/) {
+    for my $column (qw/id type path identifier label_en label_ja spoken_langs subtitle_langs streamable durationSeconds checksum sort_order/) {
         if ($args{$column}) {
             push @bind, $args{$column};
             push @where, "media.$column=?";
@@ -511,7 +509,7 @@ sub media {
     my $query = "
         SELECT
             " . ($distinct ? "DISTINCT(media.id)" : "media.id") . ",
-            media.type, media.path, $identifier_column, $label_en_column, $label_ja_column, media.spoken_langs, media.subtitle_langs, media.immersible, media.streamable, media.durationSeconds, media.treeId, media.tags, media.checksum, media.sort_order, media.materialized_path
+            media.type, media.path, $identifier_column, $label_en_column, $label_ja_column, media.spoken_langs, media.subtitle_langs, media.streamable, media.durationSeconds, media.treeId, media.tags, media.checksum, media.sort_order, media.materialized_path
         FROM media
     ";
 
@@ -586,7 +584,7 @@ sub media_with_id {
 
     my $sth = $self->_dbh->prepare('
         SELECT
-            id, type, path, identifier, label_en, label_ja, spoken_langs, subtitle_langs, immersible, streamable, durationSeconds, treeId, tags, checksum, sort_order, materialized_path
+            id, type, path, identifier, label_en, label_ja, spoken_langs, subtitle_langs, streamable, durationSeconds, treeId, tags, checksum, sort_order, materialized_path
         FROM media
         WHERE id = ?
         LIMIT 1

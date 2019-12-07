@@ -67,7 +67,6 @@ system (
     "--streamable",
     "--segments=Go",
     "--segments=$segment",
-    "--noimmersible",
     "/media/paul/Go/$segment/$id.mp4",
     "--identifier=$id" . (($ARGV{master}||$ARGV{alphago}) ? (" (#".($ARGV{master}||$ARGV{alphago}).")") : ""),
     (($ARGV{master}||$ARGV{alphago}) ? () : ("--sort_order=$id")),
