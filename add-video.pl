@@ -88,7 +88,6 @@ if ($ARGV{'viewing'}) {
         end_time => undef,
         initial_seconds => 0,
         elapsed_seconds => undef,
-        audio_track => 0,
         location => $ARGV{'viewing'},
         who => 'shawn',
     );

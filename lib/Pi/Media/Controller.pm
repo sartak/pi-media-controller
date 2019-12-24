@@ -76,8 +76,7 @@ has has_toggled_subtitles => (
 
 has audio_track => (
     is      => 'ro',
-    isa     => 'Int',
-    default => 0,
+    isa     => 'Maybe[Int]',
     writer  => '_set_audio_track',
 );
 
