@@ -551,6 +551,7 @@ my %endpoints;
             my $mediaId = $req->param('mediaId');
             my $startTime = $req->param('startTime');
             my $endTime = $req->param('endTime');
+            my $completed = $req->param('completed');
             my $initialSeconds = $req->param('initialSeconds');
             my $endSeconds = $req->param('endSeconds');
             my $audioTrack = $req->param('audioTrack');
@@ -566,6 +567,7 @@ my %endpoints;
             # close enough
             if ($media->duration_seconds && $endSeconds > $media->duration_seconds * .9) {
                 $endSeconds = undef;
+                $completed = 1;
             }
             my $elapsedSeconds = $endSeconds ? int($endSeconds - $initialSeconds) : undef;
 
@@ -575,13 +577,14 @@ my %endpoints;
                 end_time        => int($endTime),
                 initial_seconds => int($initialSeconds),
                 elapsed_seconds => $elapsedSeconds,
+                completed       => $completed,
                 audio_track     => $audioTrack,
                 location        => $location,
                 who             => $who,
             );
 
             my $res = $req->new_response(204);
-            $res->header('X-PMC-Completed' => defined($elapsedSeconds) ? 0 : 1);
+            $res->header('X-PMC-Completed' => $completed);
             return $res;
         },
     },

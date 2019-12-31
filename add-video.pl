@@ -88,6 +88,7 @@ if ($ARGV{'viewing'}) {
         end_time => undef,
         initial_seconds => 0,
         elapsed_seconds => undef,
+        completed => 1,
         location => $ARGV{'viewing'},
         who => 'shawn',
     );

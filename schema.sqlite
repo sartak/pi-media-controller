@@ -39,6 +39,7 @@ CREATE TABLE IF NOT EXISTS viewing (
     endTime INTEGER,
     initialSeconds INTEGER,
     elapsedSeconds INTEGER,
+    completed BOOLEAN,
     audioTrack INTEGER,
     location TEXT,
     who TEXT
