@@ -21,4 +21,10 @@ perl -Ilib -Iextlib add-tree-media-sort.pl
 
 perl -Ilib -Iextlib intuit-checksums.pl
 
-echo 'select path, spoken_langs from media where spoken_langs like "%?%" and treeId IN (1, 12);' | sqlite3 $PMC_DATABASE
+echo 'select rowid, path, spoken_langs from media where spoken_langs like "%?%" and path like "Movies/%";' | sqlite3 $PMC_DATABASE
+
+echo 'select media.rowid, path, viewing.startTime, viewing.endTime, viewing.location, viewing.who from viewing left join media on media.rowid = viewing.mediaId where audioTrack IS NULL and media.rowid IS NOT NULL order by viewing.rowid asc;' | sqlite3 $PMC_DATABASE
+
+echo 'select media.rowid, media.path, viewing.audioTrack, media.spoken_langs from viewing left join media on media.rowid = viewing.mediaid where media.rowid is not null and (media.spoken_langs="" or media.spoken_langs is null) and media.checksum is not null order by viewing.rowid asc;' | sqlite3 $PMC_DATABASE
+
+echo 'select media.rowid, media.path, viewing.audioTrack, media.spoken_langs from viewing left join media on media.rowid = viewing.mediaid where media.rowid is not null and media.spoken_langs LIKE "%?%" and media.checksum is not null order by viewing.rowid asc;' | sqlite3 $PMC_DATABASE | perl -nle 's/\|(\d+)\|([^|]+)$/$x = (split ",", $2)[$1]; "|$1|$2|$x"/e; print if $x =~ /\?/'
