@@ -87,7 +87,7 @@ sub _inflate_media_from_sth {
 
     my $begin = time;
 
-    while (my ($id, $type, $path, $identifier, $label_en, $label_ja, $spoken_langs, $subtitle_langs, $streamable, $durationSeconds, $treeId, $tags, $checksum, $sort_order, $materialized_path) = $sth->fetchrow_array) {
+    while (my ($id, $type, $path, $identifier, $label_en, $label_ja, $spoken_langs, $subtitle_langs, $streamable, $durationSeconds, $treeId, $tags, $checksum, $sort_order, $materialized_path, $skip1_start, $skip1_end, $skip2_start, $skip2_end) = $sth->fetchrow_array) {
         my %label;
         $label{en} = $label_en if $label_en;
         $label{ja} = $label_ja if $label_ja;
@@ -110,6 +110,10 @@ sub _inflate_media_from_sth {
                 checksum          => $checksum,
                 sort_order        => $sort_order,
                 materialized_path => $materialized_path,
+                skip1_start       => $skip1_start,
+                skip1_end         => $skip1_end,
+                skip2_start       => $skip2_start,
+                skip2_end         => $skip2_end,
             );
             push @{ $videos_by_id{$id} ||= [] }, $media;
         }
@@ -509,7 +513,7 @@ sub media {
     my $query = "
         SELECT
             " . ($distinct ? "DISTINCT(media.id)" : "media.id") . ",
-            media.type, media.path, $identifier_column, $label_en_column, $label_ja_column, media.spoken_langs, media.subtitle_langs, media.streamable, media.durationSeconds, media.treeId, media.tags, media.checksum, media.sort_order, media.materialized_path
+            media.type, media.path, $identifier_column, $label_en_column, $label_ja_column, media.spoken_langs, media.subtitle_langs, media.streamable, media.durationSeconds, media.treeId, media.tags, media.checksum, media.sort_order, media.materialized_path, media.skip1Start, media.skip1End, media.skip2Start, media.skip2End
         FROM media
     ";
 
@@ -584,7 +588,7 @@ sub media_with_id {
 
     my $sth = $self->_dbh->prepare('
         SELECT
-            id, type, path, identifier, label_en, label_ja, spoken_langs, subtitle_langs, streamable, durationSeconds, treeId, tags, checksum, sort_order, materialized_path
+            id, type, path, identifier, label_en, label_ja, spoken_langs, subtitle_langs, streamable, durationSeconds, treeId, tags, checksum, sort_order, materialized_path, media.skip1start, media.skip1end, media.skip2start, media.skip2end
         FROM media
         WHERE id = ?
         LIMIT 1

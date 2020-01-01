@@ -27,10 +27,13 @@ CREATE TABLE IF NOT EXISTS media (
     path TEXT UNIQUE NOT NULL,
     checksum TEXT,
     materialized_path TEXT,
-
     spoken_langs TEXT,
     subtitle_langs TEXT,
-    durationSeconds INTEGER
+    durationSeconds INTEGER,
+    skip1Start INTEGER DEFAULT NULL,
+    skip1End INTEGER DEFAULT NULL,
+    skip2Start INTEGER DEFAULT NULL,
+    skip2End INTEGER DEFAULT NULL
 );
 
 CREATE TABLE IF NOT EXISTS viewing (
