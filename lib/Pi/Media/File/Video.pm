@@ -22,22 +22,22 @@ has duration_seconds => (
 
 has skip1_start => (
     is => 'ro',
-    isa => 'Maybe[Int]',
+    isa => 'Maybe[Num]',
 );
 
 has skip1_end => (
     is => 'ro',
-    isa => 'Maybe[Int]',
+    isa => 'Maybe[Num]',
 );
 
 has skip2_start => (
     is => 'ro',
-    isa => 'Maybe[Int]',
+    isa => 'Maybe[Num]',
 );
 
 has skip2_end => (
     is => 'ro',
-    isa => 'Maybe[Int]',
+    isa => 'Maybe[Num]',
 );
 
 {

@@ -30,10 +30,10 @@ CREATE TABLE IF NOT EXISTS media (
     spoken_langs TEXT,
     subtitle_langs TEXT,
     durationSeconds INTEGER,
-    skip1Start INTEGER DEFAULT NULL,
-    skip1End INTEGER DEFAULT NULL,
-    skip2Start INTEGER DEFAULT NULL,
-    skip2End INTEGER DEFAULT NULL
+    skip1Start REAL DEFAULT NULL,
+    skip1End REAL DEFAULT NULL,
+    skip2Start REAL DEFAULT NULL,
+    skip2End REAL DEFAULT NULL
 );
 
 CREATE TABLE IF NOT EXISTS viewing (
