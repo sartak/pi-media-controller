@@ -551,7 +551,7 @@ my %endpoints;
             my $mediaId = $req->param('mediaId');
             my $startTime = $req->param('startTime');
             my $endTime = $req->param('endTime');
-            my $completed = $req->param('completed');
+            my $completed = $req->param('completed') || 0;
             my $initialSeconds = $req->param('initialSeconds');
             my $endSeconds = $req->param('endSeconds');
             my $audioTrack = $req->param('audioTrack');
