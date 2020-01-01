@@ -335,7 +335,7 @@ sub _finished_media {
 
     my $end_seconds;
     my $initial_seconds = $self->initial_seconds;
-    my $completed = defined($end_seconds) ? 0 : 1;
+    my $completed = 0;
 
     if ($media->isa('Pi::Media::File::Video')) {
         if (my ($h, $m, $s) = $self->_buffer =~ /Stopped at: (\d+):(\d\d):(\d\d)/) {
@@ -345,7 +345,6 @@ sub _finished_media {
 
             # close enough
             if ($media->duration_seconds && $end_seconds > $media->duration_seconds * .9) {
-                $end_seconds = undef;
                 $completed = 1;
             }
         }
@@ -365,7 +364,7 @@ sub _finished_media {
         end_time        => $end_time,
         initial_seconds => $initial_seconds,
         audio_track     => $self->audio_track,
-        elapsed_seconds => ($end_seconds && ($end_seconds - $initial_seconds)),
+        elapsed_seconds => $end_seconds - $initial_seconds,
         completed       => $completed,
         location        => $self->config->{location},
         who             => $self->current_media->{requestor}->name,

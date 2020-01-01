@@ -60,6 +60,8 @@ if (!$treeId) {
     $treeId = $library->tree_from_segments(@$segments);
 }
 
+my $duration = duration_of($path);
+
 my $id = $library->insert_video(
     path            => $path,
     identifier      => $identifier,
@@ -68,7 +70,7 @@ my $id = $library->insert_video(
     spoken_langs    => $spoken_langs,
     subtitle_langs  => $subtitle_langs,
     streamable      => $streamable,
-    durationSeconds => duration_of($path),
+    durationSeconds => $duration,
     treeId          => $treeId,
     tags            => $tags,
     sort_order      => $sort_order,
@@ -87,7 +89,7 @@ if ($ARGV{'viewing'}) {
         start_time => undef,
         end_time => undef,
         initial_seconds => 0,
-        elapsed_seconds => undef,
+        elapsed_seconds => $duration,
         completed => 1,
         location => $ARGV{'viewing'},
         who => 'shawn',

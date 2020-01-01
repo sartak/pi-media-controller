@@ -161,7 +161,7 @@ sub _inflate_media_from_sth {
             my $query = 'SELECT mediaId, MAX(endTime) FROM viewing WHERE';
             $query .= ' who=? AND mediaId IN (';
             $query .= join ', ', map { '?' } keys %videos_by_id;
-            $query .= ') AND (elapsedSeconds IS NULL OR completed) GROUP BY mediaId;';
+            $query .= ') AND completed GROUP BY mediaId;';
 
             my $sth = $self->_dbh->prepare($query);
             warn "prepare viewing query at " . (time - $begin) . "s" if $ENV{PMC_PROFILE};
@@ -199,7 +199,7 @@ sub _inflate_media_from_sth {
             {
                 my $query = 'SELECT mediaId FROM viewing WHERE who=? AND (';
                 $query .= join ' OR ', map { 'mediaId=?' } keys %games_by_id;
-                $query .= ') AND (elapsedSeconds IS NULL OR completed) GROUP BY mediaId;';
+                $query .= ') AND completed GROUP BY mediaId;';
 
                 my $sth = $self->_dbh->prepare($query);
                 $sth->execute($main::CURRENT_USER->name, keys %games_by_id);
@@ -642,7 +642,7 @@ sub add_viewing {
 sub _resume_state_for_video {
     my ($self, $media) = @_;
 
-    my $query = q{select initialSeconds, elapsedSeconds, audioTrack from viewing where mediaId=? and viewing.endTime > strftime('%s', 'now')-30*24*60*60 AND (viewing.elapsedSeconds IS NOT NULL AND NOT viewing.completed) and viewing.endTime = (select max(endTime) from viewing as v where v.mediaId = ? and v.who = ?) limit 1;};
+    my $query = q{select initialSeconds, elapsedSeconds, audioTrack from viewing where mediaId=? and viewing.endTime > strftime('%s', 'now')-30*24*60*60 AND NOT viewing.completed and viewing.endTime = (select max(endTime) from viewing as v where v.mediaId = ? and v.who = ?) limit 1;};
 
     my $sth = $self->_dbh->prepare($query);
     $sth->execute($media->id, $media->id, $main::CURRENT_USER->name);

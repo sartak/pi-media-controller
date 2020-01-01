@@ -566,17 +566,15 @@ my %endpoints;
 
             # close enough
             if ($media->duration_seconds && $endSeconds > $media->duration_seconds * .9) {
-                $endSeconds = undef;
                 $completed = 1;
             }
-            my $elapsedSeconds = $endSeconds ? int($endSeconds - $initialSeconds) : undef;
 
             $Library->add_viewing(
                 media           => $media,
                 start_time      => int($startTime),
                 end_time        => int($endTime),
                 initial_seconds => int($initialSeconds),
-                elapsed_seconds => $elapsedSeconds,
+                elapsed_seconds => int($endSeconds - $initialSeconds),
                 completed       => $completed,
                 audio_track     => $audioTrack,
                 location        => $location,
