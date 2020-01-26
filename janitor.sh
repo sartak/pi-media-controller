@@ -21,7 +21,7 @@ perl -Ilib -Iextlib add-tree-media-sort.pl
 
 perl -Ilib -Iextlib intuit-checksums.pl
 
-echo 'select rowid, path, spoken_langs from media where spoken_langs like "%?%" and path like "Movies/%";' | sqlite3 $PMC_DATABASE
+echo 'select rowid, path, spoken_langs from media where spoken_langs like "%?%" and path like "Movies/%" and media.checksum is not null;' | sqlite3 $PMC_DATABASE
 
 echo 'select media.rowid, path, viewing.startTime, viewing.endTime, viewing.location, viewing.who from viewing left join media on media.rowid = viewing.mediaId where audioTrack IS NULL and media.rowid IS NOT NULL order by viewing.rowid asc;' | sqlite3 $PMC_DATABASE
 
