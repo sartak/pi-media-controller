@@ -13,6 +13,7 @@ use File::Slurp 'slurp';
 use URI::Escape;
 use AnyEvent::HTTP;
 use Time::HiRes 'time';
+use AnyEvent::Filesys::Notify;
 
 use Pi::Media::Queue::Autofilling;
 use Pi::Media::Controller;
@@ -1264,6 +1265,22 @@ $app = builder {
 
 
 $server->register_service($app);
+
+my ($dir) = $ENV{PMC_DATABASE} =~ m{^(.*)/[^/]+$}
+  or die "Unable to parse $ENV{PMC_DATABASE}";
+
+my $notifier = AnyEvent::Filesys::Notify->new(
+  dirs => [$dir],
+  filter => sub {
+    my $f = shift;
+    return $f eq $ENV{PMC_DATABASE};
+  },
+  cb => sub {
+    $notify_cb->({ type => 'database/modified' });
+  },
+  parse_events => 1,
+  skip_subdirs => 1,
+);
 
 warn "Ready!\n";
 
