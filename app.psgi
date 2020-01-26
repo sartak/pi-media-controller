@@ -569,6 +569,12 @@ my %endpoints;
                 $completed = 1;
             }
 
+            for my $skip ($media->skips) {
+                if (!defined($skip->[1]) && $endSeconds > $skip->[0] - 2) {
+                    $completed = 1;
+                }
+            }
+
             $Library->add_viewing(
                 media           => $media,
                 start_time      => int($startTime),

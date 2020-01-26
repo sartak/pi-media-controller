@@ -347,6 +347,12 @@ sub _finished_media {
             if ($media->duration_seconds && $end_seconds > $media->duration_seconds * .9) {
                 $completed = 1;
             }
+
+            for my $skip ($media->skips) {
+                if (!defined($skip->[1]) && $end_seconds > $skip->[0] - 2) {
+                    $completed = 1;
+                }
+            }
         }
 
     }
