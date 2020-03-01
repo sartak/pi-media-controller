@@ -1,4 +1,5 @@
 package Pi::Media::Config;
+use utf8;
 use 5.14.0;
 use Mouse;
 use JSON;
@@ -24,7 +25,7 @@ has config => (
     my $self = shift;
     my $file = $self->file;
     my $location = $self->location;
-    my $json = JSON->new;
+    my $json = JSON->new->utf8;
 
     my $config = $json->decode(scalar slurp $file);
 
