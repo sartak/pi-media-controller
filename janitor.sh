@@ -1,6 +1,8 @@
 #!/bin/bash
 cd ~/pi-media-controller/
 
+export PMC_LOCATION=Office
+
 perl -Ilib -Iextlib untracked-media.pl /media/trocadero/Commercials /media/trocadero/LP /media/trocadero/Movies /media/trocadero/ROM/*/ /media/trocadero/Shorts /media/trocadero/Go /media/trocadero/TV
 
 perl -Ilib -Iextlib fsck.pl
