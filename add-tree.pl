@@ -4,6 +4,7 @@ use warnings;
 use utf8::all;
 use Getopt::Whatever;
 use Pi::Media::Library;
+use Pi::Media::Config;
 
 for my $key (keys %ARGV) {
     next if $key eq 'segments';
@@ -21,7 +22,10 @@ $label_en || $label_ja or die usage("Must have at least one of label_en or label
 
 @ARGV == 0 or usage("must have no stray args");
 
-my $library = Pi::Media::Library->new(file => $ENV{PMC_DATABASE});
+my $library = Pi::Media::Library->new(
+  file   => $ENV{PMC_DATABASE},
+  config => Pi::Media::Config->new,
+);
 
 if (!$parent) {
     $parent = $library->tree_from_segments(@$segments);

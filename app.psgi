@@ -70,7 +70,10 @@ my $notify_cb = sub {
     @Watchers = @ok;
 };
 
-my $Library = Pi::Media::Library->new(file => $ENV{PMC_DATABASE});
+my $Library = Pi::Media::Library->new(
+  file   => $ENV{PMC_DATABASE},
+  config => $config,
+);
 my $Queue = Pi::Media::Queue::Autofilling->new(
     library   => $Library,
     notify_cb => $notify_cb,

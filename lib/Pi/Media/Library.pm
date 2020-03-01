@@ -6,6 +6,7 @@ use Pi::Media::File::Game;
 use Pi::Media::File::Book;
 use Pi::Media::Tree;
 use Pi::Media::User;
+use Pi::Media::Config;
 use DBI;
 use Path::Class;
 use Time::HiRes 'time';
@@ -30,6 +31,12 @@ has file => (
     is      => 'ro',
     isa     => 'Str',
     default => 'library.sqlite',
+);
+
+has config => (
+    is       => 'ro',
+    isa      => 'Pi::Media::Config',
+    required => 1,
 );
 
 has _resume_state_cache => (

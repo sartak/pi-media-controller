@@ -3,10 +3,14 @@ use 5.14.0;
 use warnings;
 use utf8::all;
 use Pi::Media::Library;
+use Pi::Media::Config;
 use IPC::Run3;
 use Encode 'encode_utf8';
 
-my $library = Pi::Media::Library->new(file => $ENV{PMC_DATABASE});
+my $library = Pi::Media::Library->new(
+  file   => $ENV{PMC_DATABASE},
+  config => Pi::Media::Config->new,
+);
 
 my @media = $library->media(
     all            => 1,

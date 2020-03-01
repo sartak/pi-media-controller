@@ -4,6 +4,7 @@ use warnings;
 use utf8::all;
 use Getopt::Whatever;
 use Pi::Media::Library;
+use Pi::Media::Config;
 
 for my $key (keys %ARGV) {
     next if $key eq 'segments' || $key eq 'tag';
@@ -54,7 +55,10 @@ if (exists $ARGV{subtitle_langs}) {
     $subtitle_langs = [map { defined($_) ? $_ : '' } split / *, */, $ARGV{subtitle_langs}];
 }
 
-my $library = Pi::Media::Library->new(file => $ENV{PMC_DATABASE});
+my $library = Pi::Media::Library->new(
+  file   => $ENV{PMC_DATABASE},
+  config => Pi::Media::Config->new,
+);
 
 if (!$treeId) {
     $treeId = $library->tree_from_segments(@$segments);

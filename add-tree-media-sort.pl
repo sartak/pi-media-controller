@@ -5,8 +5,12 @@ use utf8::all;
 use JSON;
 use Getopt::Whatever;
 use Pi::Media::Library;
+use Pi::Media::Config;
 
-my $library = Pi::Media::Library->new(file => $ENV{PMC_DATABASE});
+my $library = Pi::Media::Library->new(
+  file   => $ENV{PMC_DATABASE},
+  config => Pi::Media::Config->new,
+);
 my @trees = $library->trees(all => 1, media_sort => 1);
 push @trees, $library->trees(id => $_) for @ARGV;
 

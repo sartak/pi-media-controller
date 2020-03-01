@@ -3,10 +3,14 @@ use 5.14.0;
 use warnings;
 use utf8::all;
 use Pi::Media::Library;
+use Pi::Media::Config;
 use MP4::Info;
 use Image::ExifTool ':Public';
 
-my $library = Pi::Media::Library->new(file => $ENV{PMC_DATABASE});
+my $library = Pi::Media::Library->new(
+  file   => $ENV{PMC_DATABASE},
+  config => Pi::Media::Config->new,
+);
 
 # mp4, m4v
 {
