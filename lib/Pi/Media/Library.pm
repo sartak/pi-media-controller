@@ -15,6 +15,7 @@ use Unicode::Normalize 'NFC';
 has _dbh => (
     is      => 'ro',
     lazy    => 1,
+    clearer => '_clear_dbh',
     default => sub {
         my $dbh = DBI->connect(
             "dbi:SQLite:dbname=" . shift->file,
@@ -647,7 +648,16 @@ sub add_viewing {
         $args{location},
         $args{who},
     ));
-    return $self->_dbh->sqlite_last_insert_rowid;
+    my $rowid = $self->_dbh->sqlite_last_insert_rowid;
+
+    if (my $target = $self->config->value('rsync_to_on_viewing')) {
+      $self->_dbh->disconnect();
+      $self->_clear_dbh();
+
+      system("rsync", "-az", $self->file, $target);
+    }
+
+    return $rowid;
 }
 
 sub _resume_state_for_video {
