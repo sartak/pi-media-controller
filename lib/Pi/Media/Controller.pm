@@ -5,6 +5,7 @@ use AnyEvent::Run;
 use Pi::Media::Queue;
 use Pi::Media::File;
 use Pi::Media::Library;
+use Pi::Media::Config;
 use File::Slurp 'slurp';
 
 has notify_cb => (
@@ -21,7 +22,7 @@ has current_media => (
 
 has config => (
     is       => 'ro',
-    isa      => 'HashRef',
+    isa      => 'Pi::Media::Config',
     required => 1,
 );
 
@@ -253,7 +254,7 @@ sub _handle_for_media {
         open my $handle, '-|', 'youtube-dl', '-g', $media->url;
         my $url = <$handle>;
         close $handle;
-        my @args = ('-b', @{ $self->config->{omxplayer_args} || [] });
+        my @args = ('-b', @{ $self->config->value('omxplayer_args') || [] });
         return AnyEvent::Run->new(
             cmd => ['omxplayer', @args, $url],
         );
@@ -275,13 +276,13 @@ sub _handle_for_media {
             push @args, '--aidx', $self->audio_track + 1;
         }
 
-        push @args, @{ $self->config->{omxplayer_args} || [] };
+        push @args, @{ $self->config->value('omxplayer_args') || [] };
         return AnyEvent::Run->new(
             cmd => ['omxplayer', @args, $media->path],
         );
     }
     elsif ($media->isa('Pi::Media::File::Game')) {
-        my @emulator_cmd = @{ $self->config->{emulator_for}{$media->extension} || [] };
+        my @emulator_cmd = @{ $self->config->value('emulator_for')->{$media->extension} || [] };
         if (@emulator_cmd == 0) {
             die "No emulator for type " . $media->extension;
         }
@@ -372,7 +373,7 @@ sub _finished_media {
         audio_track     => $self->audio_track,
         elapsed_seconds => $end_seconds - $initial_seconds,
         completed       => $completed,
-        location        => $self->config->{location},
+        location        => $self->config->location,
         who             => $self->current_media->{requestor}->name,
     );
 

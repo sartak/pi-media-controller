@@ -1,6 +1,7 @@
 package Pi::Media::Television;
 use 5.14.0;
 use Mouse;
+use Pi::Media::Config;
 use AnyEvent::Run;
 use JSON::Types;
 use JSON 'encode_json';
@@ -13,7 +14,7 @@ has notify_cb => (
 
 has config => (
     is       => 'ro',
-    isa      => 'HashRef',
+    isa      => 'Pi::Media::Config',
     required => 1,
 );
 

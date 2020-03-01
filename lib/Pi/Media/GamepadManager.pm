@@ -3,10 +3,11 @@ use 5.14.0;
 use Mouse;
 use Pi::Media::Gamepad::Wiimote;
 use Pi::Media::Controller;
+use Pi::Media::Config;
 
 has config => (
     is       => 'ro',
-    isa      => 'HashRef',
+    isa      => 'Pi::Media::Config',
     required => 1,
 );
 

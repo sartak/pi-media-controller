@@ -23,7 +23,7 @@ has _explicitly_disconnected => (
 sub scan {
     my $self = shift;
 
-    my $file = $self->config->{gamepad}{wiimote}{$self->led};
+    my $file = $self->config->value('gamepad')->{wiimote}{$self->led};
 
     die "File $file doesn't exist" if !-e $file;
 

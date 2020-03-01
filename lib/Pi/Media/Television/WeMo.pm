@@ -6,7 +6,7 @@ use JSON::Types;
 extends 'Pi::Media::Television';
 
 sub host {
-    return shift->config->{television}{host};
+    return shift->config->value('television')->{host};
 }
 
 sub is_on {

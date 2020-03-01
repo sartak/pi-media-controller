@@ -28,17 +28,7 @@ select((select(STDERR), $|=1)[0]);
 
 my $json = JSON->new->convert_blessed(1);
 
-die "Need config.json" unless -e "config.json";
-my $config = $json->decode(scalar slurp "config.json");
-
-$config->{location} = $ENV{PMC_LOCATION} if $ENV{PMC_LOCATION};
-
-if ($config->{by_location}) {
-    %$config = (
-        %$config,
-        %{ $config->{by_location}{$config->{location}} || {} },
-    );
-}
+my $config = Pi::Media::Config->new;
 
 my $server = Twiggy::Server->new(
     port => ($ENV{PMC_PORT}||5000),
@@ -93,13 +83,13 @@ my $Controller = Pi::Media::Controller->new(
 );
 push @extra_cb, sub { $Controller->got_event(@_) };
 
-my $TelevisionClass = $config->{television}{class} || 'Pi::Media::Television::HDMI';
+my $TelevisionClass = $config->value('television')->{class} || 'Pi::Media::Television::HDMI';
 Mouse::load_class($TelevisionClass);
 my $tv_state = -e "tv.json" ? $json->decode(scalar slurp "tv.json") : { is_on => 1 };
 my $Television = $TelevisionClass->new(
     config    => $config,
     notify_cb => $notify_cb,
-    %{ $config->{television} },
+    %{ $config->value('television') },
     %$tv_state,
     is_on => ($tv_state->{is_on} ? 1 : 0), # JSON::XS::Boolean fails type
 );
@@ -111,7 +101,7 @@ my $AC = Pi::Media::AC->new(
     is_on => ($ac_state->{is_on} ? 1 : 0), # JSON::XS::Boolean fails type
 );
 
-if (!$config->{disable_gamepads}) {
+if (!$config->value('disable_gamepads')) {
     my $GamepadManager = Pi::Media::GamepadManager->new(
         config => $config,
         controller => $Controller,
@@ -454,7 +444,7 @@ my %endpoints;
                         };
                     }
 
-                    unless ($config->{disable_streaming}) {
+                    unless ($config->value('disable_streaming')) {
                         push @actions, {
                             url    => "/stream?media=" . $id,
                             type   => 'stream',
@@ -472,7 +462,7 @@ my %endpoints;
                         }
                     }
 
-                    unless ($config->{disable_downloads}) {
+                    unless ($config->value('disable_downloads')) {
                         push @actions, {
                             url    => "/download?media=" . $id,
                             type   => 'download',
@@ -631,7 +621,7 @@ my %endpoints;
         GET => sub {
             my $req = shift;
 
-            if ($config->{disable_streaming}) {
+            if ($config->value('disable_streaming')) {
                 my $res = $req->new_response(400);
                 $res->body("streaming disabled");
                 return $res;
@@ -749,7 +739,7 @@ my %endpoints;
         GET => sub {
             my $req = shift;
 
-            if ($config->{disable_download}) {
+            if ($config->value('disable_download')) {
                 my $res = $req->new_response(400);
                 $res->body("download disabled");
                 return $res;
@@ -1078,7 +1068,7 @@ my %endpoints;
         PUT => sub {
             my $req = shift;
             if (my $scene = $req->param('scene')) {
-                my $url = "$config->{hue_host}/api/newdeveloper/groups/0/action";
+                my $url = $config->value('hue_host').'/api/newdeveloper/groups/0/action';
                 my $body = encode_utf8($json->encode({ scene => $scene }));
 
                 http_request

@@ -6,15 +6,18 @@ use JSON;
 use File::Slurp 'slurp';
 use Getopt::Whatever;
 use Pi::Media::Library;
+use Pi::Media::Config;
 use Sort::Naturally;
 
 my $treeId = shift or die "usage: $0 [--verbose] [--path] treeId\n";
 
-die "Need config.json" unless -e "config.json";
-my $json = JSON->new->utf8->convert_blessed(1);
-my $config = $json->decode(scalar slurp "config.json");
+my $config = Pi::Media::Config->new;
 
-my $library = Pi::Media::Library->new(file => $ENV{PMC_DATABASE});
+my $library = Pi::Media::Library->new(
+  file   => $ENV{PMC_DATABASE},
+  config => $config,
+);
+
 $library->begin;
 
 my @media = (
@@ -22,7 +25,7 @@ my @media = (
     $library->trees(parentId => $treeId),
 );
 
-my %fixup = %{ $config->{sort_fixup}{$treeId} || {} };
+my %fixup = %{ $config->value('sort_fixup')->{$treeId} || {} };
 my %saw_fixup;
 
 if ($ARGV{path}) {
