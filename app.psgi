@@ -1096,7 +1096,9 @@ my $authenticate = sub {
     my $username;
 
     if ($username = ($req->header('X-PMC-Username') || $req->param('user'))) {
-        if (my $pass = ($req->header('X-PMC-Password') || $req->param('pass'))) {
+	if ($req->address eq '127.0.0.1') {
+          $user = $username;
+	} elsif (my $pass = ($req->header('X-PMC-Password') || $req->param('pass'))) {
             $user = $Library->login($username, $pass);
         }
     }
