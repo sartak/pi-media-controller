@@ -1112,7 +1112,7 @@ my $app = sub {
 
     my ($username, $user) = $authenticate->($env);
     if (!$user) {
-        warn "Unauthorized request" . ($username ? " from user '$username'" : "") . " for " . $req->method . ' ' . $req->path_info . "\n";
+        warn "Unauthorized request" . ($username ? " by user '$username'" : "") . " from " . $req->address . " for " . $req->method . ' ' . $req->path_info . "\n";
         my $res = $req->new_response(401);
         $res->header('X-PMC-Time' => scalar gmtime);
         $res->header('Cache-control' => 'private, max-age=0, no-store');
@@ -1200,7 +1200,7 @@ $app = builder {
 
         my ($username, $user) = $authenticate->($env);
         if (!$user) {
-            warn "Unauthorized request" . ($username ? " from user '$username'" : "") . " for " . $req->method . ' ' . $req->path_info . "\n";
+            warn "Unauthorized request" . ($username ? " by user '$username'" : "") . " from " . $req->address . " for " . $req->method . ' ' . $req->path_info . "\n";
             my $res = $req->new_response(401);
             $res->header('X-PMC-Time' => scalar gmtime);
             $res->header('Cache-control' => 'private, max-age=0, no-store');
