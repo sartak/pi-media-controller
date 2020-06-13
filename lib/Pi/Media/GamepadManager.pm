@@ -108,10 +108,12 @@ sub scan_wiimote {
 
                   my $game = $self->library->last_game_played;
                   if ($game) {
+                    my $tv_is_off = !$self->television->is_on;
                     warn "Automatically resuming most recent game\n";
                     $game->{initial_seconds} = 0;
                     $game->{audio_track} = 0;
                     $game->{save_state} = 0;
+                    $game->{auto_poweroff_tv} = $tv_is_off;
 
                     $self->queue->push($game);
 
@@ -163,6 +165,7 @@ sub disconnect_all {
     }
 
     @{ $self->gamepads } = ();
+    $self->_disconnect_handle(undef);
 }
 
 sub remove_gamepad {
@@ -204,8 +207,14 @@ sub got_event {
     elsif ($event->{type} eq 'finished') {
         return unless $event->{media}->type eq 'game';
 
-        warn "Just finished a game! Disconnecting gamepads in 5...";
-        $self->disconnect_all_after(5*60);
+        if ($event->{media}->{auto_poweroff_tv} && !$self->controller->current_media && !$self->queue->has_media) {
+          warn "Just finished the launch game and there's nothing in the hopper; disconnecting";
+          $self->television->power_off;
+          $self->disconnect_all();
+        } else {
+          warn "Just finished a game! Disconnecting gamepads in 5...";
+          $self->disconnect_all_after(5*60);
+        }
     }
 }
 
