@@ -23,6 +23,7 @@ find(sub {
     return if $file =~ /\.DS_Store/
            || $file =~ /\.state\.(auto|\d+)$/
            || $file =~ /\.srm$/
+           || $file =~ /\.ips$/
            || $file =~ /\.cfg$/
            || $file =~ /\.sav$/;
 
