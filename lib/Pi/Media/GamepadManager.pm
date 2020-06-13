@@ -23,6 +23,24 @@ has controller => (
     required => 1,
 );
 
+has library => (
+    is       => 'ro',
+    isa      => 'Pi::Media::Library',
+    required => 1,
+);
+
+has queue => (
+    is       => 'ro',
+    isa      => 'Pi::Media::Queue',
+    required => 1,
+);
+
+has television => (
+    is       => 'ro',
+    isa      => 'Pi::Media::Television',
+    required => 1,
+);
+
 has _wiimote_handle => (
     is      => 'rw',
     clearer => '_clear_wiimote_handle',
@@ -83,9 +101,33 @@ sub scan_wiimote {
                 push @{ $self->gamepads }, $gamepad;
 
                 # if there's no game, ok, but turn off wiimote in 5 minutes
-                if (!$self->controller->current_media || $self->controller->current_media->type ne 'game') {
-                    warn "But! there's no game, so I'm turning it back off in 5...";
-                    $self->disconnect_all_after(5*60);
+                if (!$self->controller->current_media) {
+
+                  # TODO extract current user from most recent game
+                  local $main::CURRENT_USER = $self->library->login_without_password('shawn');
+
+                  my $game = $self->library->last_game_played;
+                  if ($game) {
+                    warn "Automatically resuming most recent game\n";
+                    $game->{initial_seconds} = 0;
+                    $game->{audio_track} = 0;
+                    $game->{save_state} = 0;
+
+                    $self->queue->push($game);
+
+                    $self->controller->play_next_in_queue;
+
+                    # we do this last so the game is ready by the time
+                    # the tv is on
+                    $self->television->set_active_source
+                        if $self->television->can('set_active_source');
+
+                  } else {
+                    warn "But! There's no game that I can kick off\n";
+                  }
+                } elsif ($self->controller->current_media->type ne 'game') {
+                  warn "But! We're not playing a game, so I'm turning it back off in 5...\n";
+                  $self->disconnect_all_after(5*60);
                 }
             }
         }

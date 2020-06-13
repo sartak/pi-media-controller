@@ -85,6 +85,25 @@ sub login {
     return;
 }
 
+sub login_without_password {
+    my ($self, $username) = @_;
+
+    my $query = 'SELECT name, password, preferred_lang FROM user WHERE name=?;';
+
+    my $sth = $self->_dbh->prepare($query);
+    $sth->execute($username);
+
+    if (my ($name, $password, $preferred_lang) = $sth->fetchrow_array) {
+        return Pi::Media::User->new(
+            name           => $name,
+            password       => $password,
+            preferred_lang => $preferred_lang,
+        );
+    }
+
+    return;
+}
+
 sub _inflate_media_from_sth {
     my ($self, $sth, %args) = @_;
 
@@ -744,6 +763,19 @@ sub stream_tmp {
     my $self = shift;
 
     return Path::Class::file($self->file)->dir->subdir('tmp')->stringify . '/';
+}
+
+sub last_game_played {
+  my $self = shift;
+  my @media = $self->media(
+    all            => 1,
+    joins          => 'JOIN viewing ON viewing.mediaId = media.id',
+    where          => 'media.type = "game" AND viewing.startTime IS NOT NULL',
+    order          => 'viewing.rowid DESC',
+    limit          => '1',
+    excludeViewing => 1,
+  );
+  return $media[0];
 }
 
 1;

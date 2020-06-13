@@ -50,7 +50,7 @@ my $notify_cb = sub {
     # external watchers
 
     my $unicode_json = $json->encode($event);
-    warn $unicode_json;
+    warn $unicode_json . "\n";
 
     my $json = encode_utf8($unicode_json) . "\n";
 
@@ -108,6 +108,9 @@ if (!$config->value('disable_gamepads')) {
     my $GamepadManager = Pi::Media::GamepadManager->new(
         config => $config,
         controller => $Controller,
+        library => $Library,
+        queue => $Queue,
+        television => $Television,
     );
     $GamepadManager->scan;
     push @extra_cb, sub { $GamepadManager->got_event(@_) };
@@ -1097,7 +1100,7 @@ my $authenticate = sub {
 
     if ($username = ($req->header('X-PMC-Username') || $req->param('user'))) {
 	if ($req->address eq '127.0.0.1') {
-          $user = $username;
+          $user = $Library->login_without_password($username);
 	} elsif (my $pass = ($req->header('X-PMC-Password') || $req->param('pass'))) {
             $user = $Library->login($username, $pass);
         }
