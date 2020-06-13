@@ -365,7 +365,7 @@ sub _finished_media {
         }
     }
 
-    $self->library->add_viewing(
+    my $viewing_id = $self->library->add_viewing(
         media           => $self->current_media,
         start_time      => $self->_start_time,
         end_time        => $end_time,
@@ -377,7 +377,7 @@ sub _finished_media {
         who             => $self->current_media->{requestor}->name,
     );
 
-    warn "Done playing $media\n";
+    warn "Done playing $media (viewing $viewing_id)\n";
     $self->_clear_current_media;
     $self->_clear_handle;
     $self->_buffer('');
