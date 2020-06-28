@@ -354,8 +354,10 @@ sub _finished_media {
                     $completed = 1;
                 }
             }
+        } else {
+          $end_seconds = $media->duration_seconds;
+          $completed = 1;
         }
-
     }
     else {
         $end_seconds = $end_time - $self->_start_time;
