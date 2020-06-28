@@ -21,7 +21,7 @@ $ua->default_header('X-PMC-Username' => $username);
 my $json = JSON->new->utf8;
 
 my $config = $json->decode(scalar slurp "$drive/pmc.config");
-my %count;
+my %highest;
 
 while (1) {
   my @new_screenshots;
@@ -50,10 +50,13 @@ while (1) {
   }
   my $dest = "$drive/$subdir";
 
-  if (!exists($count{$dest})) {
+  if (!exists($highest{$dest})) {
     opendir(my $handle, $dest) or die "Cannot opendir $dest: $!";
-    my $count = grep { !/^\./ } readdir($handle);
-    $count{$dest} = $count;
+    while (my $file = readdir($handle)) {
+      my ($id) = $file =~ /^(\d+)\.png$/;
+      next if !$id;
+      $highest{$dest} = $id if $id > ($highest{$dest} || 0);
+    }
   }
 
   for my $file (@new_screenshots) {
@@ -63,17 +66,16 @@ while (1) {
       warn "Could not extract extension from $file";
       next;
     }
-    my $count = 1 + $count{$dest};
-    my $d = "$dest/$count.png";
+    my $id = 1 + $highest{$dest};
+    my $d = "$dest/$id.png";
     if (-e $d) {
       warn "Could not move $file; $d already exists";
       next;
     }
     rename $file => $d;
     print "$file -> $d\n";
-    ++$count{$dest};
+    ++$highest{$dest};
   }
 } continue {
   sleep 1;
 }
-
