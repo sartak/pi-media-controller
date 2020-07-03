@@ -70,6 +70,7 @@ my $notify_cb = sub {
     @Watchers = @ok;
 
     if (my $url = $config->value('notify_url')) {
+      $url .= "/$event->{type}" if $event->{type};
       http_request(
         POST => $url,
         headers => {
