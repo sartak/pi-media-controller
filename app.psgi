@@ -76,6 +76,7 @@ my $notify_cb = sub {
         headers => {
           'User-Agent' => 'pmc.sartak.org',
           'Content-Type' => 'application/json',
+          %{ $config->value('notify_headers') || {} },
         },
         body => $json,
         sub { "ignore" },

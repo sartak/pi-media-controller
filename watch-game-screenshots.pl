@@ -85,6 +85,8 @@ while (1) {
         rom => $dir,
         file => $d,
       }),
+      %{ $config->value('notify_headers') || {} },
+      %{ $config->value('notify_headers_wgs') || {} },
     );
   }
 } continue {
