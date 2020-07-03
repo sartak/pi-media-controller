@@ -15,8 +15,10 @@ my $username = shift;
 
 my $watcher = Filesys::Notify::Simple->new(["$drive/ROM/Screenshots/"]);
 
-my $ua = LWP::UserAgent->new;
-$ua->default_header('X-PMC-Username' => $username);
+my $pmc_ua = LWP::UserAgent->new;
+$pmc_ua->default_header('X-PMC-Username' => $username);
+
+my $pubsub_ua = LWP::UserAgent->new(agent => 'watch-game-screenshots');
 
 my $json = JSON->new->utf8;
 
@@ -29,7 +31,7 @@ while (1) {
     push @new_screenshots, map { $_->{path } } @_;
   });
 
-  my $res = $ua->get("http://$pmc_addr/current");
+  my $res = $pmc_ua->get("http://$pmc_addr/current");
   if ($res->code != 200) {
     warn "Got unexpected result from PC: " . $res->status_line;
     next;
@@ -75,6 +77,15 @@ while (1) {
     rename $file => $d;
     print "$file -> $d\n";
     ++$highest{$dest};
+
+    $pubsub_ua->post(
+      "$config->{notify_url}/screenshot",
+      'Content-Type' => 'application/json',
+      Content => $json->encode({
+        rom => $dir,
+        file => $d,
+      }),
+    );
   }
 } continue {
   sleep 1;
