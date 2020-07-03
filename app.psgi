@@ -1293,6 +1293,7 @@ my $notifier = AnyEvent::Filesys::Notify->new(
 );
 
 warn "Ready!\n";
+$notify_cb->({ type => 'launched' });
 
 if ($ENV{PMC_AUTOPLAY} && $Queue->has_media) {
     $Television->set_active_source
