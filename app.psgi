@@ -68,6 +68,18 @@ my $notify_cb = sub {
     }
 
     @Watchers = @ok;
+
+    if (my $url = $config->value('notify_url')) {
+      http_request(
+        POST => $url,
+        headers => {
+          'User-Agent' => 'pmc.sartak.org',
+          'Content-Type' => 'application/json',
+        },
+        body => $json,
+        sub { "ignore" },
+      );
+    }
 };
 
 my $Library = Pi::Media::Library->new(
