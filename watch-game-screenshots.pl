@@ -78,6 +78,11 @@ while (1) {
     print "$file -> $d\n";
     ++$highest{$dest};
 
+    my %notify_headers = (
+      %{ $config->{notify_headers} || {} },
+      %{ $config->{notify_headers_wgs} || {} },
+    );
+
     $pubsub_ua->post(
       "$config->{notify_url}/screenshot",
       'Content-Type' => 'application/json',
@@ -85,8 +90,7 @@ while (1) {
         rom => $dir,
         file => $d,
       }),
-      %{ $config->value('notify_headers') || {} },
-      %{ $config->value('notify_headers_wgs') || {} },
+      %notify_headers,
     );
   }
 } continue {
