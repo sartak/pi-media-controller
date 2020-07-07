@@ -93,6 +93,4 @@ while (1) {
       %notify_headers,
     );
   }
-} continue {
-  sleep 1;
 }
