@@ -49,9 +49,10 @@ has _handle => (
     clearer => '_clear_handle',
 );
 
-has _start_time => (
-    is      => 'rw',
+has start_time => (
+    is      => 'ro',
     isa     => 'Int',
+    writer  => '_set_start_time',
     clearer => '_clear_start_time',
 );
 
@@ -198,7 +199,7 @@ sub _play_media {
     $self->_set_is_paused(0);
     $self->_set_audio_track($media->{audio_track} || 0);
     $self->_set_current_media($media);
-    $self->_start_time(time);
+    $self->_set_start_time(time);
     $self->_game_home_button_pressed(1);
 
     if ($media->type eq 'video') {
@@ -360,7 +361,7 @@ sub _finished_media {
         }
     }
     else {
-        $end_seconds = $end_time - $self->_start_time;
+        $end_seconds = $end_time - $self->start_time;
 
         if ($self->_game_home_button_pressed) {
             $self->_temporarily_stopped(1);
@@ -369,7 +370,7 @@ sub _finished_media {
 
     my $viewing_id = $self->library->add_viewing(
         media           => $self->current_media,
-        start_time      => $self->_start_time,
+        start_time      => $self->start_time,
         end_time        => $end_time,
         initial_seconds => $initial_seconds,
         audio_track     => $self->audio_track,
