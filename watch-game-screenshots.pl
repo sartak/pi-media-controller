@@ -26,10 +26,20 @@ my $config = $json->decode(scalar slurp "$drive/pmc.config");
 my %highest;
 
 while (1) {
+  my $hupped = 0;
+
+  $SIG{HUP} = sub {
+    warn "Got SIGHUP; clearing fs cache…\n";
+    %highest = ();
+    $hupped++;
+  };
+
   my @new_screenshots;
   $watcher->wait(sub {
     push @new_screenshots, map { $_->{path } } @_;
   });
+
+  next if $hupped && !@new_screenshots;
 
   my $res = $pmc_ua->get("http://$pmc_addr/current");
   if ($res->code != 200) {
