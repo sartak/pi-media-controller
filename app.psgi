@@ -1305,8 +1305,10 @@ warn "Ready!\n";
 $notify_cb->({ type => 'launched' });
 
 my $provisional_viewing_timer;
-sub fire_provisional_viewing_timer {
+sub send_provisional_viewing {
   undef $provisional_viewing_timer;
+
+  my $url = $config->value('provisional_viewing_url') or return;
 
   my $media = $Controller->current_media;
   return if !$media;
@@ -1315,15 +1317,24 @@ sub fire_provisional_viewing_timer {
   my $payload = encode_utf8($json->encode({
       startTime => $start,
       elapsedSeconds => time - $start,
-      payload => {
+      payload => $json->encode({
         media       => $media,
         audio_track => $Controller->audio_track,
         location    => $config->location,
         who         => $media->{requestor}->name,
-      },
+      }),
   }));
 
-  use Data::Dumper; warn Dumper($payload);
+  http_request(
+    UPSERT => $url,
+    headers => {
+      'User-Agent' => 'pmc.sartak.org',
+      'Content-Type' => 'application/json',
+      %{ $config->value('provisional_viewing_headers') || {} },
+    },
+    body => $payload,
+    sub { "ignore" },
+  );
 
   restart_provisional_viewing_timer(60);
 }
@@ -1332,13 +1343,12 @@ sub restart_provisional_viewing_timer {
   my $after = shift;
 
   if (!$after) {
-    return fire_provisional_viewing_timer();
+    return send_provisional_viewing();
   }
 
-  warn "Scheduling a provisional viewing timer for ${after}s…\n";
   $provisional_viewing_timer = AnyEvent->timer(
     after    => $after,
-    cb       => \&fire_provisional_viewing_timer,
+    cb       => \&send_provisional_viewing,
   );
 };
 
