@@ -102,5 +102,10 @@ sub has_tag {
     return;
 }
 
+sub description {
+  my $self = shift;
+  return $self->label->{en} || $self->label->{ja} || $self->path;
+}
+
 1;
 

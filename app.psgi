@@ -1314,9 +1314,13 @@ sub send_provisional_viewing {
   return if !$media;
 
   my $start = $Controller->start_time;
+  my $elapsed = time - $start;
+
+  warn "Provisional viewing of " . $media->description . " (${elapsed}s) UPSERT $url…\n";
+
   my $payload = encode_utf8($json->encode({
       startTime => $start,
-      elapsedSeconds => time - $start,
+      elapsedSeconds => $elapsed,
       payload => $json->encode({
         media => {
           %{ $media->TO_JSON },
