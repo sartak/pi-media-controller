@@ -125,6 +125,7 @@ if (!$config->value('disable_gamepads')) {
         library => $Library,
         queue => $Queue,
         television => $Television,
+        start_cb => \&restart_provisional_viewing_timer,
     );
     $GamepadManager->scan;
     push @extra_cb, sub { $GamepadManager->got_event(@_) };

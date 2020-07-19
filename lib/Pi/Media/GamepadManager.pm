@@ -41,6 +41,11 @@ has television => (
     required => 1,
 );
 
+has start_cb => (
+  is  => 'ro',
+  isa => 'CodeRef',
+);
+
 has _wiimote_handle => (
     is      => 'rw',
     clearer => '_clear_wiimote_handle',
@@ -123,6 +128,10 @@ sub scan_wiimote {
                     # the tv is on
                     $self->television->set_active_source
                         if $self->television->can('set_active_source');
+
+                    if ($self->start_cb) {
+                      $self->start_cb->();
+                    }
 
                   } else {
                     warn "But! There's no game that I can kick off\n";
