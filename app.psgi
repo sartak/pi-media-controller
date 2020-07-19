@@ -1318,7 +1318,10 @@ sub send_provisional_viewing {
       startTime => $start,
       elapsedSeconds => time - $start,
       payload => $json->encode({
-        media       => $media,
+        media => {
+          %{ $media->TO_JSON },
+          path => $Library->_relativify_path($media->path),
+        },
         audio_track => $Controller->audio_track,
         location    => $config->location,
         who         => $media->{requestor}->name,
