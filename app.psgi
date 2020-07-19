@@ -151,6 +151,8 @@ my %endpoints;
                     if $Television->can('set_active_source');
                 $Controller->play_next_in_queue;
 
+                restart_provisional_viewing_timer();
+
                 return $req->new_response(204);
             }
 
@@ -166,6 +168,7 @@ my %endpoints;
 
                 if (!$Controller->current_media) {
                     $Controller->play_next_in_queue;
+                    restart_provisional_viewing_timer();
                 }
             }
 
@@ -193,6 +196,7 @@ my %endpoints;
             if ($Controller->unpause) {
                 if (!$Controller->current_media) {
                     $Controller->play_next_in_queue;
+                    restart_provisional_viewing_timer();
                 }
 
                 return $req->new_response(200);
@@ -229,6 +233,7 @@ my %endpoints;
                 if ($Controller->unpause) {
                     if (!$Controller->current_media) {
                         $Controller->play_next_in_queue;
+                        restart_provisional_viewing_timer();
                     }
 
                     return $req->new_response(200);
@@ -331,6 +336,7 @@ my %endpoints;
             }
             else {
                 $Controller->play_next_in_queue;
+                restart_provisional_viewing_timer();
                 $res->redirect('/current');
             }
 
@@ -366,6 +372,7 @@ my %endpoints;
                         if $Television->can('set_active_source');
                     if (!$Controller->current_media) {
                         $Controller->play_next_in_queue;
+                        restart_provisional_viewing_timer();
                     }
                 }
                 else {
@@ -1297,10 +1304,49 @@ my $notifier = AnyEvent::Filesys::Notify->new(
 warn "Ready!\n";
 $notify_cb->({ type => 'launched' });
 
+my $provisional_viewing_timer;
+sub fire_provisional_viewing_timer {
+  undef $provisional_viewing_timer;
+
+  my $media = $Controller->current_media;
+  return if !$media;
+
+  my $start = $Controller->start_time;
+  my $payload = encode_utf8($json->encode({
+      startTime => $start,
+      elapsedSeconds => time - $start,
+      payload => {
+        media       => $media,
+        audio_track => $Controller->audio_track,
+        location    => $config->location,
+        who         => $media->{requestor}->name,
+      },
+  }));
+
+  use Data::Dumper; warn Dumper($payload);
+
+  restart_provisional_viewing_timer(60);
+}
+
+sub restart_provisional_viewing_timer {
+  my $after = shift;
+
+  if (!$after) {
+    return fire_provisional_viewing_timer();
+  }
+
+  warn "Scheduling a provisional viewing timer for ${after}s…\n";
+  $provisional_viewing_timer = AnyEvent->timer(
+    after    => $after,
+    cb       => \&fire_provisional_viewing_timer,
+  );
+};
+
 if ($ENV{PMC_AUTOPLAY} && $Queue->has_media) {
     $Television->set_active_source
         if $Television->can('set_active_source');
     $Controller->play_next_in_queue;
+    restart_provisional_viewing_timer(1);
 }
 
 AE::cv->recv;
