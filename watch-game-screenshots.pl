@@ -86,10 +86,7 @@ while (1) {
     $pubsub_ua->post(
       "$config->{notify_url}/screenshot",
       'Content-Type' => 'application/json',
-      Content => $json->encode({
-        rom => $dir,
-        file => $d,
-      }),
+      Content => $json->encode({ file => $d }),
       %notify_headers,
     );
   }
