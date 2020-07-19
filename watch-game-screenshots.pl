@@ -55,7 +55,7 @@ while (1) {
   if (!exists($highest{$dest})) {
     opendir(my $handle, $dest) or die "Cannot opendir $dest: $!";
     while (my $file = readdir($handle)) {
-      my ($id) = $file =~ /^(\d+)\.png$/;
+      my ($id) = $file =~ /^(\d+)\.\w+$/;
       next if !$id;
       $highest{$dest} = $id if $id > ($highest{$dest} || 0);
     }
