@@ -119,6 +119,8 @@ sub _inflate_media_from_sth {
         $label{en} = $label_en if $label_en;
         $label{ja} = $label_ja if $label_ja;
         $tags = [grep { length } split '`', $tags];
+        $spoken_langs ||= '';
+        $subtitle_langs ||= '';
 
         my $media;
         if ($type eq 'video') {
@@ -151,6 +153,8 @@ sub _inflate_media_from_sth {
                 path              => $self->_absolutify_path($path),
                 identifier        => $identifier,
                 label             => \%label,
+                spoken_langs      => [split ',', $spoken_langs],
+                subtitle_langs    => [split ',', $subtitle_langs],
                 streamable        => $streamable,
                 treeId            => $treeId,
                 tags              => $tags,
@@ -167,6 +171,8 @@ sub _inflate_media_from_sth {
                 path              => $self->_absolutify_path($path),
                 identifier        => $identifier,
                 label             => \%label,
+                spoken_langs      => [split ',', $spoken_langs],
+                subtitle_langs    => [split ',', $subtitle_langs],
                 streamable        => $streamable,
                 treeId            => $treeId,
                 tags              => $tags,

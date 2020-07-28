@@ -9,6 +9,18 @@ has playtime => (
     default => 0,
 );
 
+has spoken_langs => (
+    is       => 'ro',
+    isa      => 'ArrayRef[Str]',
+    required => 1,
+);
+
+has subtitle_langs => (
+    is       => 'ro',
+    isa      => 'ArrayRef[Str]',
+    required => 1,
+);
+
 sub TO_JSON {
     my $self = shift;
     my $frozen = $self->SUPER::TO_JSON(@_);
@@ -16,6 +28,9 @@ sub TO_JSON {
     for (qw/playtime/) {
         $frozen->{$_} = $self->$_;
     };
+
+    $frozen->{spoken_langs} = $self->available_audio;
+    $frozen->{subtitle_langs} = $self->available_subtitles;
 
     return $frozen;
 }
