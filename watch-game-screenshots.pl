@@ -71,6 +71,8 @@ while (1) {
     }
   }
 
+  my $time = time;
+
   for my $file (@new_screenshots) {
     next if !-e $file; # maybe already moved
     my ($ext) = $file =~ /\.(\w+)$/;
@@ -93,11 +95,18 @@ while (1) {
       %{ $config->{notify_headers_wgs} || {} },
     );
 
+    utime $time, $time, "$dest/.time";
+
     $pubsub_ua->post(
       "$config->{notify_url}/screenshot",
       'Content-Type' => 'application/json',
-      Content => $json->encode({ file => $d }),
+      Content => $json->encode({
+        file => $d,
+        etag => int($time),
+      }),
       %notify_headers,
     );
   }
+
+  utime $time, $time, "$drive/Pictures/study/.time";
 }
