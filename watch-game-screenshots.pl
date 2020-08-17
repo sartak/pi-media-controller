@@ -7,6 +7,7 @@ use File::Spec;
 use LWP::UserAgent;
 use JSON;
 use File::Slurp 'slurp';
+use HTTP::Date;
 
 @ARGV == 3 or die "usage: $0 [/media/trocadero] [pmc-addr] [username]";
 my $drive = shift;
@@ -102,7 +103,7 @@ while (1) {
       'Content-Type' => 'application/json',
       Content => $json->encode({
         file => $d,
-        etag => int($time),
+        last_modified => time2str($time),
       }),
       %notify_headers,
     );
