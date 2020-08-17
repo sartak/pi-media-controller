@@ -98,11 +98,15 @@ while (1) {
 
     utime $time, $time, "$dest/.time";
 
+    my $path = $d;
+    $path =~ s!^\Q$drive\E/Pictures/study!!;
+
     $pubsub_ua->post(
       "$config->{notify_url}/screenshot",
       'Content-Type' => 'application/json',
       Content => $json->encode({
         file => $d,
+        path => $path,
         last_modified => time2str($time),
       }),
       %notify_headers,
