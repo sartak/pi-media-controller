@@ -135,6 +135,7 @@ sub description {
         'pl'    => 'Polish',
         'pt'    => 'Portuguese',
         'ru'    => 'Russian',
+        'sv'    => 'Swedish',
         'th'    => 'Thai',
         'zh'    => 'Chinese',
 
@@ -147,6 +148,7 @@ sub description {
         '?/por' => 'Portuguese(?)',
         '?/rus' => 'Russian(?)',
         '?/spa' => 'Spanish(?)',
+        '?/swe' => 'Swedish(?)',
         '?/tha' => 'Thai(?)',
         '?/zho' => 'Chinese(?)',
         '?/hun' => 'Hungarian(?)',
