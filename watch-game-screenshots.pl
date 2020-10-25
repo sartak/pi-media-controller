@@ -8,6 +8,7 @@ use LWP::UserAgent;
 use JSON;
 use File::Slurp 'slurp';
 use HTTP::Date;
+use Digest::SHA;
 
 @ARGV == 3 or die "usage: $0 [/media/trocadero] [pmc-addr] [username]";
 my $drive = shift;
@@ -96,7 +97,14 @@ while (1) {
       %{ $config->{notify_headers_wgs} || {} },
     );
 
+    my $sha = Digest::SHA->new(1);
+    $sha->addfile($d);
+    my $digest = $sha->hexdigest;
+
     utime $time, $time, "$dest/.time";
+
+    my $info = `file $d`;
+    my ($width, $height) = $info =~ /, (\d+) ?x ?(\d+), /;
 
     my $path = $d;
     $path =~ s!^\Q$drive\E/Pictures/study!!;
@@ -108,6 +116,9 @@ while (1) {
         file => $d,
         path => $path,
         last_modified => time2str($time),
+        digest => $digest,
+        width => $width,
+        height => $height,
       }),
       %notify_headers,
     );
