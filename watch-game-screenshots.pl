@@ -97,14 +97,24 @@ while (1) {
       %{ $config->{notify_headers_wgs} || {} },
     );
 
+    my ($width, $height);
+    while (1) {
+      my $info = `file $d`;
+      if ($info =~ /: empty$/) {
+        warn "Sleeping because $d still appears empty…\n";
+        sleep 1;
+        next;
+      }
+      ($width, $height) = $info =~ /, (\d+) ?x ?(\d+), /;
+      warn "Unable to parse: $info" unless $width && $height;
+      last;
+    }
+
     my $sha = Digest::SHA->new(1);
     $sha->addfile($d);
     my $digest = $sha->hexdigest;
 
     utime $time, $time, "$dest/.time";
-
-    my $info = `file $d`;
-    my ($width, $height) = $info =~ /, (\d+) ?x ?(\d+), /;
 
     my $path = $d;
     $path =~ s!^\Q$drive\E/Pictures/study!!;
