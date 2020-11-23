@@ -307,7 +307,23 @@ sub _handle_for_media {
         }
 
         my $state_path = "$base_path.state.auto";
+        my $mem_path = "$base_path.srm";
         my $time = time;
+
+        if (my $backup_dir = $self->config->value('savestate_backup')) {
+          my $subdir = $self->library->_relativify_path($media->path);
+          $subdir =~ s!ROM/!!;
+          $subdir =~ s!\.\w+!!g;
+
+          my $dir = join '/', $backup_dir, $subdir;
+          system("mkdir", "-p", $dir);
+
+          my $dest = join '/', $dir, time;
+          system("cp" , $state_path, "$dest.state");
+          system("cp" , $mem_path, "$dest.srm");
+          warn("Backed up to $dest\n");
+        }
+
         if ($self->save_state eq 'new') {
           system("mv", $state_path => "$base_path.state.$time");
         }
