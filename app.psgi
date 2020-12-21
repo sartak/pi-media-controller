@@ -1120,10 +1120,10 @@ my $authenticate = sub {
     my $user;
     my $username;
 
-    if ($username = ($req->header('X-PMC-Username') || $req->param('user'))) {
+    if ($username = ($req->header('X-PMC-Username') || $req->header('X-Username') || $req->param('user'))) {
 	if ($req->address eq '127.0.0.1') {
           $user = $Library->login_without_password($username);
-	} elsif (my $pass = ($req->header('X-PMC-Password') || $req->param('pass'))) {
+	} elsif (my $pass = ($req->header('X-PMC-Password') || $req->header('X-Password') || $req->param('pass'))) {
             $user = $Library->login($username, $pass);
         }
     }
