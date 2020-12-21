@@ -1112,6 +1112,15 @@ my %endpoints;
             return $res;
         },
     },
+    '/api/auth' => {
+        GET => sub {
+            my $req = shift;
+            my $res = $req->new_response(200);
+            $res->content_type('text/plain');
+            $res->body($main::CURRENT_USER->name);
+            return $res;
+        },
+    },
 );
 
 my $authenticate = sub {
