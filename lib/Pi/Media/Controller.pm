@@ -291,11 +291,22 @@ sub _handle_for_media {
         my $base_path = $media->path;
         $base_path =~ s/.\w+$//;
 
-        my $cfg_path = "$base_path.cfg";
-        if (-e $cfg_path) {
-            push @emulator_cmd, "--appendconfig", $cfg_path;
+        my $directory = $base_path;
+        $directory =~ s!/[^/]+$!!;
 
-            my $config = slurp($cfg_path);
+        my $extra_cfg_path = "/tmp/retroarch-$$.cfg";
+        open my $handle, '>', $extra_cfg_path;
+        print $handle qq[savefile_directory = "$directory"\n];
+        print $handle qq[savestate_directory = "$directory"\n];
+        close $handle;
+
+        push @emulator_cmd, "--appendconfig", $extra_cfg_path;
+
+        my $game_cfg_path = "$base_path.cfg";
+        if (-e $game_cfg_path) {
+            push @emulator_cmd, "--appendconfig", $game_cfg_path;
+
+            my $config = slurp($game_cfg_path);
             if ($config =~ / ^ \s* \# \s* pmc: \s* save_state \s* = \s* never \b /mx) {
                 my $state_path = "$base_path.state.auto";
                 unlink $state_path;
