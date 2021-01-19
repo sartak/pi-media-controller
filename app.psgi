@@ -50,9 +50,8 @@ my $notify_cb = sub {
     # external watchers
 
     my $unicode_json = $json->encode($event);
-    warn $unicode_json . "\n";
-
     my $json = encode_utf8($unicode_json) . "\n";
+    warn $json;
 
     my @ok;
 
