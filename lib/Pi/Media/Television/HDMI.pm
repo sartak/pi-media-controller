@@ -26,7 +26,15 @@ sub power_on {
     my $self = shift;
 
     print STDERR "Turning on TV... ";
-    $self->_handle->push_write("on\n");
+    $self->_handle->push_write("on 0\n");
+    print STDERR "ok.\n";
+}
+
+sub power_off {
+    my $self = shift;
+
+    print STDERR "Turning off TV... ";
+    $self->_handle->push_write("standby 0\n");
     print STDERR "ok.\n";
 }
 
