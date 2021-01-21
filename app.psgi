@@ -100,8 +100,9 @@ my $Controller = Pi::Media::Controller->new(
 push @extra_cb, sub { $Controller->got_event(@_) };
 
 my $TelevisionClass = $config->value('television')->{class} || 'Pi::Media::Television::HDMI';
+my $TelevisionStateFile = $config->value('television')->{file} || 'tv.json';
 Mouse::load_class($TelevisionClass);
-my $tv_state = -e "tv.json" ? $json->decode(scalar slurp "tv.json") : { is_on => 1 };
+my $tv_state = -e $TelevisionStateFile ? $json->decode(scalar slurp $TelevisionStateFile) : { is_on => 1 };
 my $Television = $TelevisionClass->new(
     config    => $config,
     notify_cb => $notify_cb,

@@ -26,6 +26,12 @@ has is_on => (
     trigger => sub { shift->_write_state },
 );
 
+has file => (
+    is      => 'ro',
+    isa     => 'Str',
+    default => 'tv.json',
+);
+
 sub notify {
     my $self = shift;
     $self->notify_cb->(@_);
@@ -35,7 +41,7 @@ sub _write_state {
     my $self = shift;
 
     my $json = encode_json($self->state);
-    write_file "tv.json", $json;
+    write_file $self->file, $json;
 }
 
 sub power_status {
