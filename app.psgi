@@ -162,15 +162,17 @@ my %endpoints;
         },
         PLAYPAUSE => sub {
             my $req = shift;
-            if ($Controller->toggle_pause) {
-                # unpaused
-                $Television->set_active_source
-                    if $Television->can('set_active_source');
 
-                if (!$Controller->current_media) {
-                    $Controller->play_next_in_queue;
-                    restart_provisional_viewing_timer();
-                }
+            $Television->set_active_source
+                if $Television->can('set_active_source');
+
+            if (!$Controller->current_media) {
+                $Controller->play_next_in_queue;
+                restart_provisional_viewing_timer();
+            }
+
+            if ($Controller->current_media) {
+                $Controller->toggle_pause;
             }
 
             return $req->new_response(200);

@@ -452,7 +452,7 @@ sub _finished_media {
 sub toggle_pause {
     my $self = shift;
 
-    die if !$self->current_media;
+    die "No current media" if !$self->current_media;
 
     if ($self->current_media->isa('Pi::Media::File::Video')) {
         $self->_run_command('p');
