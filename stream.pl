@@ -71,4 +71,9 @@ QUALITY: while (1) {
   last unless $retry;
 }
 
+while (`pgrep omxplayer`) {
+    warn "Streamlink exited; waiting for omxplayer\n";
+    sleep 1;
+}
+
 warn "Exiting from stream.pl\n";
