@@ -66,7 +66,7 @@ QUALITY: while (1) {
 
   warn "@command $quality\n";
 
-  run3 [@command, $quality], \undef, $handle->(0), $handle->(1);
+  run3 [@command, $quality], undef, $handle->(0), $handle->(1);
 
   last unless $retry;
 }
