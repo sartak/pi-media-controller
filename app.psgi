@@ -460,24 +460,6 @@ my %endpoints;
                         };
                     }
 
-                    unless ($config->value('disable_streaming')) {
-                        push @actions, {
-                            url    => "/stream?media=" . $id,
-                            type   => 'stream',
-                            label  => $seconds ? 'Stream from Beginning' : 'Stream',
-                        };
-
-                        if ($seconds) {
-                            push @actions, {
-                                url            => "/stream?media=" . $id . '&initialSeconds=' . $seconds . '&audioTrack=' . $audio_track,
-                                type           => 'stream',
-                                label          => "Resume Stream",
-                                initialSeconds => $seconds,
-                                audioTrack     => $audio_track,
-                            };
-                        }
-                    }
-
                     unless ($config->value('disable_downloads')) {
                         push @actions, {
                             url    => "/download?media=" . $id,
@@ -630,124 +612,6 @@ my %endpoints;
 
             my $res = $req->new_response(204);
             return $res;
-        },
-    },
-
-    '/stream' => {
-        GET => sub {
-            my $req = shift;
-
-            if ($config->value('disable_streaming')) {
-                my $res = $req->new_response(400);
-                $res->body("streaming disabled");
-                return $res;
-            }
-
-            our %session;
-            my $session_id = $req->header('X-Playback-Session-ID');
-            if ($session_id && $session{$session_id}) {
-                return $session{$session_id}->($req);
-            }
-
-            my $id = $req->param('media') or do {
-                my $res = $req->new_response(400);
-                $res->body("media required");
-                return $res;
-            };
-
-            my $media = $Library->media_with_id($id) or do {
-                my $res = $req->new_response(404);
-                $res->body("media not found");
-                return $res;
-            };
-
-            my $initialSeconds = $req->param('initialSeconds');
-
-            my $user = $main::CURRENT_USER;
-            my $username = $user->name;
-            my $password = $user->password;
-            my $app = $req->header('X-App-Name');
-            $app = $app ? "/$app" : "";
-
-            my $dir = $Library->stream_tmp . "pmc/";
-            my $rand;
-            for (0..7) { $rand .= chr( int(rand(25) + 65) ); }
-            $dir .= $rand;
-            system("mkdir", $dir);
-
-            my $path = $media->path;
-            my $list_path = "$dir/list.m3u8";
-            my @command = (
-                "ffmpeg",
-                "-i", $path,
-                "-codec", "copy",
-                "-map", "0",
-                ($initialSeconds ? ("-ss", $initialSeconds) : ()),
-                "-f", "segment",
-                "-segment_list", $list_path,
-                "-segment_time", 10,
-                "-segment_format", "mpeg_ts",
-                "-segment_list_flags", "live",
-                "-vbsf", "h264_mp4toannexb",
-                "-flags", "-global_header",
-                "$dir/segment%05d.ts",
-            );
-            warn join(' ', @command) . "\n";
-
-            $SIG{CHLD} = 'IGNORE';
-            if (fork() == 0) {
-                exec @command;
-            }
-
-            my $before = "$app/static/stream/$rand/";
-            my $after = "?user=$username&pass=$password";
-            my $body = '';
-            my $target_duration = 20;
-
-            $session{$session_id} = sub {
-                my $req = shift;
-                my $res = $req->new_response(200);
-                $res->header('Content-Type' => 'application/x-mpegURL');
-                $res->header('Cache-Control' => 'private, no-cache');
-
-                use Time::HiRes 'sleep';
-
-                # make sure the sum duration of videos encoded thus far is
-                # greater than the target duration
-                # http://stackoverflow.com/a/36509633
-                while (1) {
-                    next if !-e $list_path;
-                    $body = slurp $list_path;
-
-                    my $duration = 0;
-                    $duration += $1 while $body =~ m{^#EXTINF:([0-9.]+),}mg;
-                    last if $duration > $target_duration;
-                }
-                continue {
-                    sleep 0.1;
-                }
-
-                $body = slurp $list_path;
-
-                # absolute URLs including auth
-                $body =~ s{^(segment.*)$}{$before$1$after}mg;
-
-                # https://developer.apple.com/library/ios/technotes/tn2288/_index.html#//apple_ref/doc/uid/DTS40012238-CH1-EVENT_PLAYLIST
-                $body =~ s{^(#EXTM3U)$}{$1\n#EXT-X-PLAYLIST-TYPE:EVENT}m;
-
-                # this tag is unnecessary
-                $body =~ s{^#EXT-X-MEDIA-SEQUENCE:\d+\n}{}m;
-
-                # target duration must not change and videos must not exceed
-                # it; best to highball it (we asked ffmpeg for 10s chunks)
-                $body =~ s{^(#EXT-X-TARGETDURATION):\d+}{$1:$target_duration}m;
-
-                $res->body($body);
-
-                return $res;
-            };
-
-            return $session{$session_id}->($req);
         },
     },
 
@@ -1201,14 +1065,6 @@ $app = builder {
             return $res;
         };
     };
-
-    enable "Plack::Middleware::Static::Range",
-        path => sub {
-            my ($path, $env) = @_;
-            return 0 unless $authenticate->($env);
-            s!^/+static/stream/!!;
-        },
-        root => $Library->stream_tmp . "pmc/";
 
     enable "Plack::Middleware::Static::Range",
         path => sub {

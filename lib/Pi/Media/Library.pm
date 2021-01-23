@@ -765,12 +765,6 @@ sub library_root {
     return Path::Class::file($self->file)->dir->stringify . '/';
 }
 
-sub stream_tmp {
-    my $self = shift;
-
-    return Path::Class::file($self->file)->dir->subdir('tmp')->stringify . '/';
-}
-
 sub last_game_played {
   my $self = shift;
   my @media = $self->media(
