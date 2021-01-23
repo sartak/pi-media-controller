@@ -33,7 +33,7 @@ for my $media ($library->media(all => 1, excludeViewing => 1)) {
         }
     }
 
-    unless ($media->path =~ /^real:/ || $media->has_tag('ignore-missing') || (-e $media->path && !-d _)) {
+    unless ($media->path =~ /^real:/ || $media->has_tag('ignore-missing') || $media->type eq 'stream' || (-e $media->path && !-d _)) {
         warn $media->id . ': cannot read ' . $media->path . "\n";
     }
 }
