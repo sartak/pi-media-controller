@@ -20,7 +20,6 @@ use Pi::Media::Controller;
 use Pi::Media::Library;
 use Pi::Media::GamepadManager;
 use Pi::Media::AC;
-use Pi::Media::File::Stream;
 
 our $CURRENT_USER;
 
@@ -296,35 +295,22 @@ my %endpoints;
         },
         POST => sub {
             my $req = shift;
-            my $media;
 
-            if ($req->param('url')) {
-                $media = Pi::Media::File::Stream->new(
-                    url        => $req->param('url'),
-                    type       => 'stream',
-                    path       => 'stream:' . $req->param('url'),
-                    label      => { en => $req->param('url') },
-                    tags       => [],
-                    streamable => 1,
-                );
-            }
-            else {
-                my $id = $req->param('media') or do {
-                    my $res = $req->new_response(400);
-                    $res->body("media required");
-                    return $res;
-                };
+            my $id = $req->param('media') or do {
+                my $res = $req->new_response(400);
+                $res->body("media required");
+                return $res;
+            };
 
-                $media = $Library->media_with_id($id) or do {
-                    my $res = $req->new_response(404);
-                    $res->body("media not found");
-                    return $res;
-                };
+            my $media = $Library->media_with_id($id) or do {
+                my $res = $req->new_response(404);
+                $res->body("media not found");
+                return $res;
+            };
 
-                $media->{initial_seconds} = $req->param('initialSeconds') || 0;
-                $media->{audio_track} = $req->param('audioTrack') || 0;
-                $media->{save_state} = $req->param('saveState') || 0;
-            }
+            $media->{initial_seconds} = $req->param('initialSeconds') || 0;
+            $media->{audio_track} = $req->param('audioTrack') || 0;
+            $media->{save_state} = $req->param('saveState') || 0;
 
             warn "Queued $media ...\n";
 
