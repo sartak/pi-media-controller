@@ -524,6 +524,35 @@ my %endpoints;
                         }
                     }
                 }
+                elsif ($thing->isa('Pi::Media::File::Stream')) {
+                    my $id = $thing->id;
+
+                    push @actions, {
+                        url    => "/queue?media=" . $id,
+                        type   => 'enqueue',
+                        label  => 'Stream on TV',
+                    };
+
+                    my $treeId = $thing->treeId;
+                    $tags_for_tree{$treeId} ||= [$Library->media_tags_for_tree($treeId)];
+                    my @tags = @{ $thing->tags };
+                    for my $tag ('bookmark', @{ $tags_for_tree{$thing->treeId} }) {
+                        if (grep { $_ eq $tag } @tags) {
+                            push @actions, {
+                                url    => "/library/tags?mediaId=" . $id . "&removeTag=" . uri_escape($tag),
+                                type   => 'tag',
+                                label  => $tag eq 'bookmark' ? "Unbookmark" : "Remove Tag \"$tag\"",
+                            };
+                        }
+                        else {
+                            push @actions, {
+                                url    => "/library/tags?mediaId=" . $id . "&addTag=" . uri_escape($tag),
+                                type   => 'tag',
+                                label  => $tag eq 'bookmark' ? 'Bookmark' : "Add Tag \"$tag\"",
+                            };
+                        }
+                    }
+                }
 
                 $thing->{actions} = \@actions;
             }

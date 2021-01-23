@@ -58,6 +58,9 @@ for my $want (sort keys %want_tree) {
         elsif ($by->isa('Pi::Media::File::Game')) {
             warn "    game " . $by->id . " (" . ($by->label->{en} || $by->label->{ja}) . ")";
         }
+        elsif ($by->isa('Pi::Media::File::Stream')) {
+            warn "    stream " . $by->id . " (" . ($by->label->{en} || $by->label->{ja}) . ")";
+        }
         else {
             die $by;
         }

@@ -4,6 +4,7 @@ use Mouse;
 use Pi::Media::File::Video;
 use Pi::Media::File::Game;
 use Pi::Media::File::Book;
+use Pi::Media::File::Stream;
 use Pi::Media::Tree;
 use Pi::Media::User;
 use Pi::Media::Config;
@@ -111,6 +112,7 @@ sub _inflate_media_from_sth {
     my %videos_by_id;
     my %games_by_id;
     my %books_by_id;
+    my %streams_by_id;
 
     my $begin = time;
 
@@ -181,6 +183,24 @@ sub _inflate_media_from_sth {
                 materialized_path => $materialized_path,
             );
             push @{ $books_by_id{$id} ||= [] }, $media;
+        }
+        elsif ($type eq 'stream') {
+            $media = Pi::Media::File::Stream->new(
+                id                => $id,
+                type              => $type,
+                path              => $path,
+                identifier        => $identifier,
+                label             => \%label,
+                spoken_langs      => [split ',', $spoken_langs],
+                subtitle_langs    => [split ',', $subtitle_langs],
+                streamable        => $streamable,
+                treeId            => $treeId,
+                tags              => $tags,
+                checksum          => $checksum,
+                sort_order        => $sort_order,
+                materialized_path => $materialized_path,
+            );
+            push @{ $streams_by_id{$id} ||= [] }, $media;
         }
         else {
             die "Unknown type '$type' for row id $id";
@@ -343,6 +363,25 @@ sub insert_book {
         $args{label_en},
         $args{label_ja},
         0,
+        $args{treeId},
+    ));
+
+    return $self->_dbh->sqlite_last_insert_rowid;
+}
+
+sub insert_stream {
+    my ($self, %args) = @_;
+
+    $self->_dbh->do('
+        INSERT INTO media
+            (path, type, identifier, label_en, label_ja, streamable, treeId)
+        VALUES (?, "stream", ?, ?, ?, ?, ?)
+    ;', {}, (
+        $self->_relativify_path($args{path}),
+        $args{identifier},
+        $args{label_en},
+        $args{label_ja},
+        1,
         $args{treeId},
     ));
 

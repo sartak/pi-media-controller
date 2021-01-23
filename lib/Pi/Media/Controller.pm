@@ -131,7 +131,7 @@ sub stop_current {
     if (!$self->current_media) {
         return;
     }
-    elsif ($self->current_media->isa('Pi::Media::File::Video')) {
+    elsif ($self->current_media->isa('Pi::Media::File::Video') || $self->current_media->isa('Pi::Media::File::Stream')) {
         $self->_run_command('q');
     }
     elsif ($self->current_media->isa('Pi::Media::File::Game')) {
@@ -185,7 +185,7 @@ sub _play_media {
     my $self = shift;
     my $media = shift;
 
-    if (!-e $media->path) {
+    if (!$media->isa('Pi::Media::File::Stream') && !-e $media->path) {
         $self->notify({
             type  => 404,
             error => "Media file " . $media->path . " not found",
@@ -271,6 +271,11 @@ sub _handle_for_media {
         push @args, @{ $self->config->value('omxplayer_args') || [] };
         return AnyEvent::Run->new(
             cmd => ['omxplayer', @args, $media->path],
+        );
+    }
+    elsif ($media->isa('Pi::Media::File::Stream')) {
+        return AnyEvent::Run->new(
+            cmd => ['./stream.pl', $media->path],
         );
     }
     elsif ($media->isa('Pi::Media::File::Game')) {
@@ -445,7 +450,7 @@ sub toggle_pause {
 
     die "No current media" if !$self->current_media;
 
-    if ($self->current_media->isa('Pi::Media::File::Video')) {
+    if ($self->current_media->isa('Pi::Media::File::Video') || $self->current_media->isa('Pi::Media::File::Stream')) {
         $self->_run_command('p');
     }
     elsif ($self->current_media->isa('Pi::Media::File::Game')) {
