@@ -71,6 +71,7 @@ sub scan_wiimote {
     my $self = shift;
 
     my $pmc_location = $self->config->location;
+    my $presence_device = $self->config->value('default_presence_device');
 
     $self->_wiimote_buffer('');
 
@@ -94,7 +95,7 @@ sub scan_wiimote {
         undef $handle;
         $self->_wiimote_handle(undef);
 
-        my $current_location = `./get-location.pl`;
+        my $current_location = `./get-location.pl $presence_device`;
         chomp $current_location;
         if ($current_location ne $pmc_location) {
             warn "Opting out of auto-wiimote connection because current location ($current_location) doesn't match ($pmc_location)\n";

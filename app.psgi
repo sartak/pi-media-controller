@@ -1117,6 +1117,16 @@ $app = builder {
             return $res->finalize;
         }
 
+	my $device = $req->header('X-PMC-Device') || $req->param('device');
+        if (!$device) {
+            my $res = $req->new_response(400);
+            $res->header('X-PMC-Time' => scalar gmtime);
+            $res->header('Cache-control' => 'private, max-age=0, no-store');
+            $res->body("no device sent");
+            warn "no device sent in call to /status from $username\n";
+            return $res->finalize;
+        }
+
         if ($req->method eq 'GET') {
             $env->{'plack.skip-deflater'} = 1;
 
@@ -1125,7 +1135,7 @@ $app = builder {
                 my $writer = $responder->([200, ['Content-Type' => 'application/json', 'X-PMC-Time' => scalar(gmtime), 'Cache-control' => 'private, max-age=0, no-store']]);
                 push @Watchers, $writer;
 
-                my $current_location = `./get-location.pl`;
+                my $current_location = `./get-location.pl $device`;
                 chomp $current_location;
 
                 $notify_cb->({ type => 'connected' }, $writer);
@@ -1151,7 +1161,7 @@ $app = builder {
 
                 $notify_cb->($Controller->audio_status, $writer);
 
-                $notify_cb->({ type => 'subscriber' });
+                $notify_cb->({ type => 'subscriber', device => $device, username => $username });
             };
         }
         else {
