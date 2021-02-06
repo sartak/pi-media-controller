@@ -1125,8 +1125,12 @@ $app = builder {
                 my $writer = $responder->([200, ['Content-Type' => 'application/json', 'X-PMC-Time' => scalar(gmtime), 'Cache-control' => 'private, max-age=0, no-store']]);
                 push @Watchers, $writer;
 
+                my $current_location = `./get-location.pl`;
+                chomp $current_location;
+
                 $notify_cb->({ type => 'connected' }, $writer);
                 $notify_cb->($Television->power_status, $writer);
+                $notify_cb->({ type => 'location/current', location => $current_location }, $writer);
 
                 if ($Television->can('volume_status')) {
                     $notify_cb->($Television->volume_status, $writer);
