@@ -70,6 +70,8 @@ sub scan {
 sub scan_wiimote {
     my $self = shift;
 
+    my $pmc_location = $self->config->location;
+
     $self->_wiimote_buffer('');
 
     my $handle = AnyEvent::Run->new(
@@ -91,6 +93,13 @@ sub scan_wiimote {
     $handle->on_error(sub {
         undef $handle;
         $self->_wiimote_handle(undef);
+
+        my $current_location = `./get-location.pl`;
+        chomp $current_location;
+        if ($current_location ne $pmc_location) {
+            warn "Opting out of auto-wiimote connection because current location ($current_location) doesn't match ($pmc_location)\n";
+            return;
+        }
 
         for my $id ($self->_wiimote_buffer =~ m{(\w\w:\w\w:\w\w:\w\w:\w\w:\w\w)[\s\t]*Nintendo}g) {
             if (!$self->gamepad_with_id($id)) {
