@@ -290,11 +290,16 @@ sub _handle_for_media {
         my $directory = $base_path;
         $directory =~ s!/[^/]+$!!;
 
+        my $screenshot_dir = $self->library->library_root . 'ROM/Screenshots/' . $self->config->hostname . '/';
+
         my $extra_cfg_path = "/tmp/retroarch-$$.cfg";
         open my $handle, '>', $extra_cfg_path;
         print $handle qq[savefile_directory = "$directory"\n];
         print $handle qq[savestate_directory = "$directory"\n];
+        print $handle qq[screenshot_directory = "$screenshot_dir"\n];
         close $handle;
+
+        system("mkdir", "-p", $screenshot_dir);
 
         push @emulator_cmd, "--appendconfig", $extra_cfg_path;
 

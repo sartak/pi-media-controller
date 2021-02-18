@@ -15,7 +15,20 @@ my $drive = shift;
 my $pmc_addr = shift;
 my $username = shift;
 
-my $watcher = Filesys::Notify::Simple->new(["$drive/ROM/Screenshots/"]);
+my @dirs = do {
+  my @d;
+  my $dir = "$drive/ROM/Screenshots/";
+  opendir(my $handle, $dir) or die $!;
+  while ($_ = readdir($handle)) {
+    next if /^\.+$/;
+    my $path = "$dir$_";
+    next unless -d $path;
+    push @d, $path;
+  }
+  @d
+};
+
+my $watcher = Filesys::Notify::Simple->new(\@dirs);
 
 my $pmc_ua = LWP::UserAgent->new;
 $pmc_ua->default_header('X-PMC-Username' => $username);

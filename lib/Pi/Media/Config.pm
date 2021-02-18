@@ -17,6 +17,17 @@ has location => (
   default => $ENV{PMC_LOCATION},
 );
 
+has hostname => (
+  is => 'ro',
+  isa => 'Str',
+  lazy => 1,
+  default => sub {
+    my $hostname = `hostname`;
+    chomp $hostname;
+    return $hostname;
+  },
+);
+
 has config => (
   is => 'ro',
   isa => 'HashRef',
