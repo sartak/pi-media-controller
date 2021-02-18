@@ -25,7 +25,8 @@ find(sub {
            || $file =~ /\.srm$/
            || $file =~ /\.ips$/
            || $file =~ /\.cfg$/
-           || $file =~ /\.sav$/;
+           || $file =~ /\.sav$/
+           || $file =~ /\/\.address$/;
 
     return if $seen{$file};
 
