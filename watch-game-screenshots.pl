@@ -10,10 +10,8 @@ use File::Slurp 'slurp';
 use HTTP::Date;
 use Digest::SHA;
 
-@ARGV == 3 or die "usage: $0 [/media/trocadero] [pmc-addr] [username]";
+@ARGV == 1 or die "usage: $0 [/media/trocadero]";
 my $drive = shift;
-my $pmc_addr = shift;
-my $username = shift;
 
 my @dirs = do {
   my @d;
@@ -31,7 +29,6 @@ my @dirs = do {
 my $watcher = Filesys::Notify::Simple->new(\@dirs);
 
 my $pmc_ua = LWP::UserAgent->new;
-$pmc_ua->default_header('X-PMC-Username' => $username);
 
 my $pubsub_ua = LWP::UserAgent->new(agent => 'watch-game-screenshots');
 
@@ -39,6 +36,7 @@ my $json = JSON->new->utf8;
 
 my $config = $json->decode(scalar slurp "$drive/pmc.config");
 my %highest;
+my %pmc_addr_for_hostname;
 
 while (1) {
   my $hupped = 0;
@@ -56,45 +54,66 @@ while (1) {
 
   next if $hupped && !@new_screenshots;
 
-  my $res = $pmc_ua->get("http://$pmc_addr/current");
-  if ($res->code != 200) {
-    warn "Got unexpected result from PC: " . $res->status_line;
-    next;
-  }
-
-  my $current = $json->decode($res->decoded_content);
-  my $rom = $current->{path};
-  $rom =~ m{^\Q$drive\E/?(ROM/.*)};
-  my $dir = $1;
-  if (!$dir) {
-    warn "Could not extract directory from path $rom";
-    next;
-  }
-  my $subdir = $config->{screenshot_subdir}{$1};
-  if (!$subdir) {
-    warn "No configured screenshot_subdir for $1";
-    next;
-  }
-  my $dest = "$drive/$subdir";
-
-  if (!exists($highest{$dest})) {
-    opendir(my $handle, $dest) or die "Cannot opendir $dest: $!";
-    while (my $file = readdir($handle)) {
-      my ($id) = $file =~ /^(\d+)\.\w+$/;
-      next if !$id;
-      $highest{$dest} = $id if $id > ($highest{$dest} || 0);
-    }
-  }
+  my %dest_for_hostname;
 
   my $time = time;
 
   for my $file (@new_screenshots) {
     next if !-e $file; # maybe already moved
-    my ($ext) = $file =~ /\.(\w+)$/;
-    if (!$ext) {
-      warn "Could not extract extension from $file";
+
+    my ($hostname, $ext) = $file =~ m{/([^/]+)/[^/]+\.(\w+)$};
+    if (!$hostname || !$ext) {
+      warn "Could not extract hostname and extension from $file";
       next;
     }
+
+    if (!$dest_for_hostname{$hostname}) {
+      my ($pmc_addr, $pmc_user, $pmc_pass) = @{ $pmc_addr_for_hostname{$hostname} ||= do {
+        my $addr_file = $file;
+        $file =~ s{/[^/]+\.\w+$}{/.address};
+        [split "\n", scalar slurp $file];
+      } };
+
+      my $res = $pmc_ua->get(
+        "$pmc_addr/current",
+	'X-PMC-Username' => $pmc_user,
+	'X-PMC-Password' => $pmc_pass,
+      );
+
+      if ($res->code != 200) {
+        warn "Got unexpected result from $pmc_addr " . $res->status_line;
+        next;
+      }
+
+      my $current = $json->decode($res->decoded_content);
+      my $rom = $current->{path};
+      $rom =~ m{^\Q$drive\E/?(ROM/.*)};
+      my $dir = $1;
+      if (!$dir) {
+        warn "Could not extract directory from path $rom";
+        next;
+      }
+      my $subdir = $config->{screenshot_subdir}{$1};
+      if (!$subdir) {
+        warn "No configured screenshot_subdir for $1";
+        next;
+      }
+      my $dest = "$drive/$subdir";
+
+      if (!exists($highest{$dest})) {
+        opendir(my $handle, $dest) or die "Cannot opendir $dest: $!";
+        while (my $file = readdir($handle)) {
+          my ($id) = $file =~ /^(\d+)\.\w+$/;
+          next if !$id;
+          $highest{$dest} = $id if $id > ($highest{$dest} || 0);
+        }
+      }
+
+      $dest_for_hostname{$hostname} = $dest;
+    }
+
+    my $dest = $dest_for_hostname{$hostname};
+
     my $id = 1 + $highest{$dest};
     my $d = "$dest/$id.png";
     if (-e $d) {
