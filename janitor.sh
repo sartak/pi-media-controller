@@ -23,6 +23,10 @@ perl -Ilib -Iextlib add-tree-media-sort.pl
 
 perl -Ilib -Iextlib intuit-checksums.pl
 
+echo 'update viewing set elapsedSeconds=(select durationSeconds from media where media.rowid=viewing.mediaId) where elapsedSeconds is null and location != 'unknown' and exists (select 1 from media where media.rowid=viewing.mediaId and media.durationSeconds IS NOT NULL);' | sqlite3 $PMC_DATABASE
+
+echo 'select media.rowid, path, viewing.elapsedSeconds, viewing.startTime, viewing.endTime, viewing.location, viewing.who from viewing left join media on media.rowid = viewing.mediaId where viewing.elapsedSeconds IS NULL and media.rowid IS NOT NULL and viewing.location != "unknown" order by viewing.rowid asc;' | sqlite3 $PMC_DATABASE
+
 echo 'select rowid, path, spoken_langs from media where spoken_langs like "%?%" and path like "Movies/%" and media.checksum is not null;' | sqlite3 $PMC_DATABASE
 
 echo 'select media.rowid, path, viewing.startTime, viewing.endTime, viewing.location, viewing.who from viewing left join media on media.rowid = viewing.mediaId where audioTrack IS NULL and media.rowid IS NOT NULL order by viewing.rowid asc;' | sqlite3 $PMC_DATABASE
