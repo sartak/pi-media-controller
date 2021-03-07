@@ -993,6 +993,61 @@ my %endpoints;
             return $res;
         },
     },
+    '/switchbot' => {
+        GET => sub {
+             my $req = shift;
+
+	     my $devices = $config->value('switchbot');
+	     my $device = $req->param('device');
+
+	     if ($device) {
+		 if (!$devices->{$device}) {
+                    my $res = $req->new_response(404);
+                    $res->body("device not found");
+                    return $res;
+		 }
+
+                 my $res = $req->new_response(200);
+                 $res->body($devices->{$device});
+                 return $res;
+	     } else {
+	         my $res = $req->new_response(200);
+                 $res->content_type("application/json");
+                 $res->body(encode_utf8($json->encode([keys %$devices])));
+		 return $res;
+	     }
+	},
+
+	PRESS => sub {
+             my $req = shift;
+
+	     my $devices = $config->value('switchbot');
+	     my $device = $req->param('device');
+
+	     if ($device) {
+		 if (!$devices->{$device}) {
+                    my $res = $req->new_response(404);
+                    $res->body("device not found");
+                    return $res;
+		 }
+
+		 for (1..3) {
+		     my $fail = system("python3", "/home/pmc/python-host/switchbot_py3.py", "--device", $devices->{$device}, "--connect-timeout", "30");
+		     if (!$fail) {
+                         return $req->new_response(201);
+		     }
+
+		     sleep 2;
+                 }
+
+                 my $res = $req->new_response(500);
+                 $res->body("got error $?");
+                 return $res;
+	     } else {
+	         return $req->new_response(405);
+	     }
+	},
+    },
     '/api/auth' => {
         GET => sub {
             my $req = shift;
