@@ -40,12 +40,19 @@ sub shift {
         }
 
         if (my $language = $tree->default_language) {
+          my $alt = $language eq 'ja' ? '?/jpn'
+                  : $language eq 'can' ? '?/zho'
+                  : $language eq 'en' ? '?/eng'
+                  : '';
+
           MEDIA: for my $media (@media) {
             my $tracks = $media->{spoken_langs};
-            for my $i (0 .. @$tracks - 1) {
-              if ($language eq $tracks->[$i]) {
-                $media->{audio_track} = $i;
-                next MEDIA;
+            for my $l (grep { length } $language, $alt) {
+              for my $i (0 .. @$tracks - 1) {
+                if ($l eq $tracks->[$i]) {
+                  $media->{audio_track} = $i;
+                  next MEDIA;
+                }
               }
             }
           }
