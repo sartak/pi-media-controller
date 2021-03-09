@@ -2,6 +2,7 @@ package Pi::Media::Queue::Autofilling;
 use 5.14.0;
 use Mouse;
 use Pi::Media::User;
+use List::Util 'shuffle';
 extends 'Pi::Media::Queue';
 
 has source => (
@@ -59,7 +60,7 @@ sub shift {
         }
 
         local $main::CURRENT_USER = $self->requestor;
-        $self->push(@media);
+        $self->push(shuffle @media);
 
         $self->clear_autofill_source;
         $self->clear_requestor;
