@@ -220,7 +220,7 @@ sub set_active_source {
 
     if ($self->power_on) {
         warn "waiting to set active source because we just powered on";
-        sleep 15;
+        sleep 10;
     }
 
     $self->set_input('Pi');
