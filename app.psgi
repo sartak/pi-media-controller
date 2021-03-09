@@ -789,6 +789,14 @@ my %endpoints;
 
             return $endpoints{'/television/input'}{GET}->($req);
         },
+        TAKE => sub {
+            my $req = shift;
+
+            $Television->set_active_source
+                if $Television->can('set_active_source');
+
+            return $endpoints{'/television/input'}{GET}->($req);
+        },
     },
 
     '/television/power' => {
