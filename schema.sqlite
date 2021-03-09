@@ -11,7 +11,8 @@ CREATE TABLE IF NOT EXISTS tree (
     limit_clause TEXT,
     sort_order INTEGER,
     media_tags TEXT DEFAULT "",
-    materialized_path TEXT
+    materialized_path TEXT,
+    default_language TEXT
 );
 
 CREATE TABLE IF NOT EXISTS media (

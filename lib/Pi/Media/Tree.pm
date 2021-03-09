@@ -63,9 +63,14 @@ has materialized_path => (
     isa => 'Maybe[Str]',
 );
 
+has default_language => (
+    is => 'ro',
+    isa => 'Maybe[Str]',
+);
+
 sub TO_JSON {
     my $self = shift;
-    my $frozen = { map { $_ => $self->$_ } qw/id label color parentId sort_order media_tags materialized_path/ };
+    my $frozen = { map { $_ => $self->$_ } qw/id label color parentId sort_order media_tags materialized_path default_language/ };
 
     $frozen->{actions} = $self->{actions} if $self->{actions};
     $frozen->{type} = 'tree';

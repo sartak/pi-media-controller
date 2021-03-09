@@ -280,7 +280,7 @@ sub _inflate_trees_from_sth {
 
     my @trees;
 
-    while (my ($id, $label_en, $label_ja, $parentId, $color, $joins, $where, $group, $order, $limit, $sort_order, $media_tags, $materialized_path) = $sth->fetchrow_array) {
+    while (my ($id, $label_en, $label_ja, $parentId, $color, $joins, $where, $group, $order, $limit, $sort_order, $media_tags, $materialized_path, $default_language) = $sth->fetchrow_array) {
         my %label;
         $label{en} = $label_en if $label_en;
         $label{ja} = $label_ja if $label_ja;
@@ -299,6 +299,7 @@ sub _inflate_trees_from_sth {
             sort_order        => $sort_order,
             media_tags        => $media_tags,
             materialized_path => $materialized_path,
+            default_language  => $default_language,
         );
 
         push @trees, $tree;
@@ -483,7 +484,7 @@ sub trees {
         push @bind, $args{parentId};
     }
 
-    my $query = 'SELECT tree.id, tree.label_en, tree.label_ja, tree.parentId, tree.color, tree.join_clause, tree.where_clause, tree.group_clause, tree.order_clause, tree.limit_clause, tree.sort_order, tree.media_tags, tree.materialized_path FROM tree';
+    my $query = 'SELECT tree.id, tree.label_en, tree.label_ja, tree.parentId, tree.color, tree.join_clause, tree.where_clause, tree.group_clause, tree.order_clause, tree.limit_clause, tree.sort_order, tree.media_tags, tree.materialized_path, tree.default_language FROM tree';
 
     if ($args{media_sort}) {
         $query .= ' LEFT JOIN tree_media_sort ON tree.id = tree_media_sort.treeId';
