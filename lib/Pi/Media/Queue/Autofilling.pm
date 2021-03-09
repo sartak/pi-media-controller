@@ -39,6 +39,18 @@ sub shift {
             @media = $self->library->media(treeId => $tree->id);
         }
 
+        if (my $language = $tree->default_language) {
+          MEDIA: for my $media (@media) {
+            my $tracks = $media->{spoken_langs};
+            for my $i (0 .. @$tracks - 1) {
+              if ($language eq $tracks->[$i]) {
+                $media->{audio_track} = $i;
+                next MEDIA;
+              }
+            }
+          }
+        }
+
         local $main::CURRENT_USER = $self->requestor;
         $self->push(@media);
 
