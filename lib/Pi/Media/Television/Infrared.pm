@@ -64,9 +64,9 @@ around state => sub {
 };
 
 sub _transmit {
-    my ($self, $cmd) = @_;
-
-    my $name = $self->infrared_name;
+    my $self = shift;
+    my $cmd  = shift;
+    my $name = shift || $self->infrared_name;
 
     # try twice before reporting failure
 
