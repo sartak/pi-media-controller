@@ -24,7 +24,7 @@ has maximum_volume => (
 
 has inputs => (
     is      => 'ro',
-    isa     => 'ArrayRef[Str]',
+    isa     => 'ArrayRef[Str|HashRef]',
     default => sub { ['Pi'] },
 );
 
@@ -179,25 +179,12 @@ sub input_status {
     return { type => "television/input", input => $self->input, @_ };
 }
 
-sub set_input {
+sub _set_input_infrared {
     my $self = shift;
-    my $input = shift;
-
-    my @inputs = @{ $self->inputs };
-    my %input_index = map { $inputs[$_] => $_ } 0..$#inputs;
-
-    die "invalid input $input. valid are: @inputs" unless exists $input_index{$input};
-
-    return if $self->input eq $input;
-
-    die "tv isn't on" if !$self->is_on;
-
-    $self->notify($self->input_status(input => $input, prospective => 1));
+    my $current = shift;
+    my $desired = shift;
 
     $self->_transmit("INPUT");
-
-    my $current = $input_index{$self->input};
-    my $desired = $input_index{$input};
 
     while ($current > $desired) {
         $self->_transmit("LEFT");
@@ -210,8 +197,65 @@ sub set_input {
     }
 
     $self->_transmit("OK");
+}
 
-    $self->_set_input($input);
+sub _set_input_techole {
+    my $self = shift;
+    my $desired = 1 + shift; # 0 index
+
+    $self->_transmit("CHANNEL$desired", "Techole");
+}
+
+sub _find_input {
+    my $self = shift;
+    my $name = shift;
+
+    my $inputs = $self->inputs;
+
+    for my $i (0..$#$inputs) {
+        my $spec = $inputs->[$i];
+
+        if (ref($spec) eq 'HASH') {
+            my ($type) = keys %$spec;
+            my $subspecs = $spec->{$type};
+            for my $j (0..$#$subspecs) {
+                if ($subspecs->[$j] eq $name) {
+                    return ($i, $type, $j);
+                }
+            }
+        } elsif ($spec eq $name) {
+            return ($i);
+        }
+    }
+
+    return;
+}
+
+sub set_input {
+    my $self = shift;
+    my $desired = shift;
+    my $current = $self->input;
+
+    return if $desired eq $current;
+
+    my ($from_infrared_index, $from_subtype, $from_subindex) = $self->_find_input($current);
+    my ($to_infrared_index, $to_subtype, $to_subindex) = $self->_find_input($desired);
+
+    die "invalid input $desired" unless defined $to_infrared_index;
+
+    die "tv isn't on" if !$self->is_on;
+
+    $self->notify($self->input_status(input => $desired, prospective => 1));
+
+    if ($from_infrared_index != $to_infrared_index) {
+      $self->_set_input_infrared($from_infrared_index, $to_infrared_index);
+    }
+
+    if (($to_subtype || '') eq 'Techole') {
+      $self->_set_input_techole($to_subindex);
+    }
+
+    $self->_set_input($desired);
     $self->notify($self->input_status);
 }
 
