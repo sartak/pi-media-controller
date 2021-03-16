@@ -203,7 +203,7 @@ sub _set_input_techole {
     my $self = shift;
     my $desired = 1 + shift; # 0 index
 
-    $self->_transmit("CHANNEL$desired", "Techole");
+    $self->_transmit("CHANNEL$desired", "TECHOLE");
 }
 
 sub _find_input {
