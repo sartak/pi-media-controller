@@ -71,16 +71,36 @@ sub _transmit {
     # try twice before reporting failure
 
     warn(join ' ', 'irsend', 'SEND_ONCE', $name, $cmd);
-    system('irsend', 'SEND_ONCE', $name, $cmd);
-
-    if ($?) {
-        warn "trying again!";
-        warn(join ' ', 'irsend', 'SEND_ONCE', $name, $cmd);
+    eval {
+        local $SIG{ALRM} = sub { die "alarm\n" };
+	alarm 2;
         system('irsend', 'SEND_ONCE', $name, $cmd);
+	alarm 0;
+    };
 
-        if ($?) {
-            die "irsend failed";
-        }
+    if ($@) {
+        return if $@ eq "alarm\n";
+	warn $@;
+    } elsif (!$?) {
+        return;
+    }
+
+    warn "trying again!";
+    warn(join ' ', 'irsend', 'SEND_ONCE', $name, $cmd);
+
+    eval {
+        local $SIG{ALRM} = sub { die "alarm\n" };
+	alarm 2;
+        system('irsend', 'SEND_ONCE', $name, $cmd);
+	alarm 0;
+    };
+
+    if ($@) {
+        return if $@ eq "alarm\n";
+	warn $@;
+    }
+    elsif ($?) {
+        die "irsend failed";
     }
 }
 
