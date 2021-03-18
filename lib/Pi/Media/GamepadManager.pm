@@ -120,7 +120,7 @@ sub scan_wiimote {
                 if (!$self->controller->current_media) {
 
                   # TODO extract current user from most recent game
-                  local $main::CURRENT_USER = $self->library->login_without_password('shawn');
+                  local $main::CURRENT_USER = $self->library->login_without_password($self->config->value('default_presence_user'));
 
                   my $game = $self->library->last_game_played;
                   if ($game) {
