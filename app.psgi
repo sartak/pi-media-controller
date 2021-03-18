@@ -85,11 +85,13 @@ my $notify_cb = sub {
 
 my $LibraryClass = $config->value('leader')
                  ? "Pi::Media::Library::Follower"
-                 ? "Pi::Media::Library";
+                 : "Pi::Media::Library";
+Mouse::load_class($LibraryClass);
 my $Library = $LibraryClass->new(
   file   => $ENV{PMC_DATABASE},
   config => $config,
 );
+
 my $Queue = Pi::Media::Queue::Autofilling->new(
     library   => $Library,
     notify_cb => $notify_cb,
