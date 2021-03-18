@@ -2,6 +2,8 @@ package Pi::Media::Library::Follower;
 use 5.14.0;
 use Mouse;
 use DBD::SQLite::Constants qw/:file_open/;
+use URI;
+use LWP::UserAgent;
 
 extends 'Pi::Media::Library';
 
@@ -24,8 +26,11 @@ has '+_dbh' => (
 sub add_viewing {
     my ($self, %args) = @_;
 
+    my $media = $args{media};
+    my $leader = $self->config->value('leader');
+
     my %params = (
-        mediaId        => $args{media}->id,
+        mediaId        => $media->id,
         startTime      => $args{start_time},
         endTime        => $args{end_time},
         completed      => $args{completed},
@@ -35,9 +40,23 @@ sub add_viewing {
         location       => $args{location},
     );
 
-    my $viewing_id = 'XXX';
+    my $uri = URI->new("$leader/library/viewed");
+    $uri->query_form(\%params);
+    warn $uri;
 
-    return $viewing_id;
+    my %headers = (
+        'X-PMC-Username' => ($media->{requestor} || $main::CURRENT_USER)->name,
+        'X-PMC-Password' => ($media->{requestor} || $main::CURRENT_USER)->password,
+    );
+
+    my $ua = LWP::UserAgent->new;
+    my $res = $ua->put($uri, %headers);
+    warn "Forwarded to leader $leader, got " . $res->status_line;
+    if (!$res->is_success) {
+      die $res->status_line;
+    }
+
+    return $res->header('X-PMC-Viewing');
 }
 
 1;
