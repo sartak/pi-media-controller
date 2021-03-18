@@ -18,22 +18,11 @@ has _dbh => (
     lazy    => 1,
     clearer => '_clear_dbh',
     default => sub {
-        my $self = shift;
-
-        my %options = (
-            RaiseError => 1,
-        );
-
-        if ($self->config->value('leader')) {
-            use DBD::SQLite::Constants qw/:file_open/;
-            $options{sqlite_open_flags} = SQLITE_OPEN_READONLY;
-        }
-
         my $dbh = DBI->connect(
-            "dbi:SQLite:dbname=" . $self->file,
+            "dbi:SQLite:dbname=" . shift->file,
             undef,
             undef,
-            \%options,
+	    { RaiseError => 1 },
         );
         $dbh->{sqlite_unicode} = 1;
         $dbh

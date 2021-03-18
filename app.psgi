@@ -83,7 +83,10 @@ my $notify_cb = sub {
     }
 };
 
-my $Library = Pi::Media::Library->new(
+my $LibraryClass = $config->value('leader')
+                 ? "Pi::Media::Library::Follower"
+                 ? "Pi::Media::Library";
+my $Library = $LibraryClass->new(
   file   => $ENV{PMC_DATABASE},
   config => $config,
 );
