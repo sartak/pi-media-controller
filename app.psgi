@@ -589,7 +589,7 @@ my %endpoints;
             };
 
             # close enough
-            if ($media->duration_seconds && $endSeconds > $media->duration_seconds * .9) {
+            if ($media->can('duration_seconds') && $media->duration_seconds && $endSeconds > $media->duration_seconds * .9) {
                 $completed = 1;
             }
 
