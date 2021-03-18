@@ -599,7 +599,7 @@ my %endpoints;
                 }
             }
 
-            $Library->add_viewing(
+            my $viewing_id = $Library->add_viewing(
                 media           => $media,
                 start_time      => int($startTime),
                 end_time        => int($endTime),
@@ -613,6 +613,7 @@ my %endpoints;
 
             my $res = $req->new_response(204);
             $res->header('X-PMC-Completed' => $completed);
+            $res->header('X-PMC-Viewing' => $viewing_id);
             return $res;
         },
     },
