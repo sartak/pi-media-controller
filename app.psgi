@@ -14,6 +14,7 @@ use URI::Escape;
 use AnyEvent::HTTP;
 use Time::HiRes 'time';
 use AnyEvent::Filesys::Notify;
+use LWP::UserAgent;
 
 use Pi::Media::Queue::Autofilling;
 use Pi::Media::Controller;
@@ -614,6 +615,21 @@ my %endpoints;
     '/library/tags' => {
         POST => sub {
             my $req = shift;
+
+            if (my $leader = $config->value('leader')) {
+                my $ua = LWP::UserAgent->new;
+                my %headers = @{ $req->headers->flatten };
+                for my $key (keys %headers) {
+                    next if $key =~ /^X-PMC-/i;
+                    next if uc($key) eq 'X-USERNAME';
+                    next if uc($key) eq 'X-PASSWORD';
+                    delete $headers{$key};
+                }
+                my $res = $ua->post($leader . $req->request_uri, %headers);
+                warn "Forwarded to leader $leader, got " . $res->status_line;
+                return $req->new_response($res->code);
+            }
+
             my $mediaId = $req->param('mediaId');
             my $addTag = $req->param('addTag');
             my $removeTag = $req->param('removeTag');
