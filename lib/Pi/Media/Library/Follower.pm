@@ -42,14 +42,17 @@ sub add_viewing {
 
     my $uri = URI->new("$leader/library/viewed");
     $uri->query_form(\%params);
-    warn $uri;
+
+    my $user = $media->{requestor} || $main::CURRENT_USER;
+    warn "No user!" if !$user;
 
     my %headers = (
-        'X-PMC-Username' => ($media->{requestor} || $main::CURRENT_USER)->name,
-        'X-PMC-Password' => ($media->{requestor} || $main::CURRENT_USER)->password,
+        'X-PMC-Username' => $user->name,
+        'X-PMC-Password' => $user->password,
     );
 
     my $ua = LWP::UserAgent->new;
+    warn "PUT $uri";
     my $res = $ua->put($uri, %headers);
     warn "Forwarded to leader $leader, got " . $res->status_line;
     if (!$res->is_success) {
