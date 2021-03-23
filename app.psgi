@@ -593,10 +593,12 @@ my %endpoints;
                 $completed = 1;
             }
 
-            for my $skip ($media->skips) {
-                if (!defined($skip->[1]) && $endSeconds > $skip->[0] - 2) {
-                    $completed = 1;
-                }
+	    if ($media->can('skips')) {
+		    for my $skip ($media->skips) {
+			if (!defined($skip->[1]) && $endSeconds > $skip->[0] - 2) {
+			    $completed = 1;
+			}
+		    }
             }
 
             my $viewing_id = $Library->add_viewing(
