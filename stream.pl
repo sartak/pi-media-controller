@@ -6,6 +6,8 @@ use lib 'extlib';
 use utf8::all;
 use Pi::Media::Config;
 use IPC::Run3;
+use URI;
+use URI::QueryParam;
 
 my $config = Pi::Media::Config->new;
 
@@ -23,6 +25,10 @@ if ($url =~ m{^https?://(?:www\.)twitch\.tv/}) {
   my $auth = $config->value('twitch_oauth') or die "Need twitch_oauth\n";
   push @command, "--http-header";
   push @command, "Authorization=OAuth $auth";
+} elsif ($url =~ m{^https?://(\w+\.)?youtube\.com/}) {
+  my $uri = URI->new($url);
+  my $v = $uri->query_param("v");
+  $url = "https://www.youtube.com/watch?v=$v";
 }
 
 push @command, $url;
