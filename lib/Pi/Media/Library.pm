@@ -378,7 +378,7 @@ sub insert_stream {
             (path, type, identifier, label_en, label_ja, streamable, treeId)
         VALUES (?, "stream", ?, ?, ?, ?, ?)
     ;', {}, (
-        $self->_relativify_path($args{path}),
+        $args{path},
         $args{identifier},
         $args{label_en},
         $args{label_ja},
