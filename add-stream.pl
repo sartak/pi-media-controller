@@ -44,7 +44,7 @@ my $id = $library->insert_stream(
     identifier      => $identifier,
     label_en        => $label_en,
     label_ja        => $label_ja,
-    spoken_langs    => $spoken_langs,
+    spoken_langs    => \@spoken_langs,
     treeId          => $treeId,
 );
 
