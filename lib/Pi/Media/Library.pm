@@ -375,13 +375,14 @@ sub insert_stream {
 
     $self->_dbh->do('
         INSERT INTO media
-            (path, type, identifier, label_en, label_ja, streamable, treeId)
-        VALUES (?, "stream", ?, ?, ?, ?, ?)
+            (path, type, identifier, label_en, label_ja, spoken_langs, streamable, treeId)
+        VALUES (?, "stream", ?, ?, ?, ?, ?, ?)
     ;', {}, (
         $args{path},
         $args{identifier},
         $args{label_en},
         $args{label_ja},
+        (join ',', @{$args{spoken_langs}}),
         1,
         $args{treeId},
     ));

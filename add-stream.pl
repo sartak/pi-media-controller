@@ -27,6 +27,9 @@ $label_en || $label_ja or die usage("Must have at least one of label_en or label
 my $path = $ARGV[0] or usage("url required");
 @ARGV == 1 or usage("must have no stray args: " . join(', ', @ARGV));
 
+my @spoken_langs = map { defined($_) ? $_ : '' } split / *, */, $ARGV{spoken_langs};
+@spoken_langs == 1 or die usage("Must have exactly 1 spoken_langs");
+
 my $library = Pi::Media::Library->new(
   file   => $ENV{PMC_DATABASE},
   config => Pi::Media::Config->new,
@@ -41,6 +44,7 @@ my $id = $library->insert_stream(
     identifier      => $identifier,
     label_en        => $label_en,
     label_ja        => $label_ja,
+    spoken_langs    => $spoken_langs,
     treeId          => $treeId,
 );
 
