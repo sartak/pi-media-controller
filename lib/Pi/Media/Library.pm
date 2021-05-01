@@ -738,7 +738,6 @@ sub _resume_state_for_video {
         or return;
 
     $initial += $elapsed || 0;
-    return if $initial < $media->duration_seconds * .1;
     return if $initial < 10 * 60;
     return ($initial, $audio_track);
 }
