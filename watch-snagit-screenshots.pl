@@ -10,8 +10,13 @@ use File::Slurp 'slurp';
 use HTTP::Date;
 use Digest::SHA;
 
-@ARGV == 1 or die "usage: $0 [/media/trocadero]";
+@ARGV == 2 or die "usage: $0 /media/trocadero Pictures/study";
 my $drive = shift;
+
+my $directory = shift;
+$directory =~ s!/+!/!g;
+$directory =~ s!^/!!;
+$directory =~ s!/$!!;
 
 my $watcher = Filesys::Notify::Simple->new(["$drive/tmp/snagit/"]);
 
@@ -125,7 +130,7 @@ while (1) {
     utime $time, $time, "$dest/.time";
 
     my $path = $d;
-    $path =~ s!^\Q$drive\E/Pictures/study!!;
+    $path =~ s!^\Q$drive\E/\Q$directory\E!!;
 
     $pubsub_ua->post(
       "$config->{notify_url}/screenshot",
@@ -142,5 +147,5 @@ while (1) {
     );
   }
 
-  utime $time, $time, "$drive/Pictures/study/.time";
+  utime $time, $time, "$drive/$directory/.time";
 }
