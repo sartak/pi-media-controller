@@ -2,15 +2,11 @@
 use 5.14.0;
 use warnings;
 use Pi::Media::Library;
-use Pi::Media::Config;
 use Digest::SHA;
 use File::Find;
 use Encode;
 
-my $library = Pi::Media::Library->new(
-  file   => $ENV{PMC_DATABASE},
-  config => Pi::Media::Config->new,
-);
+my $library = Pi::Media::Library->new;
 
 @ARGV or die "usage: $0 directories|treeId\n";
 

@@ -32,13 +32,13 @@ has _dbh => (
 has file => (
     is      => 'ro',
     isa     => 'Str',
-    default => 'library.sqlite',
+    default => $ENV{PMC_DATABASE},
 );
 
 has config => (
     is       => 'ro',
     isa      => 'Pi::Media::Config',
-    required => 1,
+    default  => sub { Pi::Media::Config->new },
 );
 
 has _resume_state_cache => (

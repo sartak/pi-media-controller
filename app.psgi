@@ -21,6 +21,7 @@ use Pi::Media::Controller;
 use Pi::Media::Library;
 use Pi::Media::GamepadManager;
 use Pi::Media::AC;
+use Pi::Media::Config;
 
 our $CURRENT_USER;
 
@@ -88,7 +89,6 @@ my $LibraryClass = $config->value('leader')
                  : "Pi::Media::Library";
 Mouse::load_class($LibraryClass);
 my $Library = $LibraryClass->new(
-  file   => $ENV{PMC_DATABASE},
   config => $config,
 );
 

@@ -4,7 +4,6 @@ use warnings;
 use utf8::all;
 use Getopt::Whatever;
 use Pi::Media::Library;
-use Pi::Media::Config;
 
 for my $key (keys %ARGV) {
     next if $key eq 'segments';
@@ -30,10 +29,7 @@ my $path = $ARGV[0] or usage("url required");
 my @spoken_langs = map { defined($_) ? $_ : '' } split / *, */, $ARGV{spoken_langs};
 @spoken_langs == 1 or die usage("Must have exactly 1 spoken_langs");
 
-my $library = Pi::Media::Library->new(
-  file   => $ENV{PMC_DATABASE},
-  config => Pi::Media::Config->new,
-);
+my $library = Pi::Media::Library->new;
 
 if (!$treeId) {
     $treeId = $library->tree_from_segments(@$segments);

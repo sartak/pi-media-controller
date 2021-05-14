@@ -3,12 +3,8 @@ use 5.14.0;
 use warnings;
 use utf8::all;
 use Pi::Media::Library;
-use Pi::Media::Config;
 
-my $library = Pi::Media::Library->new(
-  file   => $ENV{PMC_DATABASE},
-  config => Pi::Media::Config->new,
-);
+my $library = Pi::Media::Library->new;
 my @roots = $library->trees(parentId => 0);
 my @trees = map { ["", length(scalar(@roots)-1), $_] } @roots;
 my %i_for;

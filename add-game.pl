@@ -4,7 +4,6 @@ use warnings;
 use utf8::all;
 use Getopt::Whatever;
 use Pi::Media::Library;
-use Pi::Media::Config;
 
 for my $key (keys %ARGV) {
     next if $key eq 'segments';
@@ -35,10 +34,7 @@ $ARGV{'ignore-missing-file'} || $path =~ /^real:/ || (-e $path && !-d _)
 
 my $streamable = $ARGV{streamable} ? 1 : 0;
 
-my $library = Pi::Media::Library->new(
-  file   => $ENV{PMC_DATABASE},
-  config => Pi::Media::Config->new,
-);
+my $library = Pi::Media::Library->new;
 
 if (!$treeId) {
     $treeId = $library->tree_from_segments(@$segments);

@@ -3,13 +3,9 @@ use 5.14.0;
 use warnings;
 use utf8::all;
 use Pi::Media::Library;
-use Pi::Media::Config;
 use Digest::SHA;
 
-my $library = Pi::Media::Library->new(
-  file   => $ENV{PMC_DATABASE},
-  config => Pi::Media::Config->new,
-);
+my $library = Pi::Media::Library->new;
 
 my @media = $library->media(
     all            => 1,
