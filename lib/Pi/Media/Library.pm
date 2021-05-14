@@ -19,7 +19,7 @@ has _dbh => (
     clearer => '_clear_dbh',
     default => sub {
         my $dbh = DBI->connect(
-            "dbi:SQLite:dbname=" . shift->file,
+            "dbi:SQLite:dbname=" . shift->database,
             undef,
             undef,
 	    { RaiseError => 1 },
@@ -29,7 +29,7 @@ has _dbh => (
     },
 );
 
-has file => (
+has database => (
     is      => 'ro',
     isa     => 'Str',
     default => $ENV{PMC_DATABASE},
@@ -39,7 +39,7 @@ has root => (
     is      => 'ro',
     isa     => 'Str',
     lazy    => 1,
-    default => sub { Path::Class::file($self->file)->dir->stringify . '/' },
+    default => sub { Path::Class::file($self->database)->dir->stringify . '/' },
 );
 
 has config => (
@@ -727,7 +727,7 @@ sub add_viewing {
       $self->_dbh->disconnect();
       $self->_clear_dbh();
 
-      system("rsync", "-az", $self->file, $target);
+      system("rsync", "-az", $self->database, $target);
     }
 
     return $rowid;

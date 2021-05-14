@@ -1261,7 +1261,7 @@ my $notifier = AnyEvent::Filesys::Notify->new(
   dirs => [$dir],
   filter => sub {
     my $f = shift;
-    return $f eq $ENV{PMC_DATABASE};
+    return $f eq $library->database;
   },
   cb => sub {
     $notify_cb->({ type => 'database/modified' });

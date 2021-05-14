@@ -10,7 +10,7 @@ extends 'Pi::Media::Library';
 has '+_dbh' => (
     default => sub {
         my $dbh = DBI->connect(
-            "dbi:SQLite:dbname=" . shift->file,
+            "dbi:SQLite:dbname=" . shift->database,
             undef,
             undef,
 	    {
