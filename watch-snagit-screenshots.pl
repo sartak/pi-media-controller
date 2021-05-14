@@ -24,7 +24,7 @@ my $pubsub_ua = LWP::UserAgent->new(agent => 'watch-snagit-screenshots');
 
 my $json = JSON->new->utf8;
 
-my $config = $json->decode(scalar slurp "$drive/pmc.config");
+my $config = $json->decode(scalar slurp "config.json");
 my %highest;
 
 my $intake_ua = LWP::UserAgent->new;

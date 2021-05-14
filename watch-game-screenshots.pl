@@ -19,7 +19,7 @@ $directory =~ s!^/!!;
 $directory =~ s!/$!!;
 
 my $json = JSON->new->utf8;
-my $config = $json->decode(scalar slurp "$drive/pmc.config");
+my $config = $json->decode(scalar slurp "config.json");
 
 my @dirs = do {
   my @d;
