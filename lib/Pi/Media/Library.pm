@@ -38,8 +38,7 @@ has database => (
 has root => (
     is      => 'ro',
     isa     => 'Str',
-    lazy    => 1,
-    default => sub { shift->database_directory . '/' },
+    default => $ENV{PMC_MEDIA} . '/',
 );
 
 has config => (
