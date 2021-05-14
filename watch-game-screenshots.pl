@@ -18,9 +18,12 @@ $directory =~ s!/+!/!g;
 $directory =~ s!^/!!;
 $directory =~ s!/$!!;
 
+my $json = JSON->new->utf8;
+my $config = $json->decode(scalar slurp "$drive/pmc.config");
+
 my @dirs = do {
   my @d;
-  my $dir = "$drive/ROM/Screenshots/";
+  my $dir = $config->{rom_screenshot_dir};
   opendir(my $handle, $dir) or die $!;
   while ($_ = readdir($handle)) {
     next if /^\.+$/;
@@ -37,9 +40,6 @@ my $pmc_ua = LWP::UserAgent->new;
 
 my $pubsub_ua = LWP::UserAgent->new(agent => 'watch-game-screenshots');
 
-my $json = JSON->new->utf8;
-
-my $config = $json->decode(scalar slurp "$drive/pmc.config");
 my %highest;
 my %pmc_addr_for_hostname;
 

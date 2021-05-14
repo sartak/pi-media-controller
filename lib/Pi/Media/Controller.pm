@@ -290,7 +290,7 @@ sub _handle_for_media {
         my $directory = $base_path;
         $directory =~ s!/[^/]+$!!;
 
-        my $screenshot_dir = $self->library->root . 'ROM/Screenshots/' . $self->config->hostname . '/';
+	my $screenshot_dir = $self->config->value('rom_screenshot_dir') . $self->config->hostname . '/';
 
         my $extra_cfg_path = "/tmp/retroarch-$$.cfg";
         open my $handle, '>', $extra_cfg_path;
