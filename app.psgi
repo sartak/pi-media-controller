@@ -1173,7 +1173,7 @@ $app = builder {
             return 0 unless $authenticate->($env);
             s!^/+static/download/!!;
         },
-        root => $Library->library_root;
+        root => $Library->root;
 
     mount '/status' => sub {
         my $env = shift;

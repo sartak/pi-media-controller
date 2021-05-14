@@ -35,6 +35,13 @@ has file => (
     default => $ENV{PMC_DATABASE},
 );
 
+has root => (
+    is      => 'ro',
+    isa     => 'Str',
+    lazy    => 1,
+    default => sub { Path::Class::file($self->file)->dir->stringify . '/' },
+);
+
 has config => (
     is       => 'ro',
     isa      => 'Pi::Media::Config',
@@ -788,7 +795,7 @@ sub _absolutify_path {
 
     return $relative if $relative =~ /^real:/;
 
-    return Path::Class::file($self->file)->dir->file($relative)->stringify;
+    return Path::Class::dir($self->root)->file($relative)->stringify;
 }
 
 sub _relativify_path {
@@ -796,13 +803,7 @@ sub _relativify_path {
 
     return $absolute if $absolute =~ /^real:/;
 
-    return Path::Class::file($absolute)->relative(Path::Class::file($self->file)->dir)->stringify;
-}
-
-sub library_root {
-    my $self = shift;
-
-    return Path::Class::file($self->file)->dir->stringify . '/';
+    return Path::Class::file($absolute)->relative($self->root)->stringify;
 }
 
 sub last_game_played {
