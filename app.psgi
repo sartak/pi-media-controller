@@ -1254,14 +1254,11 @@ $app = builder {
 
 $server->register_service($app);
 
-my ($dir) = $ENV{PMC_DATABASE} =~ m{^(.*)/[^/]+$}
-  or die "Unable to parse $ENV{PMC_DATABASE}";
-
 my $notifier = AnyEvent::Filesys::Notify->new(
-  dirs => [$dir],
+  dirs => [$Library->database_directory],
   filter => sub {
     my $f = shift;
-    return $f eq $library->database;
+    return $f eq $Library->database;
   },
   cb => sub {
     $notify_cb->({ type => 'database/modified' });

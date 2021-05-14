@@ -39,7 +39,7 @@ has root => (
     is      => 'ro',
     isa     => 'Str',
     lazy    => 1,
-    default => sub { Path::Class::file($self->database)->dir->stringify . '/' },
+    default => sub { shift->database_directory . '/' },
 );
 
 has config => (
@@ -804,6 +804,11 @@ sub _relativify_path {
     return $absolute if $absolute =~ /^real:/;
 
     return Path::Class::file($absolute)->relative($self->root)->stringify;
+}
+
+sub database_directory {
+  my $self = shift;
+  return Path::Class::file($self->database)->dir->stringify;
 }
 
 sub last_game_played {
