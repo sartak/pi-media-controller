@@ -42,6 +42,11 @@ my $notify_cb = sub {
     my $event = shift;
     my $single = shift;
 
+    $event = {
+      %{ $config->value('notify_content') || {} },
+      %$event,
+    };
+
     # internal watchers
     for my $cb (@extra_cb) {
         next if $single && $cb != $single;
