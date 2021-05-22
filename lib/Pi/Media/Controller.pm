@@ -284,80 +284,85 @@ sub _handle_for_media {
             die "No emulator for type " . $media->extension;
         }
 
-        my $base_path = $media->path;
-        $base_path =~ s/.\w+$//;
+        my $is_retroarch = $emulator_cmd[0] =~ /retroarch/i;
 
-        my $directory = $base_path;
-        $directory =~ s!/[^/]+$!!;
+        if ($is_retroarch) {
+           my $base_path = $media->path;
+           $base_path =~ s/.\w+$//;
 
-	my $screenshot_dir = $self->config->value('rom_screenshot_dir') . $self->config->hostname . '/';
+           my $directory = $base_path;
+           $directory =~ s!/[^/]+$!!;
 
-        my $extra_cfg_path = "/tmp/retroarch-$$.cfg";
-        open my $handle, '>', $extra_cfg_path;
-        print $handle qq[savefile_directory = "$directory"\n];
-        print $handle qq[savestate_directory = "$directory"\n];
-        print $handle qq[screenshot_directory = "$screenshot_dir"\n];
-        close $handle;
+	          my $screenshot_dir = $self->config->value('rom_screenshot_dir') . $self->config->hostname . '/';
 
-        system("mkdir", "-p", $screenshot_dir);
+            my $extra_cfg_path = "/tmp/retroarch-$$.cfg";
+            open my $handle, '>', $extra_cfg_path;
+            print $handle qq[savefile_directory = "$directory"\n];
+            print $handle qq[savestate_directory = "$directory"\n];
+            print $handle qq[screenshot_directory = "$screenshot_dir"\n];
+            close $handle;
 
-        push @emulator_cmd, "--appendconfig", $extra_cfg_path;
+            system("mkdir", "-p", $screenshot_dir);
 
-        my $game_cfg_path = "$base_path.cfg";
-        if (-e $game_cfg_path) {
-            push @emulator_cmd, "--appendconfig", $game_cfg_path;
+            push @emulator_cmd, "--appendconfig", $extra_cfg_path;
 
-            my $config = slurp($game_cfg_path);
-            if ($config =~ / ^ \s* \# \s* pmc: \s* save_state \s* = \s* never \b /mx) {
-                my $state_path = "$base_path.state.auto";
-                unlink $state_path;
+            my $game_cfg_path = "$base_path.cfg";
+            if (-e $game_cfg_path) {
+                push @emulator_cmd, "--appendconfig", $game_cfg_path;
+
+                my $config = slurp($game_cfg_path);
+                if ($config =~ / ^ \s* \# \s* pmc: \s* save_state \s* = \s* never \b /mx) {
+                    my $state_path = "$base_path.state.auto";
+                    unlink $state_path;
+                }
+
+                if ($config =~ / ^ \s* libretro_path \s* = /mx) {
+                    @emulator_cmd = grep { $_ ne '-L' && !/\.so$/ } @emulator_cmd;
+                }
             }
 
-            if ($config =~ / ^ \s* libretro_path \s* = /mx) {
-                @emulator_cmd = grep { $_ ne '-L' && !/\.so$/ } @emulator_cmd;
+            my $state_path = "$base_path.state.auto";
+            my $mem_path = "$base_path.srm";
+            my $time = time;
+
+            if (my $backup_dir = $self->config->value('savestate_backup')) {
+    	        if (-e $state_path || -e $mem_path) {
+                my $subdir = $self->library->_relativify_path($media->path);
+                $subdir =~ s!ROM/!!;
+                $subdir =~ s!\.\w+!!g;
+
+                my $dir = join '/', $backup_dir, $subdir;
+                system("mkdir", "-p", $dir);
+
+                my $dest = join '/', $dir, time;
+    	          if (-e $state_path) {
+                  system("cp" , $state_path, "$dest.state");
+                }
+                if (-e $mem_path) {
+                  system("cp" , $mem_path, "$dest.srm");
+    	          }
+
+                warn("Backed up to $dest\n");
+              }
+            }
+
+            if ($self->save_state eq 'new') {
+              if (-e $state_path) {
+                system("mv", $state_path => "$base_path.state.$time");
+              }
+            }
+            elsif ($self->save_state) {
+              my $state = $self->save_state;
+              system("mv", $state_path => "$base_path.state.$time");
+              system("mv", "$base_path.state.$state" => $state_path);
             }
         }
 
-        my $state_path = "$base_path.state.auto";
-        my $mem_path = "$base_path.srm";
-        my $time = time;
-
-        if (my $backup_dir = $self->config->value('savestate_backup')) {
-	  if (-e $state_path || -e $mem_path) {
-            my $subdir = $self->library->_relativify_path($media->path);
-            $subdir =~ s!ROM/!!;
-            $subdir =~ s!\.\w+!!g;
-
-            my $dir = join '/', $backup_dir, $subdir;
-            system("mkdir", "-p", $dir);
-
-            my $dest = join '/', $dir, time;
-	    if (-e $state_path) {
-              system("cp" , $state_path, "$dest.state");
-            }
-            if (-e $mem_path) {
-              system("cp" , $mem_path, "$dest.srm");
-	    }
-
-            warn("Backed up to $dest\n");
-          }
-        }
-
-        if ($self->save_state eq 'new') {
-	  if (-e $state_path) {
-            system("mv", $state_path => "$base_path.state.$time");
-          }
-        }
-        elsif ($self->save_state) {
-          my $state = $self->save_state;
-          system("mv", $state_path => "$base_path.state.$time");
-          system("mv", "$base_path.state.$state" => $state_path);
-        }
-
-        warn join ' ', @emulator_cmd, $media->path;
+        my @cmd = @emulator_cmd, $media->path;
+        warn join ' ', @cmd;
 
         return AnyEvent::Run->new(
-            cmd => [@emulator_cmd, $media->path],
+            cmd => \@cmd,
         );
     }
     else {
