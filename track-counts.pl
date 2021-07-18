@@ -69,9 +69,9 @@ for my $media (@media) {
 
         $library->update_media($media, %updates);
 
-        print "[$spoken] [$subtitle] " if defined($updates{spoken_langs}) && defined($updates{subtitle_langs});
-        print "[spoken:$spoken] " if defined($updates{spoken_langs}) && !defined($updates{subtitle_langs});
-        print "[subs:$subtitle] " if !defined($updates{spoken_langs}) && defined($updates{subtitle_langs});
+        print "fixed: [$spoken] [$subtitle] " if defined($updates{spoken_langs}) && defined($updates{subtitle_langs});
+        print "fixed: [spoken:$spoken] " if defined($updates{spoken_langs}) && !defined($updates{subtitle_langs});
+        print "fixed: [subs:$subtitle] " if !defined($updates{spoken_langs}) && defined($updates{subtitle_langs});
 
         print encode_utf8($media->path), "\n";
     };

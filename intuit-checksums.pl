@@ -32,7 +32,7 @@ for my $media (@media) {
         checksum => $checksum,
     ));
 
-    print "[$checksum] " . $media->path . "\n";
+    print "fixed: [$checksum] " . $media->path . "\n";
 
     for my $dupe (@dupes) {
         print " ... same as " . $dupe->path . "\n";

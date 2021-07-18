@@ -35,7 +35,7 @@ my $library = Pi::Media::Library->new;
                 durationSeconds => $secs,
             ));
 
-            print "[$secs] " . $video->path . "\n";
+            print "fixed: [$secs] " . $video->path . "\n";
         }
         else {
             warn $video->path
@@ -75,7 +75,7 @@ my $library = Pi::Media::Library->new;
                 durationSeconds => $secs,
             ));
 
-            print "[$secs] " . $video->path . "\n";
+            print "fixed: [$secs] " . $video->path . "\n";
         }
         else {
             warn $video->path;
