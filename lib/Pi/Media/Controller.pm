@@ -358,7 +358,7 @@ sub _handle_for_media {
             }
         }
 
-        my @cmd = @emulator_cmd, $media->path;
+        my @cmd = (@emulator_cmd, $media->path);
         warn join ' ', @cmd;
 
         return AnyEvent::Run->new(
