@@ -22,7 +22,8 @@ find(sub {
            || $file =~ /\.ips$/
            || $file =~ /\.cfg$/
            || $file =~ /\.sav$/
-           || $file =~ /\/\.address$/;
+           || $file =~ /\/\.address$/
+           || $file =~ m{PSX/.*\.bin$};
 
     return if $seen{$file};
 
