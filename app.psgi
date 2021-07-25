@@ -306,18 +306,48 @@ my %endpoints;
         },
         POST => sub {
             my $req = shift;
+	    my $id;
+	    my $metadata;
+	    my $override_path;
 
-            my $id = $req->param('media') or do {
-                my $res = $req->new_response(400);
-                $res->body("media required");
+	    if ($req->param('youtube')) {
+              my @media = $Library->media(
+                all => 1,
+                path => 'https://youtube.com/',
+              );
+
+	      if (@media != 1) {
+                my $res = $req->new_response(500);
+                $res->body("no youtube media found");
                 return $res;
-            };
+	      }
+
+	      $id = $media[0]->id;
+	      $override_path = $req->param('youtube');
+	      $metadata = $json->encode({ url => $override_path });
+	    } else {
+              $id = $req->param('media');
+	    }
+
+	    if (!$id) {
+              my $res = $req->new_response(400);
+              $res->body("media or youtube required");
+              return $res;
+            }
 
             my $media = $Library->media_with_id($id) or do {
                 my $res = $req->new_response(404);
                 $res->body("media not found");
                 return $res;
             };
+
+	    if ($metadata) {
+	        $media->{viewing_metadata} = $metadata;
+	    }
+
+	    if ($override_path) {
+	        $media->{path} = $override_path;
+	    }
 
             $media->{initial_seconds} = $req->param('initialSeconds') || 0;
             $media->{audio_track} = $req->param('audioTrack') || 0;
