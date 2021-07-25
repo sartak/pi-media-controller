@@ -40,6 +40,7 @@ for my $tree ($library->trees(all => 1)) {
 }
 
 delete $want_tree{0};
+delete $want_tree{-1};
 delete @want_tree{keys %seen_tree};
 
 for my $want (sort keys %want_tree) {
