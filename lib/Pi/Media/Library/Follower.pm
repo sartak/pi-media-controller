@@ -38,6 +38,7 @@ sub add_viewing {
         endSeconds     => $args{initial_seconds} + $args{elapsed_seconds},
         audioTrack     => $args{audio_track},
         location       => $args{location},
+        metadata       => $args{metadata},
     );
 
     my $uri = URI->new("$leader/library/viewed");

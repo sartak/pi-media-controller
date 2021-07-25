@@ -585,6 +585,7 @@ my %endpoints;
             my $endSeconds = $req->param('endSeconds');
             my $audioTrack = $req->param('audioTrack');
             my $location = $req->param('location');
+            my $metadata = $req->param('metadata');
             my $who = $main::CURRENT_USER->name;
 
             my $media = $Library->media_with_id($mediaId) or do {
@@ -616,6 +617,7 @@ my %endpoints;
                 audio_track     => $audioTrack,
                 location        => $location,
                 who             => $who,
+                metadata        => $metadata,
             );
 
             my $res = $req->new_response(204);

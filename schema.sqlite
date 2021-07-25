@@ -46,7 +46,8 @@ CREATE TABLE IF NOT EXISTS viewing (
     completed BOOLEAN,
     audioTrack INTEGER,
     location TEXT,
-    who TEXT
+    who TEXT,
+    metadata TEXT
 );
 
 CREATE TABLE IF NOT EXISTS user (

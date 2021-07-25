@@ -420,6 +420,7 @@ sub _finished_media {
         completed       => $completed,
         location        => $self->config->location,
         who             => $self->current_media->{requestor}->name,
+        metadata        => $self->current_media->{viewing_metadata},
     );
 
     warn "Done playing $media (viewing $viewing_id)\n";

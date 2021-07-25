@@ -707,8 +707,8 @@ sub add_viewing {
 
     $self->_dbh->do('
         INSERT INTO viewing
-            (mediaId, startTime, endTime, initialSeconds, elapsedSeconds, completed, audioTrack, location, who)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            (mediaId, startTime, endTime, initialSeconds, elapsedSeconds, completed, audioTrack, location, who, metadata)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     ;', {}, (
         $id,
         $args{start_time},
@@ -719,6 +719,7 @@ sub add_viewing {
         $args{audio_track},
         $args{location},
         $args{who},
+        $args{metadata},
     ));
     my $rowid = $self->_dbh->sqlite_last_insert_rowid;
 
