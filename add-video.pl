@@ -62,6 +62,14 @@ if (!$treeId) {
 
 my $duration = duration_of($path);
 
+my $checksum;
+if (!$ARGV{'ignore-missing-file'}) {
+  require Digest::SHA;
+  my $sha = Digest::SHA->new(1);
+  $sha->addfile($path);
+  $checksum = lc($sha->hexdigest);
+}
+
 my $id = $library->insert_video(
     path            => $path,
     identifier      => $identifier,
@@ -74,6 +82,7 @@ my $id = $library->insert_video(
     treeId          => $treeId,
     tags            => $tags,
     sort_order      => $sort_order,
+    checksum        => $checksum,
 );
 
 if ($ARGV{'ignore-missing-file'}) {

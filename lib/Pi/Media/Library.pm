@@ -319,8 +319,8 @@ sub insert_video {
 
     $self->_dbh->do('
         INSERT INTO media
-            (path, type, identifier, label_en, label_ja, spoken_langs, subtitle_langs, streamable, durationSeconds, treeId, tags, sort_order)
-        VALUES (?, "video", ?, ?, ?, ?, ?, ?, ?, ?, ?, ? )
+            (path, type, identifier, label_en, label_ja, spoken_langs, subtitle_langs, streamable, durationSeconds, treeId, tags, sort_order, checksum)
+        VALUES (?, "video", ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     ;', {}, (
         $self->_relativify_path($args{path}),
         $args{identifier},
@@ -333,6 +333,7 @@ sub insert_video {
         $args{treeId},
         ($args{tags} ? ('`' . (join '`', @{$args{tags}}) . '`') : ''),
         $args{sort_order},
+        $args{checksum},
     ));
 
     return $self->_dbh->sqlite_last_insert_rowid;
@@ -343,8 +344,8 @@ sub insert_game {
 
     $self->_dbh->do('
         INSERT INTO media
-            (path, type, identifier, label_en, label_ja, streamable, treeId)
-        VALUES (?, "game", ?, ?, ?, ?, ?)
+            (path, type, identifier, label_en, label_ja, streamable, treeId, checksum)
+        VALUES (?, "game", ?, ?, ?, ?, ?, ?)
     ;', {}, (
         $self->_relativify_path($args{path}),
         $args{identifier},
@@ -352,6 +353,7 @@ sub insert_game {
         $args{label_ja},
         $args{streamable} ? 1 : 0,
         $args{treeId},
+        $args{checksum},
     ));
 
     return $self->_dbh->sqlite_last_insert_rowid;
@@ -362,8 +364,8 @@ sub insert_book {
 
     $self->_dbh->do('
         INSERT INTO media
-            (path, type, identifier, label_en, label_ja, streamable, treeId)
-        VALUES (?, "book", ?, ?, ?, ?, ?)
+            (path, type, identifier, label_en, label_ja, streamable, treeId, checksum)
+        VALUES (?, "book", ?, ?, ?, ?, ?, ?)
     ;', {}, (
         $self->_relativify_path($args{path}),
         $args{identifier},
@@ -371,6 +373,7 @@ sub insert_book {
         $args{label_ja},
         0,
         $args{treeId},
+        $args{checksum},
     ));
 
     return $self->_dbh->sqlite_last_insert_rowid;
