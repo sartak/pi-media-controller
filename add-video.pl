@@ -4,6 +4,7 @@ use warnings;
 use utf8::all;
 use Getopt::Whatever;
 use Pi::Media::Library;
+use IPC::Run3;
 
 for my $key (keys %ARGV) {
     next if $key eq 'segments' || $key eq 'tag';
@@ -44,14 +45,69 @@ $ARGV{'ignore-missing-file'} || (-e $path && !-d _)
 
 my $streamable = $ARGV{streamable} ? 1 : 0;
 
-my $spoken_langs = ['??'];
+my $spoken_langs;
 if (exists $ARGV{spoken_langs}) {
     $spoken_langs = [map { defined($_) ? $_ : '' } split / *, */, $ARGV{spoken_langs}];
 }
-
-my $subtitle_langs = ['??'];
+my $subtitle_langs;
 if (exists $ARGV{subtitle_langs}) {
     $subtitle_langs = [map { defined($_) ? $_ : '' } split / *, */, $ARGV{subtitle_langs}];
+}
+
+if (!$spoken_langs || !$subtitle_langs) {
+  if (!$ARGV{'ignore-missing-file'}) {
+    eval {
+        run3 [ "ffmpeg", "-i", $path ], \undef, \undef, \my $ffmpeg;
+
+        my @streams = ($ffmpeg =~ /(Stream #\d+.\d+(?:\(\w+\))?: .*)/g);
+        die "no streams: " . $ffmpeg if !@streams;
+
+        my (@video, @spoken, @subtitle);
+
+        # possible softsubs
+        push @subtitle, '?';
+
+        for my $stream (@streams) {
+            my ($hint, $type, $next) = $stream =~ /^Stream #\d+.\d+(?:\((\w+)\))?: (\w+): (\w+)?/ or die "unparseable stream: " . $stream;
+            my $lang = '?';
+            $lang .= '/' . $hint if $hint && $hint ne 'und';
+
+            if ($type eq 'Video' && $next eq 'mjpeg') {
+                $type = 'Subtitle';
+            }
+
+            if ($type eq 'Video') {
+                push @video, $stream;
+            }
+            elsif ($type eq 'Audio') {
+                push @spoken, $lang;
+            }
+            elsif ($type eq 'Subtitle') {
+                push @subtitle, $lang;
+            }
+            elsif ($type eq 'Attachment' || $type eq 'Data') {
+                # skip
+            }
+            else {
+                die "invalid type $type: $stream";
+            }
+        }
+
+        die "not just 1 video: " . $ffmpeg if @video != 1;
+
+        my $spoken = join ',', @spoken;
+
+        if ($path =~ m{/TV/日本語/} && ($spoken eq '?' || $spoken eq '?/jpn')) {
+            @spoken = 'ja';
+        }
+
+	$spoken_langs = \@spoken;
+	$subtitle_langs = \@subtitle;
+    };
+  }
+
+  $spoken_langs ||= ['??'];
+  $subtitle_langs ||= ['??'];
 }
 
 my $library = Pi::Media::Library->new;
