@@ -107,6 +107,21 @@ if (!$spoken_langs || !$subtitle_langs) {
   }
 
   binmode STDOUT, ':utf8';
+
+  if ($ARGV{'prompt-spoken-langs'}) {
+    print "Spoken langs: " . join(',', @$spoken_langs) . "\n";
+    local $| = 1;
+    print "New spoken langs: ";
+    $spoken_langs = [split ',', scalar <STDIN>];
+  }
+
+  if ($ARGV{'prompt-subtitle-langs'}) {
+    print "Subtitle langs: " . join(',', @$subtitle_langs) . "\n";
+    local $| = 1;
+    print "New subtitle langs: ";
+    $subtitle_langs = [split ',', scalar <STDIN>];
+  }
+
   $spoken_langs ||= ['??'];
   $subtitle_langs ||= ['??'];
 }
