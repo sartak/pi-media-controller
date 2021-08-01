@@ -138,6 +138,7 @@ sub description {
         'sv'    => 'Swedish',
         'th'    => 'Thai',
         'zh'    => 'Chinese',
+        'yua'   => 'Mayan',
 
         '?/ces' => 'Czech(?)',
         '?/deu' => 'German(?)',
