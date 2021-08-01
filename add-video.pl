@@ -106,6 +106,7 @@ if (!$spoken_langs || !$subtitle_langs) {
     };
   }
 
+  binmode STDOUT, ':utf8';
   $spoken_langs ||= ['??'];
   $subtitle_langs ||= ['??'];
 }
