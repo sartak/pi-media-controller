@@ -135,7 +135,7 @@ if (!$treeId) {
 my $duration = duration_of($path);
 
 my $checksum;
-if (!$ARGV{'ignore-missing-file'}) {
+if (!$ARGV{'ignore-missing-file'} && !$ARGV{'defer-checksum'}) {
   require Digest::SHA;
   my $sha = Digest::SHA->new(1);
   $sha->addfile($path);
