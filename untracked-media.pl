@@ -25,6 +25,9 @@ find(sub {
            || $file =~ /\/\.address$/
            || $file =~ m{PSX/.*\.bin$};
 
+    return if $file =~ m{/ROM/[^/]+/images/};
+    return if $file =~ m{/ROM/BIOS/};
+
     return if $seen{$file};
 
     push @bad, $file;
