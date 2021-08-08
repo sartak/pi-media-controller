@@ -20,6 +20,8 @@ find(sub {
            || $file =~ /\.state\.(auto|\d+)$/
            || $file =~ /\.srm$/
            || $file =~ /\.ips$/
+           || $file =~ /\.bps$/
+           || $file =~ /\.xdelta$/
            || $file =~ /\.cfg$/
            || $file =~ /\.sav$/
            || $file =~ /\/\.address$/
