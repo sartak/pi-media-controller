@@ -24,6 +24,7 @@ find(sub {
            || $file =~ /\.ppf$/
            || $file =~ /\.xdelta$/
            || $file =~ /\.cfg$/
+           || $file =~ /\.rtc$/
            || $file =~ /\.sav$/
            || $file =~ /\/\.address$/
            || $file =~ m{PSX/.*\.bin$};
