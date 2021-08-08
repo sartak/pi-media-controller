@@ -21,6 +21,7 @@ find(sub {
            || $file =~ /\.srm$/
            || $file =~ /\.ips$/
            || $file =~ /\.bps$/
+           || $file =~ /\.ppf$/
            || $file =~ /\.xdelta$/
            || $file =~ /\.cfg$/
            || $file =~ /\.sav$/
