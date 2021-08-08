@@ -2,6 +2,8 @@
 cd ~/pi-media-controller/
 
 export PMC_LOCATION=Office
+export STUDY_PATH=/media/victoria/study/
+export STUDY_CONFIG=/media/victoria/study.config
 
 perl -Ilib -Iextlib untracked-media.pl /media/trocadero/Commercials /media/trocadero/LP /media/trocadero/Movies /media/trocadero/ROM/*/ /media/trocadero/Shorts /media/trocadero/Go /media/trocadero/TV
 
@@ -34,3 +36,5 @@ echo 'select media.rowid, path, viewing.startTime, viewing.endTime, viewing.loca
 echo 'select media.rowid, media.path, viewing.audioTrack, media.spoken_langs from viewing left join media on media.rowid = viewing.mediaid where media.rowid is not null and (media.spoken_langs="" or media.spoken_langs is null) and media.checksum is not null order by viewing.rowid asc;' | sqlite3 $PMC_DATABASE
 
 echo 'select media.rowid, media.path, viewing.audioTrack, media.spoken_langs from viewing left join media on media.rowid = viewing.mediaid where media.rowid is not null and media.spoken_langs LIKE "%?%" and media.checksum is not null order by viewing.rowid asc;' | sqlite3 $PMC_DATABASE | perl -nle 's/\|(\d+)\|([^|]+)$/$x = (split ",", $2)[$1]; "|$1|$2|$x"/e; print if $x =~ /\?/'
+
+echo 'select case when spoken_langs="ja" then coalesce(label_ja, label_en) else coalesce(label_en, label_ja) end, path, spoken_langs from media where type="game" and path not like "real:%" and path not like "%/Unsorted/%" and (spoken_langs like "%ja%" or spoken_langs like "%can%") and tags not like "%`no-study`%";' | sqlite3 $PMC_DATABASE | perl -MJSON -MFile::Slurp=slurp -nle 'BEGIN { $c = JSON->new->decode(scalar slurp $ENV{STUDY_CONFIG})->{directories} }; my ($label, $path, $lang) = split /\|/, $_; $label =~ s/ \(Disc \d+\)//; next if $s{$label}++; if (!$c->{$label}) { warn "No directory listed for $label ($lang, $path) \n" } elsif (!-e "$ENV{STUDY_PATH}/$c->{$label}") { warn "Directory $c->{$label} for $label does not exist ($lang, $path)" }'
