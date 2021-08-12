@@ -16,7 +16,7 @@ my $url = shift;
 
 my @command = ('streamlink');
 push @command, ('--verbose-player', '-l', 'debug');
-push @command, ('-np', 'omxplayer -b -o hdmi');
+push @command, ('-np', 'omxplayer --live -b -o hdmi');
 
 $url =~ s!^twitch[:/]!https://twitch.tv/!;
 $url =~ s!^youtube[:/]!https://youtube.com/watch?v=!;
