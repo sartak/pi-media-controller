@@ -48,6 +48,21 @@ if (-e $path && !$ARGV{'defer-checksum'}) {
   $checksum = lc($sha->hexdigest);
 }
 
+my $spoken_langs;
+if (exists $ARGV{spoken_langs}) {
+  $spoken_langs = [map { defined($_) ? $_ : '' } split / *, */, $ARGV{spoken_langs}];
+} else {
+  if ($path =~ m{/Japanese/}) {
+    $spoken_langs = ['ja'];
+  } elsif ($path =~ m{/Chinese/}) {
+    $spoken_langs = ['can'];
+  } elsif ($path =~ m{/English/} || $path =~ m{/Unsorted/}) {
+    $spoken_langs = ['en'];
+  } else {
+    $spoken_langs = ['?'];
+  }
+}
+
 my $id = $library->insert_game(
     path            => $path,
     identifier      => $identifier,

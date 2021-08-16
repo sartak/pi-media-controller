@@ -344,8 +344,8 @@ sub insert_game {
 
     $self->_dbh->do('
         INSERT INTO media
-            (path, type, identifier, label_en, label_ja, streamable, treeId, checksum)
-        VALUES (?, "game", ?, ?, ?, ?, ?, ?)
+            (path, type, identifier, label_en, label_ja, streamable, treeId, spoken_langs, checksum)
+        VALUES (?, "game", ?, ?, ?, ?, ?, ?, ?)
     ;', {}, (
         $self->_relativify_path($args{path}),
         $args{identifier},
@@ -353,6 +353,7 @@ sub insert_game {
         $args{label_ja},
         $args{streamable} ? 1 : 0,
         $args{treeId},
+        (join ',', @{$args{spoken_langs}}),
         $args{checksum},
     ));
 
