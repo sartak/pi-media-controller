@@ -40,6 +40,14 @@ if (!$treeId) {
     $treeId = $library->tree_from_segments(@$segments);
 }
 
+my $checksum;
+if (-e $path && !$ARGV{'defer-checksum'}) {
+  require Digest::SHA;
+  my $sha = Digest::SHA->new(1);
+  $sha->addfile($path);
+  $checksum = lc($sha->hexdigest);
+}
+
 my $id = $library->insert_game(
     path            => $path,
     identifier      => $identifier,
@@ -47,6 +55,7 @@ my $id = $library->insert_game(
     label_ja        => $label_ja,
     streamable      => $streamable,
     treeId          => $treeId,
+    checksum        => $checksum,
 );
 
 if ($ARGV{'ignore-missing-file'}) {
