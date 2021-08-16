@@ -27,7 +27,8 @@ find(sub {
            || $file =~ /\.rtc$/
            || $file =~ /\.sav$/
            || $file =~ /\/\.address$/
-           || $file =~ m{PSX/.*\.bin$};
+           || $file =~ m{PSX/.*\.bin$}
+           || $file =~ m{PSX/.*\.CD\d$};
 
     return if $file =~ m{/ROM/[^/]+/images/};
     return if $file =~ m{/ROM/BIOS/};
