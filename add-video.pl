@@ -112,14 +112,18 @@ if (!$spoken_langs || !$subtitle_langs) {
     print "Spoken langs: " . join(',', @$spoken_langs) . "\n";
     local $| = 1;
     print "New spoken langs: ";
-    $spoken_langs = [split ',', scalar <STDIN>];
+    my $in = scalar <STDIN>;
+    chomp $in;
+    $spoken_langs = [split ',', $in];
   }
 
   if ($ARGV{'prompt-subtitle-langs'}) {
     print "Subtitle langs: " . join(',', @$subtitle_langs) . "\n";
     local $| = 1;
     print "New subtitle langs: ";
-    $subtitle_langs = [split ',', scalar <STDIN>];
+    my $in = scalar <STDIN>;
+    chomp $in;
+    $subtitle_langs = [split ',', $in];
   }
 
   $spoken_langs ||= ['??'];
