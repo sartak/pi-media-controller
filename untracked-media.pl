@@ -19,6 +19,7 @@ find(sub {
     return if $file =~ /\.DS_Store/
            || $file =~ /\.state\.(auto|\d+)$/
            || $file =~ /\.srm$/
+           || $file =~ /\.srm\.\d+$/
            || $file =~ /\.ips$/
            || $file =~ /\.bps$/
            || $file =~ /\.ppf$/
@@ -26,11 +27,14 @@ find(sub {
            || $file =~ /\.cfg$/
            || $file =~ /\.rtc$/
            || $file =~ /\.sav$/
+           || $file =~ /\.ldci$/
            || $file =~ /\/\.address$/
            || $file =~ m{PSX/.*\.bin$}
            || $file =~ m{PSX/.*\.CD\d$};
 
     return if $file =~ m{/ROM/[^/]+/images/};
+    return if $file =~ m{/ROM/[^/]+/videos/};
+    return if $file =~ m{/ROM/[^/]+/gamelist\.xml(\.old)?$};
     return if $file =~ m{/ROM/BIOS/};
 
     return if $seen{$file};
