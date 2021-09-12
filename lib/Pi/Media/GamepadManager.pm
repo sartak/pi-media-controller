@@ -36,9 +36,8 @@ has queue => (
 );
 
 has television => (
-    is       => 'ro',
-    isa      => 'Pi::Media::Television',
-    required => 1,
+    is  => 'ro',
+    isa => 'Pi::Media::Television',
 );
 
 has start_cb => (
@@ -124,12 +123,15 @@ sub scan_wiimote {
 
                   my $game = $self->library->last_game_played;
                   if ($game) {
-                    my $tv_is_off = !$self->television->is_on;
                     warn "Automatically resuming most recent game\n";
                     $game->{initial_seconds} = 0;
                     $game->{audio_track} = 0;
                     $game->{save_state} = 0;
-                    $game->{auto_poweroff_tv} = $tv_is_off;
+
+                    if ($self->television) {
+                      my $tv_is_off = !$self->television->is_on;
+                      $game->{auto_poweroff_tv} = $tv_is_off;
+                    }
 
                     $self->queue->push($game);
 
@@ -138,7 +140,7 @@ sub scan_wiimote {
                     # we do this last so the game is ready by the time
                     # the tv is on
                     $self->television->set_active_source
-                        if $self->television->can('set_active_source');
+                        if $self->television && $self->television->can('set_active_source');
 
                     if ($self->start_cb) {
                       $self->start_cb->();
@@ -229,7 +231,7 @@ sub got_event {
 
         if ($event->{media}->{auto_poweroff_tv} && !$self->controller->current_media && !$self->queue->has_media) {
           warn "Just finished the launch game and there's nothing in the hopper; disconnecting";
-          $self->television->power_off;
+          $self->television->power_off if $self->television;
           $self->disconnect_all();
         } else {
           warn "Just finished a game! Disconnecting gamepads in 5...";

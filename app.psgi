@@ -109,17 +109,21 @@ my $Controller = Pi::Media::Controller->new(
 );
 push @extra_cb, sub { $Controller->got_event(@_) };
 
-my $TelevisionClass = $config->value('television')->{class} || 'Pi::Media::Television::HDMI';
-my $TelevisionStateFile = $config->value('television')->{file} || 'tv.json';
-Mouse::load_class($TelevisionClass);
-my $tv_state = -e $TelevisionStateFile ? $json->decode(scalar slurp $TelevisionStateFile) : { is_on => 1 };
-my $Television = $TelevisionClass->new(
-    config    => $config,
-    notify_cb => $notify_cb,
-    %{ $config->value('television') },
-    %$tv_state,
-    is_on => ($tv_state->{is_on} ? 1 : 0), # JSON::XS::Boolean fails type
-);
+my $Television;
+
+if ($config->value('television')) {
+  my $TelevisionClass = $config->value('television')->{class} || 'Pi::Media::Television::HDMI';
+  my $TelevisionStateFile = $config->value('television')->{file} || 'tv.json';
+  Mouse::load_class($TelevisionClass);
+  my $tv_state = -e $TelevisionStateFile ? $json->decode(scalar slurp $TelevisionStateFile) : { is_on => 1 };
+  $Television = $TelevisionClass->new(
+      config    => $config,
+      notify_cb => $notify_cb,
+      %{ $config->value('television') },
+      %$tv_state,
+      is_on => ($tv_state->{is_on} ? 1 : 0), # JSON::XS::Boolean fails type
+  );
+}
 
 my $ac_state = -e "ac.json" ? $json->decode(scalar slurp "ac.json") : {};
 my $AC = Pi::Media::AC->new(
@@ -134,7 +138,7 @@ if (!$config->value('disable_gamepads')) {
         controller => $Controller,
         library => $Library,
         queue => $Queue,
-        television => $Television,
+        ($Television ? (television => $Television) : ()),
         start_cb => \&restart_provisional_viewing_timer,
     );
     $GamepadManager->scan;
@@ -159,7 +163,7 @@ my %endpoints;
 
             if (!$Controller->current_media) {
                 $Television->set_active_source
-                    if $Television->can('set_active_source');
+                    if $Television && $Television->can('set_active_source');
                 $Controller->play_next_in_queue;
 
                 restart_provisional_viewing_timer();
@@ -174,7 +178,7 @@ my %endpoints;
             my $req = shift;
 
             $Television->set_active_source
-                if $Television->can('set_active_source');
+                if $Television && $Television->can('set_active_source');
 
             if (!$Controller->current_media) {
                 $Controller->play_next_in_queue;
@@ -190,7 +194,8 @@ my %endpoints;
         STOP => sub {
             my $req = shift;
             $Controller->stop_playing;
-            $Television->power_off if $Television->can('power_off');
+            $Television->power_off
+                if $Television && $Television->can('power_off');
             return $req->new_response(200);
         },
         PAUSE => sub {
@@ -205,7 +210,7 @@ my %endpoints;
         UNPAUSE => sub {
             my $req = shift;
             $Television->set_active_source
-                if $Television->can('set_active_source');
+                if $Television && $Television->can('set_active_source');
             if ($Controller->unpause) {
                 if (!$Controller->current_media) {
                     $Controller->play_next_in_queue;
@@ -242,7 +247,7 @@ my %endpoints;
             }
             else {
                 $Television->set_active_source
-                    if $Television->can('set_active_source');
+                    if $Television && $Television->can('set_active_source');
                 if ($Controller->unpause) {
                     if (!$Controller->current_media) {
                         $Controller->play_next_in_queue;
@@ -261,7 +266,8 @@ my %endpoints;
         DELETE => sub {
             my $req = shift;
             $Controller->stop_playing;
-            $Television->power_off if $Television->can('power_off');
+            $Television->power_off
+                if $Television && $Television->can('power_off');
             return $req->new_response(200);
         },
     },
@@ -356,7 +362,7 @@ my %endpoints;
             warn "Queued $media ...\n";
 
             $Television->set_active_source
-                if $Television->can('set_active_source');
+                if $Television && $Television->can('set_active_source');
             $Queue->push($media);
 
             my $res = $req->new_response;
@@ -399,7 +405,7 @@ my %endpoints;
                     $Queue->requestor($main::CURRENT_USER);
                     warn "Set queue source to tree $tree";
                     $Television->set_active_source
-                        if $Television->can('set_active_source');
+                        if $Television && $Television->can('set_active_source');
                     if (!$Controller->current_media) {
                         $Controller->play_next_in_queue;
                         restart_provisional_viewing_timer();
@@ -745,6 +751,8 @@ my %endpoints;
     '/television' => {
         GET => sub {
             my $req = shift;
+            return $req->new_response(404) if !$Television;
+
             my $res = $req->new_response(200);
             $res->content_type("application/json");
 
@@ -759,6 +767,7 @@ my %endpoints;
     '/television/volume' => {
         GET => sub {
             my $req = shift;
+            return $req->new_response(404) if !$Television;
 
             my $res = $req->new_response(200);
             my $body = $Television->volume;
@@ -771,6 +780,7 @@ my %endpoints;
         },
         PUT => sub {
             my $req = shift;
+            return $req->new_response(404) if !$Television;
 
             $Television->set_volume($req->param('volume'));
 
@@ -778,6 +788,7 @@ my %endpoints;
         },
         MINIMUM => sub {
             my $req = shift;
+            return $req->new_response(404) if !$Television;
 
             $Television->set_volume($Television->minimum_volume);
 
@@ -785,6 +796,7 @@ my %endpoints;
         },
         MAXIMUM => sub {
             my $req = shift;
+            return $req->new_response(404) if !$Television;
 
             $Television->set_volume($Television->maximum_volume);
 
@@ -792,6 +804,7 @@ my %endpoints;
         },
         UP => sub {
             my $req = shift;
+            return $req->new_response(404) if !$Television;
 
             $Television->volume_up;
 
@@ -799,6 +812,7 @@ my %endpoints;
         },
         DOWN => sub {
             my $req = shift;
+            return $req->new_response(404) if !$Television;
 
             $Television->volume_down;
 
@@ -806,6 +820,7 @@ my %endpoints;
         },
         MUTE => sub {
             my $req = shift;
+            return $req->new_response(404) if !$Television;
 
             $Television->mute;
 
@@ -813,6 +828,7 @@ my %endpoints;
         },
         UNMUTE => sub {
             my $req = shift;
+            return $req->new_response(404) if !$Television;
 
             $Television->unmute;
 
@@ -823,6 +839,7 @@ my %endpoints;
     '/television/input' => {
         GET => sub {
             my $req = shift;
+            return $req->new_response(404) if !$Television;
 
             my $res = $req->new_response(200);
             $res->body($Television->input);
@@ -830,6 +847,7 @@ my %endpoints;
         },
         PUT => sub {
             my $req = shift;
+            return $req->new_response(404) if !$Television;
 
             $Television->set_input($req->param('input'));
 
@@ -837,6 +855,7 @@ my %endpoints;
         },
         TAKE => sub {
             my $req = shift;
+            return $req->new_response(404) if !$Television;
 
             $Television->set_active_source
                 if $Television->can('set_active_source');
@@ -848,6 +867,7 @@ my %endpoints;
     '/television/power' => {
         GET => sub {
             my $req = shift;
+            return $req->new_response(404) if !$Television;
 
             my $res = $req->new_response(200);
             $res->body($Television->is_on ? "on" : "off");
@@ -855,6 +875,8 @@ my %endpoints;
         },
         PUT => sub {
             my $req = shift;
+            return $req->new_response(404) if !$Television;
+
             my $on  = $req->param('on');
             my $is_on = $Television->is_on;
 
@@ -869,6 +891,7 @@ my %endpoints;
         },
         ON => sub {
             my $req = shift;
+            return $req->new_response(404) if !$Television;
 
             $Television->power_on;
 
@@ -876,6 +899,7 @@ my %endpoints;
         },
         OFF => sub {
             my $req = shift;
+            return $req->new_response(404) if !$Television;
 
             $Television->power_off;
 
@@ -1248,17 +1272,17 @@ $app = builder {
                 chomp $current_location;
 
                 $notify_cb->({ type => 'connected' }, $writer);
-                $notify_cb->($Television->power_status, $writer);
+                $notify_cb->($Television->power_status, $writer) if $Television;
                 $notify_cb->({ type => 'location/current', location => $current_location }, $writer);
 
-                if ($Television->can('volume_status')) {
+                if ($Television && $Television->can('volume_status')) {
                     $notify_cb->($Television->volume_status, $writer);
                 }
                 else {
                     $notify_cb->({ type => "television/volume", hide => bool(1) }, $writer);
                 }
 
-                if ($Television->can('input_status')) {
+                if ($Television && $Television->can('input_status')) {
                     $notify_cb->($Television->input_status, $writer);
                 }
                 else {
@@ -1364,7 +1388,7 @@ sub restart_provisional_viewing_timer {
 
 if ($ENV{PMC_AUTOPLAY} && $Queue->has_media) {
     $Television->set_active_source
-        if $Television->can('set_active_source');
+        if $Television && Television->can('set_active_source');
     $Controller->play_next_in_queue;
     restart_provisional_viewing_timer(1);
 }
